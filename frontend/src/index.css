@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+/* ═══ ELITE PREMIUM STYLES ═══ */
+@import './styles/premium-colors.css';
+@import './styles/premium-typography.css';
+@import './styles/premium-animations.css';
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -14,18 +17,29 @@
   --border-3:       rgba(255,255,255,0.16);
   --gold:           #C9A84C;
   --gold-light:     #E0C06A;
+  --gold-bright:    #F4D03F;
   --gold-dim:       rgba(201,168,76,0.15);
   --gold-glow:      rgba(201,168,76,0.25);
   --white:          #F0EDE8;
   --white-70:       rgba(240,237,232,0.70);
+  --white-60:       rgba(240,237,232,0.62);
   --white-40:       rgba(240,237,232,0.40);
   --white-20:       rgba(240,237,232,0.20);
   --white-10:       rgba(240,237,232,0.10);
+  /* Semantic text roles (AA contrast-safe on near-black) */
+  --text-primary:   #F0EDE8;
+  --text-secondary: rgba(240,237,232,0.62);
+  --text-muted:     rgba(240,237,232,0.48);
+  --text-disabled:  rgba(240,237,232,0.32);
   --green:          #4ADE80;
   --red:            #EF4444;
-  --font-display:   'Cormorant Garamond', Georgia, serif;
-  --font-ui:        'Rajdhani', sans-serif;
-  --font-body:      'Inter', sans-serif;
+  /* Focus ring */
+  --focus-ring:     2px solid #C9A84C;
+  --focus-offset:   2px;
+  /* ── Type system: serif display, refined sans UI, legible sans body ── */
+  --font-display:   'Cormorant Garamond', 'Georgia', serif;
+  --font-ui:        'Space Grotesk', 'Rajdhani', sans-serif;
+  --font-body:      'Inter', 'Helvetica Neue', sans-serif;
   --nav-h:          72px;
   --ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out:    cubic-bezier(0.45, 0, 0.55, 1);
@@ -37,25 +51,94 @@
   --shadow-sm:      0 4px 16px rgba(0,0,0,0.4);
   --shadow-md:      0 8px 40px rgba(0,0,0,0.55);
   --shadow-lg:      0 20px 80px rgba(0,0,0,0.7);
-  --shadow-gold:    0 0 40px rgba(201,168,76,0.20);
-  --shadow-gold-lg: 0 0 80px rgba(201,168,76,0.30);
+  --shadow-gold:    0 0 60px rgba(201,168,76,0.35);
+  --shadow-gold-lg: 0 0 100px rgba(201,168,76,0.45);
 }
 
-html { scroll-behavior: smooth; cursor: none; }
+html { scroll-behavior: smooth; }
+
+/* LENIS SMOOTH SCROLL - required overrides (prevents conflict with native smooth scroll) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* ACCESSIBILITY: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ACCESSIBILITY: Global focus styles for keyboard navigation */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Interactive elements always afford pointer */
+button, [role="button"], a, select, input[type="submit"], input[type="button"], summary, label[for] {
+  cursor: pointer;
+}
+button:disabled, [disabled] { cursor: not-allowed; }
+
+/* Skip to content link for screen readers */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--black);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  z-index: 10000;
+  transition: top 0.3s;
+}
+
+.skip-to-content:focus {
+  top: 20px;
+}
+
 body {
   background: var(--black);
   color: var(--white);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 400;
   line-height: 1.65;
+  letter-spacing: 0.15px;
+  cursor: auto;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Clean, uniform digits everywhere (Cormorant's default figures hang unevenly) */
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum", "tnum";
 }
 
-/* ─── Custom cursor (handled by component, just hide default) ─── */
-* { cursor: none !important; }
-a, button, [role="button"], input, select, textarea, label { cursor: none !important; }
+/* Hide cursor only on public pages (when CustomCursor is active) */
+/* ACCESSIBILITY: Only hide cursor on devices with hover capability and when user hasn't opted for reduced motion */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  body.custom-cursor,
+  body.custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* Always show cursor for keyboard navigation */
+body.custom-cursor *:focus-visible {
+  cursor: auto !important;
+}
 
 /* ─── Custom Scrollbar ─── */
 ::-webkit-scrollbar { width: 4px; }
@@ -71,24 +154,71 @@ a, button, [role="button"], input, select, textarea, label { cursor: none !impor
 @media (max-width: 900px) { .container { padding: 0 24px; } }
 @media (max-width: 600px) { .container { padding: 0 16px; } }
 
-/* ─── Typography ─── */
-.text-display { font-family: var(--font-display); }
-.text-ui { font-family: var(--font-ui); }
+/* ─── Typography - LUXURY FONTS بنفس الأحجام القديمة ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+  color: var(--white);
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 600;
+}
+
+p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.2px;
+  color: var(--white-70);
+  margin: 0 0 1em 0;
+}
+
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.text-ui {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
 .text-gold {
   background: linear-gradient(135deg, var(--gold), var(--gold-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-weight: 700;
 }
+
 .eyebrow {
   font-family: var(--font-ui);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--gold);
 }
-
 /* ─── Glassmorphism ─── */
 .glass {
   background: rgba(17,17,23,0.75);
@@ -108,14 +238,14 @@ a, button, [role="button"], input, select, textarea, label { cursor: none !impor
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 30px;
+  padding: 14px 32px;
   border-radius: var(--radius-sm);
   font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  cursor: none;
+  cursor: pointer;
   border: none;
   outline: none;
   text-decoration: none;
@@ -123,28 +253,61 @@ a, button, [role="button"], input, select, textarea, label { cursor: none !impor
   position: relative;
   overflow: hidden;
   white-space: nowrap;
+  min-height: 44px;
 }
+
+/* ACCESSIBILITY: Clear focus state for keyboard navigation */
+.btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
 .btn::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.08);
-  opacity: 0;
-  transition: opacity 0.25s;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
-.btn:hover::before { opacity: 1; }
+.btn:hover::before {
+  transform: translateX(200%);
+}
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  background: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
+  background-size: 200% 100%;
   color: var(--black);
-  box-shadow: 0 4px 24px rgba(201,168,76,0.3);
+  box-shadow: 0 8px 32px rgba(201,168,76,0.4);
+  animation: goldShimmer 4s ease-in-out infinite;
+  font-weight: 700;
+  letter-spacing: 3px;
 }
-.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.45); }
+.btn-gold:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 48px rgba(201,168,76,0.6), 0 0 60px rgba(244,208,63,0.3);
+}
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes goldShimmer {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
 .btn-ghost {
-  background: transparent;
+  background: rgba(201, 168, 76, 0.08);
   color: var(--white);
-  border: 1px solid var(--border-3);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  backdrop-filter: blur(8px);
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+.btn-ghost:hover {
+  border-color: rgba(201, 168, 76, 0.8);
+  background: rgba(201, 168, 76, 0.15);
+  color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(201, 168, 76, 0.3), inset 0 0 40px rgba(201, 168, 76, 0.1);
+}
 .btn-outline-gold {
   background: var(--gold-dim);
   color: var(--gold);
@@ -171,6 +334,50 @@ body::after {
 }
 
 /* ─── Keyframe Animations ─── */
+
+/* 🔥 حركة الضوء من فوق لتحت على الكاردات */
+@keyframes lightSweepDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Glow effect يظهر ويختفي مع الضوء */
+@keyframes cardGlow {
+  0%, 100% {
+    opacity: 0;
+  }
+  40%, 60% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 40px rgba(201,168,76,0.4), 0 0 80px rgba(201,168,76,0.25);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 15px 60px rgba(201,168,76,0.55), 0 0 120px rgba(201,168,76,0.4);
+  }
+}
+
 @keyframes pageFadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -200,6 +407,11 @@ body::after {
   33%  { transform: scale(1.06) translateX(-1%) translateY(-0.5%); }
   66%  { transform: scale(1.04) translateX(1%)  translateY(0.5%); }
   100% { transform: scale(1)    translateX(0)   translateY(0); }
+}
+@keyframes heroZoom {
+  0%   { transform: scale(1.02); }
+  50%  { transform: scale(1.07) translateX(-0.5%) translateY(-0.5%); }
+  100% { transform: scale(1.1)  translateX(0.5%) translateY(0.5%); }
 }
 @keyframes slideInRight {
   from { transform: translateX(100%); opacity: 0; }
@@ -235,6 +447,61 @@ body::after {
   from { background-position: -400px 0; }
   to   { background-position: 400px 0; }
 }
+
+/* 🔥 GOLD SHIMMER EFFECT - Luxury Animation */
+@keyframes goldShimmerMove {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #C9A84C 0%,
+    #E0C06A 25%,
+    #F5E7A3 40%,
+    #FFF8DC 50%,
+    #F5E7A3 60%,
+    #E0C06A 75%,
+    #C9A84C 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: goldShimmerMove 4s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/* Hover variant - faster shimmer */
+.gold-shimmer-hover:hover {
+  animation: goldShimmerMove 2s ease-in-out infinite;
+}
+
+/* Once variant - single shimmer on load */
+.gold-shimmer-once {
+  background: linear-gradient(
+    90deg,
+    #C9A84C 0%,
+    #E0C06A 25%,
+    #F5E7A3 40%,
+    #FFF8DC 50%,
+    #F5E7A3 60%,
+    #E0C06A 75%,
+    #C9A84C 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: goldShimmerMove 3s ease-in-out 1;
+  will-change: background-position;
+}
+
 @keyframes rotateGold {
   to { transform: rotate(360deg); }
 }
@@ -249,6 +516,16 @@ body::after {
   background-size: 400px 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: var(--radius-md);
+}
+
+/* ─── Image loading spinner (OptimizedImage) ─── */
+.loading-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(201,168,76,0.18);
+  border-top-color: #E0C06A;
+  animation: spin 0.8s linear infinite;
 }
 
 /* ─── Scroll reveal ─── */
@@ -292,4 +569,62 @@ body::after {
 @media (hover: none) {
   html { cursor: auto; }
   * { cursor: auto !important; }
+}
+
+/* ─── Premium Select Dropdown Styling ─── */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select:hover {
+  border-color: rgba(201, 168, 76, 0.5);
+  background: rgba(10, 10, 14, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(201, 168, 76, 0.1);
+}
+
+select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(201, 168, 76, 0.3);
+  background: rgba(10, 10, 14, 1);
+}
+
+/* Premium Options Styling */
+select option {
+  background: #0a0a0e;
+  color: #F0EDE8;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+select option:hover {
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.15), rgba(201, 168, 76, 0.05));
+  color: var(--gold-light);
+}
+
+select option:checked {
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.25), rgba(201, 168, 76, 0.1));
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+  select option {
+    background-color: #0a0a0e;
+    color: #F0EDE8;
+  }
+
+  select option:hover {
+    background-color: rgba(201, 168, 76, 0.2);
+  }
+
+  select option:checked {
+    background: linear-gradient(90deg, rgba(201, 168, 76, 0.3), rgba(201, 168, 76, 0.15));
+    color: #E0C06A;
+  }
 }

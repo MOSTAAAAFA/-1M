@@ -2,9 +2,10 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
-
-const fmt = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+import Brand1M from '../components/Brand1M';
+import OptimizedImage from '../components/OptimizedImage';
+import { compactPrice } from '../utils/finance';
+import { SearchIcon, BoltIcon, GemIcon } from '../components/icons';
 
 const CATEGORIES = ['All', 'Sport', 'Electric', 'Electric SUV', 'Sport SUV', 'Hypercar', 'Sport Sedan', 'Electric Truck'];
 
@@ -122,7 +123,7 @@ function Hero({ onExplore }) {
             transition: 'all 0.8s 0.2s cubic-bezier(0.22,1,0.36,1)',
           }}>
             <p style={{
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '11px',
               fontWeight: '600',
               letterSpacing: '5px',
@@ -134,7 +135,7 @@ function Hero({ onExplore }) {
               gap: '12px',
             }}>
               <span style={{ width: '32px', height: '1px', background: '#c9a84c', display: 'inline-block' }} />
-              1M MOTORS — EST. 2024
+              <Brand1M /> MOTORS — EST. 2024
             </p>
           </div>
 
@@ -223,7 +224,7 @@ function Hero({ onExplore }) {
                 lineHeight: 1,
               }}>{value}</div>
               <div style={{
-                fontFamily: "'Rajdhani', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: '10px',
                 letterSpacing: '2.5px',
                 textTransform: 'uppercase',
@@ -250,7 +251,7 @@ function Hero({ onExplore }) {
         cursor: 'pointer',
       }} onClick={onExplore}>
         <span style={{
-          fontFamily: "'Rajdhani', sans-serif",
+          fontFamily: "'Space Grotesk', sans-serif",
           fontSize: '9px',
           letterSpacing: '3px',
           textTransform: 'uppercase',
@@ -283,16 +284,18 @@ function StatsBar() {
         gap: '24px',
       }}>
         {[
-          { icon: '⚡', label: 'Instant Delivery', desc: 'Nationwide shipping' },
-          { icon: '🛡', label: 'Full Warranty', desc: '4-year factory coverage' },
-          { icon: '💎', label: 'Concierge Service', desc: 'White glove experience' },
-          { icon: '🔑', label: 'Test Drive', desc: 'At your doorstep' },
+          { icon: 'bolt', label: 'Instant Delivery', desc: 'Nationwide shipping' },
+          { icon: 'shield', label: 'Full Warranty', desc: '4-year factory coverage' },
+          { icon: 'gem', label: 'Concierge Service', desc: 'White glove experience' },
+          { icon: 'key', label: 'Test Drive', desc: 'At your doorstep' },
         ].map(({ icon, label, desc }) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '22px' }}>{icon}</span>
+            <span style={{ display: 'flex', alignItems: 'center', color: '#C9A84C' }}>
+              <PerkIcon name={icon} />
+            </span>
             <div>
               <p style={{
-                fontFamily: "'Rajdhani', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: '13px',
                 fontWeight: '600',
                 letterSpacing: '0.5px',
@@ -370,7 +373,7 @@ function CollectionSection({ cars, search, setSearch, activeCategory, setActiveC
               borderRadius: '6px',
               color: 'rgba(240,237,232,0.7)',
               padding: '9px 16px',
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '12px',
               letterSpacing: '1px',
               cursor: 'pointer',
@@ -386,7 +389,7 @@ function CollectionSection({ cars, search, setSearch, activeCategory, setActiveC
 
         {/* Result count */}
         <p style={{
-          fontFamily: "'Rajdhani', sans-serif",
+          fontFamily: "'Space Grotesk', sans-serif",
           fontSize: '12px',
           letterSpacing: '2px',
           textTransform: 'uppercase',
@@ -415,7 +418,7 @@ function CollectionSection({ cars, search, setSearch, activeCategory, setActiveC
             borderRadius: '16px',
             border: '1px solid rgba(255,255,255,0.05)',
           }}>
-            <p style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</p>
+            <p style={{ fontSize: '40px', marginBottom: '16px', lineHeight: 1 }}><SearchIcon size={48} color="rgba(201,168,76,0.5)" /></p>
             <h3 style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: '24px',
@@ -449,7 +452,7 @@ function CarCard({ car, index }) {
   return (
     <Link
       to={`/car/${car.id}`}
-      style={{ textDecoration: 'none' }}
+      style={{ textDecoration: 'none', display: 'block', height: '100%' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -461,26 +464,29 @@ function CarCard({ car, index }) {
             ? 'rgba(28,28,36,0.95)'
             : 'rgba(18,18,24,0.8)',
           border: hovered
-            ? '1px solid rgba(201,168,76,0.25)'
+            ? '1px solid rgba(201,168,76,0.45)'
             : '1px solid rgba(255,255,255,0.07)',
           transition: 'all 0.45s cubic-bezier(0.22,1,0.36,1)',
           transform: hovered ? 'translateY(-8px)' : 'translateY(0)',
           boxShadow: hovered
-            ? '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)'
+            ? '0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.12)'
             : '0 4px 20px rgba(0,0,0,0.3)',
           animation: `fadeUp 0.6s ${index * 0.07}s both`,
           cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
         }}
       >
         {/* Image */}
         <div style={{ position: 'relative', overflow: 'hidden', height: '220px' }}>
-          <img
+          <OptimizedImage
             src={car.image}
             alt={car.name}
+            objectFit="cover"
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
               transition: 'transform 0.6s cubic-bezier(0.22,1,0.36,1)',
               transform: hovered ? 'scale(1.08)' : 'scale(1)',
             }}
@@ -503,7 +509,7 @@ function CarCard({ car, index }) {
             <span style={{
               padding: '4px 10px',
               borderRadius: '4px',
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '10px',
               fontWeight: '600',
               letterSpacing: '1.5px',
@@ -516,7 +522,7 @@ function CarCard({ car, index }) {
               <span style={{
                 padding: '4px 10px',
                 borderRadius: '4px',
-                fontFamily: "'Rajdhani', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: '10px',
                 fontWeight: '600',
                 letterSpacing: '1px',
@@ -561,7 +567,7 @@ function CarCard({ car, index }) {
             position: 'absolute',
             bottom: '12px',
             right: '14px',
-            fontFamily: "'Rajdhani', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontSize: '11px',
             fontWeight: '600',
             letterSpacing: '2px',
@@ -570,9 +576,9 @@ function CarCard({ car, index }) {
         </div>
 
         {/* Info */}
-        <div style={{ padding: '22px 24px 24px' }}>
+        <div style={{ padding: '22px 24px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <p style={{
-            fontFamily: "'Rajdhani', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontSize: '10px',
             fontWeight: '600',
             letterSpacing: '3px',
@@ -615,7 +621,7 @@ function CarCard({ car, index }) {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}>
                 <p style={{
-                  fontFamily: "'Rajdhani', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: '9px',
                   letterSpacing: '2px',
                   textTransform: 'uppercase',
@@ -623,7 +629,7 @@ function CarCard({ car, index }) {
                   marginBottom: '3px',
                 }}>{label}</p>
                 <p style={{
-                  fontFamily: "'Rajdhani', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#f0ede8',
@@ -632,27 +638,34 @@ function CarCard({ car, index }) {
             ))}
           </div>
 
-          {/* Price + CTA */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          {/* Gold price strip */}
+          <div style={{
+            position: 'relative',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+            padding: '14px 24px',
+            margin: 'auto -24px -24px',
+            background: 'linear-gradient(to top, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.02) 100%)',
+            borderTop: '1px solid rgba(201,168,76,0.28)',
+          }}>
             <div>
               <p style={{
-                fontFamily: "'Rajdhani', sans-serif",
-                fontSize: '10px',
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '9px',
                 letterSpacing: '2px',
                 textTransform: 'uppercase',
-                color: 'rgba(240,237,232,0.35)',
+                color: 'rgba(240,237,232,0.5)',
                 marginBottom: '2px',
               }}>From</p>
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: '22px',
                 fontWeight: '700',
-                background: 'linear-gradient(135deg, #c9a84c, #e0c06a)',
+                background: 'linear-gradient(135deg, #c9a84c, #e0c06a 60%, #f4d03f)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 lineHeight: 1,
-              }}>{fmt(car.price)}</p>
+              }}>{compactPrice(car.price)}</p>
             </div>
 
             <button
@@ -667,7 +680,7 @@ function CarCard({ car, index }) {
                 border: '1px solid rgba(201,168,76,0.4)',
                 borderRadius: '8px',
                 color: addedPulse ? '#050507' : '#c9a84c',
-                fontFamily: "'Rajdhani', sans-serif",
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: '11px',
                 fontWeight: '700',
                 letterSpacing: '1.5px',
@@ -734,7 +747,7 @@ function CategoryChip({ label, active, onClick }) {
         background: active ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
         border: active ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.08)',
         color: active ? '#c9a84c' : 'rgba(240,237,232,0.5)',
-        fontFamily: "'Rajdhani', sans-serif",
+        fontFamily: "'Space Grotesk', sans-serif",
         fontSize: '11px',
         fontWeight: '600',
         letterSpacing: '1.5px',
@@ -784,18 +797,26 @@ function Footer() {
               fontWeight: '600',
               color: '#f0ede8',
               marginBottom: '6px',
-            }}>VELOCI<span style={{
-              background: 'linear-gradient(135deg, #c9a84c, #e0c06a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>TAS</span></p>
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}>
+              <span style={{
+                fontSize: '24px',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #c9a84c, #e0c06a)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>1M</span>
+              <span style={{ fontSize: '24px', fontWeight: 600 }}>MOTORS</span>
+            </p>
             <p style={{ fontSize: '12px', color: 'rgba(240,237,232,0.3)' }}>
               © 2026 1M Motors. All rights reserved.
             </p>
           </div>
           <p style={{
-            fontFamily: "'Rajdhani', sans-serif",
+            fontFamily: "'Space Grotesk', sans-serif",
             fontSize: '11px',
             letterSpacing: '2px',
             color: 'rgba(240,237,232,0.2)',
@@ -836,4 +857,30 @@ function ArrowDown() {
       <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
     </svg>
   );
+}
+
+function ShieldIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  );
+}
+
+function KeyIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+    </svg>
+  );
+}
+
+function PerkIcon({ name }) {
+  switch (name) {
+    case 'bolt': return <BoltIcon size={22} />;
+    case 'shield': return <ShieldIcon />;
+    case 'gem': return <GemIcon size={22} />;
+    case 'key': return <KeyIcon />;
+    default: return null;
+  }
 }

@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
-import ReactPlayer from 'react-player';
+import ImageGallery from '../components/ImageGallery';
+import SocialShare from '../components/SocialShare';
+import TestDriveBooking from '../components/TestDriveBooking';
+import { StockAlert, PriceAlert } from '../components/FlashSaleCountdown';
+import { modelSrcForCar } from '../utils/carModels';
+import FinanceCalculator from '../components/FinanceCalculator';
+import ReviewsSection from '../components/ReviewsSection';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Lazy: pulls three.js out of the main bundle — loaded only when a car page opens
+const Car360Viewer = lazy(() => import('../components/Car360Viewer'));
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -14,10 +24,18 @@ export default function CarDetails() {
   const [loaded, setLoaded] = useState(false);
   const [addedPulse, setAddedPulse] = useState(false);
   const [activeTab, setActiveTab] = useState('specs');
+  const [isMuted, setIsMuted] = useState(true);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const videoRef = React.useRef(null);
 
   const car = cars.find(c => c.id === Number(id));
   const relatedCars = cars.filter(c => c.id !== car?.id && c.brand === car?.brand).slice(0, 3);
   const isFav = favorites.includes(car?.id);
+
+  const galleryImages = car
+    ? [car.heroImage || car.image, car.image].filter((v, i, a) => v && a.indexOf(v) === i)
+    : [];
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -36,7 +54,12 @@ export default function CarDetails() {
         justifyContent: 'center',
         gap: '20px',
       }}>
-        <p style={{ fontSize: '60px' }}>🏎</p>
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M5 17H3v-6l2-5h14l2 5v6h-2" />
+          <path d="M3 17h18" />
+          <circle cx="7.5" cy="17.5" r="2.5" />
+          <circle cx="16.5" cy="17.5" r="2.5" />
+        </svg>
         <h2 style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: '32px',
@@ -59,25 +82,81 @@ export default function CarDetails() {
 {/* Hero */}
 <section style={{
   position: 'relative',
-  height: 'clamp(400px, 55vh, 680px)',
+  height: 'clamp(500px, 70vh, 800px)',
   overflow: 'hidden',
 }}>
     {car.heroVideo ? (
-    <ReactPlayer
-      url={car.heroVideo}
-      playing={true}
-      muted={true}
-      loop={true}
-      controls={false}
-      width="100%"
-      height="100%"
+    <>
+    <video
+      ref={videoRef}
+      autoPlay
+      muted={isMuted}
+      loop
+      playsInline
+      preload="auto"
       style={{
         position: 'absolute',
         inset: 0,
-        pointerEvents: 'none',
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        objectPosition: 'center',
+        filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
+        transform: 'scale(1.01)',
       }}
-    />
+    >
+      <source src={car.heroVideo} type="video/mp4" />
+    </video>
+
+    {/* Sound Toggle Button */}
+    <button
+      onClick={() => setIsMuted(!isMuted)}
+      aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+      style={{
+        position: 'absolute',
+        bottom: '30px',
+        right: '30px',
+        width: '50px',
+        height: '50px',
+        borderRadius: '50%',
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(201,168,76,0.5)',
+        color: 'var(--gold)',
+        fontSize: '20px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.3s',
+        zIndex: 10,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(201,168,76,0.2)';
+        e.currentTarget.style.transform = 'scale(1.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
+    >
+      {isMuted ? (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </svg>
+      ) : (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      )}
+    </button>
+    </>
   ) : (
+    <>
     <img
       src={car.heroImage || car.image}
       alt={car.name}
@@ -93,6 +172,50 @@ export default function CarDetails() {
         transition: 'opacity 1s, transform 1.2s cubic-bezier(0.22,1,0.36,1)',
       }}
     />
+    {/* Gallery launcher */}
+    <button
+      onClick={() => setGalleryOpen(true)}
+      aria-label={`Open gallery for ${car.name}`}
+      style={{
+        position: 'absolute',
+        bottom: '30px',
+        right: '30px',
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 20px',
+        borderRadius: '50px',
+        background: 'rgba(0,0,0,0.55)',
+        backdropFilter: 'blur(14px)',
+        border: '1px solid rgba(201,168,76,0.4)',
+        color: 'var(--gold)',
+        fontFamily: "'Space Grotesk', sans-serif",
+        fontSize: '11px',
+        fontWeight: '600',
+        letterSpacing: '2px',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'all 0.3s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(201,168,76,0.2)';
+        e.currentTarget.style.transform = 'scale(1.06)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+        <line x1="11" y1="8" x2="11" y2="14"/>
+      </svg>
+      View Gallery
+    </button>
+    </>
   )}
         <div style={{
           position: 'absolute',
@@ -107,6 +230,7 @@ export default function CarDetails() {
         <div className="container" style={{ position: 'relative', zIndex: 2, paddingTop: '32px' }}>
           <button
             onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -118,7 +242,7 @@ export default function CarDetails() {
               color: 'rgba(240,237,232,0.7)',
               padding: '9px 16px',
               cursor: 'pointer',
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '12px',
               fontWeight: '600',
               letterSpacing: '1.5px',
@@ -153,7 +277,7 @@ export default function CarDetails() {
             transition: 'all 0.8s 0.3s cubic-bezier(0.22,1,0.36,1)',
           }}>
             <p style={{
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '11px',
               fontWeight: '600',
               letterSpacing: '4px',
@@ -191,6 +315,34 @@ export default function CarDetails() {
           }}>
             {/* Left column */}
             <div>
+              {/* Interactive 360° studio */}
+              <div style={{ marginBottom: '40px' }}>
+                <p className="section-eyebrow" style={{ marginBottom: '16px' }}>Interactive Studio</p>
+                <Suspense fallback={
+                  <div style={{
+                    height: 380,
+                    borderRadius: 16,
+                    background: '#000',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <div style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: '50%',
+                      border: '2px solid rgba(201,168,76,0.2)',
+                      borderTopColor: '#c9a84c',
+                      animation: 'studio-load 0.9s linear infinite',
+                    }} />
+                    <style>{`@keyframes studio-load { to { transform: rotate(360deg); } }`}</style>
+                  </div>
+                }>
+                  <Car360Viewer image={car.heroImage || car.image} alt={car.name} modelSrc={modelSrcForCar(car)} />
+                </Suspense>
+              </div>
+
               {/* Tagline */}
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif",
@@ -218,6 +370,9 @@ export default function CarDetails() {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
+                    role="tab"
+                    aria-selected={activeTab === key}
+                    aria-controls={`${key}-panel`}
                     style={{
                       padding: '14px 28px',
                       background: 'none',
@@ -226,7 +381,7 @@ export default function CarDetails() {
                         ? '2px solid #c9a84c'
                         : '2px solid transparent',
                       color: activeTab === key ? '#c9a84c' : 'rgba(240,237,232,0.4)',
-                      fontFamily: "'Rajdhani', sans-serif",
+                      fontFamily: "'Space Grotesk', sans-serif",
                       fontSize: '12px',
                       fontWeight: '600',
                       letterSpacing: '2px',
@@ -243,7 +398,11 @@ export default function CarDetails() {
 
               {/* Tab content */}
               {activeTab === 'specs' && (
-                <div style={{
+                <div
+                  id="specs-panel"
+                  role="tabpanel"
+                  aria-labelledby="specs-tab"
+                  style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                   gap: '16px',
@@ -256,7 +415,11 @@ export default function CarDetails() {
               )}
 
               {activeTab === 'features' && (
-                <div style={{
+                <div
+                  id="features-panel"
+                  role="tabpanel"
+                  aria-labelledby="features-tab"
+                  style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '12px',
@@ -301,6 +464,9 @@ export default function CarDetails() {
                 </div>
               )}
 
+              {/* Owner reviews */}
+              <ReviewsSection carId={car.id} carName={car.name} />
+
               {/* Related cars */}
               {relatedCars.length > 0 && (
                 <div style={{ marginTop: '60px' }}>
@@ -334,7 +500,7 @@ export default function CarDetails() {
               }}>
                 {/* Price */}
                 <p style={{
-                  fontFamily: "'Rajdhani', sans-serif",
+                  fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: '10px',
                   letterSpacing: '3px',
                   textTransform: 'uppercase',
@@ -379,7 +545,7 @@ export default function CarDetails() {
                   }} />
                   <div>
                     <p style={{
-                      fontFamily: "'Rajdhani', sans-serif",
+                      fontFamily: "'Space Grotesk', sans-serif",
                       fontSize: '9px',
                       letterSpacing: '2px',
                       textTransform: 'uppercase',
@@ -408,7 +574,7 @@ export default function CarDetails() {
                     flexShrink: 0,
                   }} />
                   <span style={{
-                    fontFamily: "'Rajdhani', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '12px',
                     fontWeight: '600',
                     letterSpacing: '1px',
@@ -418,9 +584,16 @@ export default function CarDetails() {
                   </span>
                 </div>
 
+                {/* Financing estimate */}
+                <div style={{ marginBottom: '24px' }}>
+                  <FinanceCalculator price={car.price} />
+                </div>
+
                 {/* CTAs */}
                 <button
                   onClick={handleAddToCart}
+                  aria-label={`Add ${car.name} to garage`}
+                  data-magnetic
                   style={{
                     width: '100%',
                     padding: '16px',
@@ -430,7 +603,7 @@ export default function CarDetails() {
                     border: 'none',
                     borderRadius: '10px',
                     color: addedPulse ? '#fff' : '#050507',
-                    fontFamily: "'Rajdhani', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '13px',
                     fontWeight: '700',
                     letterSpacing: '2px',
@@ -446,6 +619,8 @@ export default function CarDetails() {
 
                 <button
                   onClick={() => toggleFavorite(car)}
+                  aria-label={isFav ? `Remove ${car.name} from favorites` : `Add ${car.name} to favorites`}
+                  aria-pressed={isFav}
                   style={{
                     width: '100%',
                     padding: '14px',
@@ -455,7 +630,7 @@ export default function CarDetails() {
                       : '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px',
                     color: isFav ? '#c9a84c' : 'rgba(240,237,232,0.5)',
-                    fontFamily: "'Rajdhani', sans-serif",
+                    fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: '12px',
                     fontWeight: '600',
                     letterSpacing: '1.5px',
@@ -485,25 +660,144 @@ export default function CarDetails() {
                   {isFav ? 'Saved to Favorites' : 'Save to Favorites'}
                 </button>
 
+                {/* Book a test drive */}
+                <button
+                  onClick={() => setBookingOpen(true)}
+                  data-magnetic
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(201,168,76,0.35)',
+                    borderRadius: '10px',
+                    color: '#c9a84c',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    letterSpacing: '1.5px',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    marginBottom: '24px',
+                    transition: 'all 0.25s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(201,168,76,0.15)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <span style={{ color: 'var(--gold)' }}><InfoIcon name="flag" /></span>
+                  Book a Test Drive
+                </button>
+
                 {/* Info bullets */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
                   {[
-                    { icon: '🚚', text: 'Free white-glove delivery' },
-                    { icon: '🛡', text: '4-year manufacturer warranty' },
-                    { icon: '🔑', text: 'Complimentary test drive' },
-                    { icon: '↩', text: '14-day return policy' },
+                    { icon: 'delivery', text: 'Free white-glove delivery' },
+                    { icon: 'shield', text: '4-year manufacturer warranty' },
+                    { icon: 'key', text: 'Complimentary test drive' },
+                    { icon: 'return', text: '14-day return policy' },
                   ].map(({ icon, text }) => (
                     <div key={text} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px' }}>{icon}</span>
-                      <span style={{ fontSize: '12px', color: 'rgba(240,237,232,0.45)' }}>{text}</span>
+                      <InfoIcon name={icon} />
+                      <span style={{ fontSize: '12px', color: 'rgba(240,237,232,0.6)' }}>{text}</span>
                     </div>
                   ))}
                 </div>
+
+                {/* Share */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                  <SocialShare
+                    title={`${car.brand} ${car.name} at 1M Motors`}
+                    description={car.tagline}
+                  />
+                </div>
+
+                {/* VIP Alerts */}
+                {car.inStock ? (
+                  <PriceAlert currentPrice={car.price} />
+                ) : (
+                  <StockAlert productName={car.name} />
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Test drive booking modal */}
+      <AnimatePresence>
+        {bookingOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBookingOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              background: 'rgba(5,5,7,0.85)',
+              backdropFilter: 'blur(16px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px',
+              overflowY: 'auto',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, y: 24, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.92, y: 24, opacity: 0 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: 560,
+                maxHeight: '88vh',
+                overflowY: 'auto',
+                borderRadius: '20px',
+              }}
+            >
+              <button
+                onClick={() => setBookingOpen(false)}
+                aria-label="Close booking form"
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  zIndex: 10,
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  background: 'rgba(5,5,7,0.8)',
+                  color: '#c9a84c',
+                  fontSize: 18,
+                  cursor: 'pointer',
+                }}
+              >✕</button>
+              <TestDriveBooking carName={car.name} carId={car.id} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Gallery lightbox */}
+      <ImageGallery
+        images={galleryImages}
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+      />
     </div>
   );
 }
@@ -542,7 +836,7 @@ function SpecCard({ label, value }) {
       }}
     >
       <p style={{
-        fontFamily: "'Rajdhani', sans-serif",
+        fontFamily: "'Space Grotesk', sans-serif",
         fontSize: '9px',
         fontWeight: '600',
         letterSpacing: '2.5px',
@@ -551,7 +845,7 @@ function SpecCard({ label, value }) {
         marginBottom: '8px',
       }}>{labelMap[label] || label}</p>
       <p style={{
-        fontFamily: "'Rajdhani', sans-serif",
+        fontFamily: "'Space Grotesk', sans-serif",
         fontSize: '15px',
         fontWeight: '600',
         color: value === 'N/A' ? 'rgba(240,237,232,0.25)' : '#f0ede8',
@@ -618,4 +912,42 @@ function RelatedCard({ car }) {
       </div>
     </Link>
   );
+}
+
+function InfoIcon({ name }) {
+  const common = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' };
+  switch (name) {
+    case 'delivery': return (
+      <svg {...common}>
+        <path d="M10 17h4V5H2v12h3" />
+        <path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1" />
+        <circle cx="7.5" cy="17.5" r="2.5" />
+        <circle cx="17.5" cy="17.5" r="2.5" />
+      </svg>
+    );
+    case 'shield': return (
+      <svg {...common}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    );
+    case 'key': return (
+      <svg {...common}>
+        <circle cx="7.5" cy="15.5" r="5.5" />
+        <path d="m21 2-9.6 9.6" />
+        <path d="m15.5 7.5 3 3L22 7l-3-3" />
+      </svg>
+    );
+    case 'return': return (
+      <svg {...common}>
+        <path d="M1 4v6h6" />
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+      </svg>
+    );
+    case 'flag': return (
+      <svg {...common}>
+        <path d="M4 22V4s0-2 2-2h10.5l-2 4 2 4H6" />
+      </svg>
+    );
+    default: return null;
+  }
 }

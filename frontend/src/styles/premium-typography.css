@@ -1,0 +1,338 @@
+/**
+ * Elite Typography System
+ * Variable fonts, extreme scale contrast, kinetic type animations
+ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIABLE FONTS - Fluid weight and optical size
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Display serif for headlines - high contrast (loaded in public/index.html) */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+
+  /* Refined grotesk for UI */
+  --font-ui: 'Space Grotesk', system-ui, sans-serif;
+
+  /* Variable sans for body - highly legible */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Monospace for technical details */
+  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EXTREME SCALE CONTRAST - Premium Signal
+   ═══════════════════════════════════════════════════════════════════ */
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 12vw, 180px);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  font-variation-settings: 'wght' 300;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hero-title-bold {
+  font-weight: 700;
+  font-style: italic;
+  font-variation-settings: 'wght' 700;
+  letter-spacing: -0.02em;
+}
+
+.display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BODY COPY - Editorial Grid Justified
+   ═══════════════════════════════════════════════════════════════════ */
+
+.body-premium {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  color: var(--white-70);
+  font-variation-settings: 'wght' 400;
+  max-width: 65ch;
+}
+
+.body-large {
+  font-size: clamp(18px, 1.4vw, 22px);
+  line-height: 1.7;
+  font-weight: 350;
+  font-variation-settings: 'wght' 350;
+  color: var(--white);
+  max-width: 60ch;
+}
+
+.body-small {
+  font-size: clamp(14px, 1vw, 15px);
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EYEBROW / LABEL - Tight tracking, uppercase
+   ═══════════════════════════════════════════════════════════════════ */
+
+.eyebrow-premium {
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 0.8vw, 11px);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-variation-settings: 'wght' 600;
+}
+
+.eyebrow-large {
+  font-size: clamp(11px, 0.9vw, 13px);
+  letter-spacing: 0.3em;
+  font-weight: 700;
+}
+
+.eyebrow-white {
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   KINETIC TYPE - Character/Word Reveals
+   ═══════════════════════════════════════════════════════════════════ */
+
+.text-reveal-container {
+  overflow: hidden;
+  display: inline-block;
+}
+
+.text-reveal-word {
+  display: inline-block;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  margin-right: 0.25em;
+}
+
+.text-reveal-char {
+  display: inline-block;
+  transform-origin: bottom center;
+  backface-visibility: hidden;
+}
+
+/* Masked reveal animation */
+@keyframes maskRevealUp {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+}
+
+.text-mask-reveal {
+  overflow: hidden;
+  display: inline-block;
+}
+
+.text-mask-reveal > span {
+  display: inline-block;
+  animation: maskRevealUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GRADIENT TEXT - Premium Gold Treatment
+   ═══════════════════════════════════════════════════════════════════ */
+
+.text-gold-gradient {
+  background: linear-gradient(
+    135deg,
+    #C9A84C 0%,
+    #E0C06A 30%,
+    #F4D03F 50%,
+    #E0C06A 70%,
+    #C9A84C 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldFlow 4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 12px rgba(201, 168, 76, 0.3));
+}
+
+@keyframes goldFlow {
+  0%, 100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+.text-white-gradient {
+  background: linear-gradient(
+    180deg,
+    #FFFFFF 0%,
+    #F0EDE8 50%,
+    rgba(240, 237, 232, 0.7) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ASYMMETRIC LAYOUTS - Break the grid
+   ═══════════════════════════════════════════════════════════════════ */
+
+.layout-asymmetric {
+  display: grid;
+  grid-template-columns: 1fr 1.618fr; /* Golden ratio */
+  gap: clamp(40px, 6vw, 80px);
+  align-items: start;
+}
+
+.layout-asymmetric.reverse {
+  grid-template-columns: 1.618fr 1fr;
+}
+
+.layout-offset {
+  position: relative;
+  margin-left: clamp(20px, 8vw, 120px);
+}
+
+.layout-bleed-left {
+  margin-left: calc(-1 * clamp(20px, 5vw, 80px));
+}
+
+.layout-bleed-right {
+  margin-right: calc(-1 * clamp(20px, 5vw, 80px));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NUMBER STYLING - Technical Precision
+   ═══════════════════════════════════════════════════════════════════ */
+
+.number-premium {
+  font-family: var(--font-mono);
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 40px rgba(201, 168, 76, 0.4);
+}
+
+.stat-label {
+  font-family: var(--font-ui);
+  font-size: clamp(11px, 0.8vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QUOTE STYLING - Editorial Treatment
+   ═══════════════════════════════════════════════════════════════════ */
+
+.quote-premium {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  position: relative;
+  padding-left: clamp(32px, 5vw, 64px);
+}
+
+.quote-premium::before {
+  content: '"';
+  position: absolute;
+  left: 0;
+  top: -0.2em;
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--gold);
+  opacity: 0.3;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE SCALE - Mobile Optimized
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: clamp(48px, 15vw, 80px);
+    letter-spacing: -0.02em;
+  }
+
+  .layout-asymmetric,
+  .layout-asymmetric.reverse {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .layout-offset,
+  .layout-bleed-left,
+  .layout-bleed-right {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .body-premium,
+  .body-large {
+    max-width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .text-gold-gradient {
+    animation: none;
+    background-position: center;
+  }
+
+  .text-mask-reveal > span {
+    animation: none;
+    clip-path: none;
+    transform: none;
+  }
+}

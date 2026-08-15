@@ -20,7 +20,7 @@ export default function useIntersectionObserver(options = {}) {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [options]);
 
   return [ref, isVisible];
 }

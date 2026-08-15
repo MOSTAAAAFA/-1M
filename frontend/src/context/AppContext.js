@@ -77,12 +77,23 @@ function reducer(state, action) {
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  /* ─── Toasts ─── */
+  const addToast = useCallback((toast) => {
+    const id = ++toastId;
+    dispatch({ type: 'ADD_TOAST', payload: { ...toast, id } });
+    setTimeout(() => dispatch({ type: 'REMOVE_TOAST', payload: id }), 3500);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    dispatch({ type: 'REMOVE_TOAST', payload: id });
+  }, []);
+
   /* ─── Cart actions ─── */
   const addToCart = useCallback((car) => {
     dispatch({ type: 'ADD_TO_CART', payload: car });
     dispatch({ type: 'SET_CART_OPEN', payload: true });
     addToast({ type: 'success', message: `${car.name} added to your Garage` });
-  }, []);
+  }, [addToast]);
 
   const removeFromCart = useCallback((id) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: id });
@@ -104,7 +115,7 @@ export function AppProvider({ children }) {
       type: isFav ? 'info' : 'success',
       message: isFav ? `${car.name} removed from Favorites` : `${car.name} saved to Favorites ♥`,
     });
-  }, [state.favorites]);
+  }, [state.favorites, addToast]);
 
   /* ─── Compare ─── */
   const addToCompare = useCallback((car) => {
@@ -118,7 +129,7 @@ export function AppProvider({ children }) {
     }
     dispatch({ type: 'ADD_TO_COMPARE', payload: car.id });
     addToast({ type: 'success', message: `${car.name} added to Compare` });
-  }, [state.compareList]);
+  }, [state.compareList, addToast]);
 
   const removeFromCompare = useCallback((id) => {
     dispatch({ type: 'REMOVE_FROM_COMPARE', payload: id });
@@ -126,17 +137,6 @@ export function AppProvider({ children }) {
 
   const clearCompare = useCallback(() => {
     dispatch({ type: 'CLEAR_COMPARE' });
-  }, []);
-
-  /* ─── Toasts ─── */
-  const addToast = useCallback((toast) => {
-    const id = ++toastId;
-    dispatch({ type: 'ADD_TOAST', payload: { ...toast, id } });
-    setTimeout(() => dispatch({ type: 'REMOVE_TOAST', payload: id }), 3500);
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    dispatch({ type: 'REMOVE_TOAST', payload: id });
   }, []);
 
   /* ─── Cart sidebar ─── */

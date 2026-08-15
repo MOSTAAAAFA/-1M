@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
@@ -88,7 +88,10 @@ export default function CheckoutPage() {
       }} />
 
       {/* ── Header ── */}
-      <header style={{
+      <header
+        role="banner"
+        aria-label="Checkout header"
+        style={{
         position: 'relative', zIndex: 10,
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         background: 'rgba(8,8,11,0.9)',
@@ -102,6 +105,7 @@ export default function CheckoutPage() {
           {/* Back */}
           <button
             onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
             style={{
               display: 'flex', alignItems: 'center', gap: 10,
               background: 'none', border: 'none', cursor: 'pointer',
@@ -135,7 +139,10 @@ export default function CheckoutPage() {
             border: '1px solid rgba(201,168,76,0.2)',
             borderRadius: 40,
           }}>
-            <span style={{ fontSize: 12 }}>🔒</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
             <span style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '1.5px', color: 'var(--gold)' }}>
               SSL SECURED
             </span>
@@ -144,7 +151,10 @@ export default function CheckoutPage() {
       </header>
 
       {/* ── Progress Bar ── */}
-      <div style={{
+      <div
+        role="navigation"
+        aria-label="Checkout progress"
+        style={{
         position: 'relative', zIndex: 10,
         maxWidth: 1280, margin: '0 auto',
         padding: '36px 40px 0',
@@ -214,7 +224,11 @@ function StepProgress({ currentStep }) {
       {STEPS.map((s, idx) => (
         <React.Fragment key={s.id}>
           {/* Step node */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+          <div
+            role="listitem"
+            aria-current={currentStep === s.id ? 'step' : undefined}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
+          >
             <div style={{
               width: 44, height: 44, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -352,13 +366,13 @@ function OrderSummary({ cart, cartTotal, tax, grandTotal }) {
           display: 'flex', flexDirection: 'column', gap: 10,
         }}>
           {[
-            { icon: '🛡️', text: 'Buyer Protection Guarantee' },
-            { icon: '🚗', text: 'White-Glove Delivery' },
-            { icon: '📋', text: '7-Day Return Policy' },
+            { icon: 'shield', text: 'Buyer Protection Guarantee' },
+            { icon: 'delivery', text: 'White-Glove Delivery' },
+            { icon: 'return', text: '7-Day Return Policy' },
           ].map(({ icon, text }) => (
             <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 14 }}>{icon}</span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-ui)', letterSpacing: '0.5px' }}>{text}</span>
+              <span style={{ display: 'flex', color: 'var(--gold)' }}><CheckoutInfoIcon name={icon} /></span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-ui)', letterSpacing: '0.5px' }}>{text}</span>
             </div>
           ))}
         </div>
@@ -436,13 +450,15 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
         marginBottom: 32,
       }}>
         {[
-          { value: 'card', label: '💳  Credit / Debit Card' },
-          { value: 'bank', label: '🏦  Bank Transfer' },
-          { value: 'crypto', label: '₿  Cryptocurrency' },
+          { value: 'card', label: 'Credit / Debit Card' },
+          { value: 'bank', label: 'Bank Transfer' },
+          { value: 'crypto', label: 'Cryptocurrency' },
         ].map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(prev => ({ ...prev, method: opt.value }))}
+            aria-label={opt.label}
+            aria-pressed={data.method === opt.value}
             style={{
               flex: 1, padding: '12px 8px',
               borderRadius: 9, border: 'none', cursor: 'pointer',
@@ -536,8 +552,8 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
             border: '1px solid rgba(201,168,76,0.15)',
             borderRadius: 12,
           }}>
-            <p style={{ fontSize: 11, color: 'rgba(201,168,76,0.8)', fontFamily: 'var(--font-ui)', letterSpacing: '1px', marginBottom: 8 }}>
-              ℹ️ BANK TRANSFER DETAILS
+            <p style={{ fontSize: 11, color: 'rgba(201,168,76,0.9)', fontFamily: 'var(--font-ui)', letterSpacing: '1px', marginBottom: 8 }}>
+              BANK TRANSFER DETAILS
             </p>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.8 }}>
               Our team will send wire transfer instructions to your registered email within 24 hours.
@@ -555,7 +571,14 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
           border: '1px solid rgba(255,255,255,0.06)',
           borderRadius: 16,
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>₿</div>
+          <div style={{
+            width: 48, height: 48, marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(201,168,76,0.12)', borderRadius: 12, color: 'var(--gold)', margin: '0 auto 16px',
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 3v2" /><path d="M12 19v2" /><path d="M5 12H3" /><path d="M21 12h-2" /><path d="m6 6 1.5 1.5" /><path d="m16.5 16.5 1.5 1.5" /><path d="m18 6-1.5 1.5" /><path d="m7.5 16.5 1.5 1.5" /><circle cx="12" cy="12" r="4" /><path d="M12 8a4 4 0 1 0 4 4" />
+            </svg>
+          </div>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>
             Crypto Payment
           </p>
@@ -606,7 +629,7 @@ function ReviewStep({ info, payment, cart, cartTotal, tax, grandTotal, onBack, o
 
       {/* Payment Summary */}
       <ReviewCard title="Payment Method">
-        <ReviewRow label="Method" value={payment.method === 'card' ? '💳 Credit / Debit Card' : payment.method === 'bank' ? '🏦 Bank Transfer' : '₿ Cryptocurrency'} />
+        <ReviewRow label="Method" value={payment.method === 'card' ? 'Credit / Debit Card' : payment.method === 'bank' ? 'Bank Transfer' : 'Cryptocurrency'} />
         {payment.method === 'card' && <ReviewRow label="Card" value={maskedCard} />}
         {payment.method === 'card' && <ReviewRow label="Cardholder" value={payment.cardName} />}
       </ReviewCard>
@@ -639,12 +662,26 @@ function ReviewStep({ info, payment, cart, cartTotal, tax, grandTotal, onBack, o
       </div>
 
       {/* Agreement */}
-      <label style={{
+      <label
+        htmlFor="terms-agreement"
+        style={{
         display: 'flex', alignItems: 'flex-start', gap: 14,
         marginBottom: 28, cursor: 'pointer',
       }}>
+        <input
+          type="checkbox"
+          id="terms-agreement"
+          checked={agreed}
+          onChange={() => setAgreed(v => !v)}
+          style={{
+            position: 'absolute',
+            opacity: 0,
+            width: 0,
+            height: 0,
+          }}
+        />
         <div
-          onClick={() => setAgreed(v => !v)}
+          aria-hidden="true"
           style={{
             width: 20, height: 20, borderRadius: 6, flexShrink: 0, marginTop: 2,
             border: `2px solid ${agreed ? 'var(--gold)' : 'rgba(255,255,255,0.15)'}`,
@@ -668,6 +705,7 @@ function ReviewStep({ info, payment, cart, cartTotal, tax, grandTotal, onBack, o
         <button
           onClick={handleConfirm}
           disabled={!agreed || loading}
+          aria-label={`Confirm purchase of ${fmt(grandTotal)}`}
           style={{
             flex: 1, padding: '16px 32px',
             background: agreed && !loading
@@ -689,7 +727,7 @@ function ReviewStep({ info, payment, cart, cartTotal, tax, grandTotal, onBack, o
               Processing…
             </>
           ) : (
-            `🔒  Confirm Purchase · ${fmt(grandTotal)}`
+            `Confirm Purchase · ${fmt(grandTotal)}`
           )}
         </button>
       </StepFooter>
@@ -732,9 +770,12 @@ function SuccessScreen({ onHome, total }) {
           background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05))',
           border: '2px solid rgba(201,168,76,0.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 44,
           boxShadow: '0 0 60px rgba(201,168,76,0.2)',
-        }}>🏎</div>
+        }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
 
         <p style={{
           fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '4px',
@@ -803,13 +844,8 @@ function SectionHeader({ icon, title, subtitle, small }) {
 }
 
 function Field({ label, value, onChange, placeholder, type = 'text', span, tag, options }) {
-  const focusStyle = {
-    outline: 'none',
-    borderColor: 'rgba(201,168,76,0.5)',
-    background: 'rgba(201,168,76,0.05)',
-    boxShadow: '0 0 0 3px rgba(201,168,76,0.08)',
-  };
   const [focused, setFocused] = useState(false);
+  const inputId = `field-${label.replace(/\s+/g, '-').toLowerCase()}`;
 
   const sharedStyle = {
     width: '100%', padding: '14px 16px',
@@ -823,13 +859,16 @@ function Field({ label, value, onChange, placeholder, type = 'text', span, tag, 
 
   return (
     <div style={{ gridColumn: span === 2 ? 'span 2' : 'span 1' }}>
-      <label style={{
+      <label
+        htmlFor={inputId}
+        style={{
         display: 'block', marginBottom: 8,
         fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase',
         fontFamily: 'var(--font-ui)', color: 'rgba(255,255,255,0.35)',
       }}>{label}</label>
       {tag === 'select' ? (
         <select
+          id={inputId}
           value={value} onChange={onChange}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -839,6 +878,7 @@ function Field({ label, value, onChange, placeholder, type = 'text', span, tag, 
         </select>
       ) : (
         <input
+          id={inputId}
           type={type} value={value} onChange={onChange}
           placeholder={placeholder}
           onFocus={() => setFocused(true)}
@@ -936,4 +976,30 @@ function LoadingSpinner() {
       animation: 'spin 0.7s linear infinite',
     }} />
   );
+}
+
+function CheckoutInfoIcon({ name }) {
+  const common = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' };
+  switch (name) {
+    case 'shield': return (
+      <svg {...common}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    );
+    case 'delivery': return (
+      <svg {...common}>
+        <path d="M10 17h4V5H2v12h3" />
+        <path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1" />
+        <circle cx="7.5" cy="17.5" r="2.5" />
+        <circle cx="17.5" cy="17.5" r="2.5" />
+      </svg>
+    );
+    case 'return': return (
+      <svg {...common}>
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    );
+    default: return null;
+  }
 }

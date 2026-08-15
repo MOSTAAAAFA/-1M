@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API_BASE from "../utils/api";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -7,8 +7,9 @@ export default function Orders() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("https://robust-education-production-6271.up.railway.app/api/orders");
-        setOrders(res.data.orders);
+        const res = await fetch(`${API_BASE}/orders`);
+        const data = await res.json();
+        setOrders(data.orders || []);
       } catch (error) {
         console.log(error);
       }
@@ -27,19 +28,19 @@ export default function Orders() {
       
       {/* HEADER */}
       <div style={styles.header}>
-        <h1>📦 Orders Dashboard</h1>
+        <h1>Orders Dashboard</h1>
         <p>Luxury customer analytics</p>
       </div>
 
       {/* STATS */}
       <div style={styles.statsContainer}>
         <div style={styles.card}>
-          <h3>📊 Orders</h3>
+          <h3>Orders</h3>
           <h2>{orders.length}</h2>
         </div>
 
         <div style={styles.card}>
-          <h3>💰 Revenue</h3>
+          <h3>Revenue</h3>
           <h2>${totalRevenue}</h2>
         </div>
       </div>
@@ -48,7 +49,7 @@ export default function Orders() {
       <div style={styles.list}>
         {orders.length === 0 ? (
           <p style={{ textAlign: "center", opacity: 0.7 }}>
-            No orders yet 😢
+            No orders yet
           </p>
         ) : (
           orders.map((order) => (
@@ -62,13 +63,13 @@ export default function Orders() {
               <div style={styles.items}>
                 {order.items.map((item, i) => (
                   <div key={i}>
-                    🚗 {item.name} - ${item.price}
+                    {item.name} - ${item.price}
                   </div>
                 ))}
               </div>
 
               <small style={styles.date}>
-                📅 {new Date(order.createdAt).toLocaleString()}
+                {new Date(order.createdAt).toLocaleString()}
               </small>
             </div>
           ))

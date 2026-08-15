@@ -1,0 +1,371 @@
+/**
+ * Premium Color System & Materials
+ * Off-black/off-white bases, metallic accents, grain textures
+ */
+
+:root {
+  /* ═══ BASE COLORS - Off-black/Off-white (never pure #000/#fff) ═══ */
+  --black-true:         #0a0a0c;
+  --black-soft:         #111115;
+  --black-surface:      #18181f;
+  --black-surface-2:    #1f1f28;
+  --black-surface-3:    #27272f;
+
+  --white-true:         #f7f6f3;
+  --white-soft:         #F0EDE8;
+  --white-muted:        rgba(240, 237, 232, 0.85);
+  --white-dim:          rgba(240, 237, 232, 0.6);
+  --white-subtle:       rgba(240, 237, 232, 0.4);
+  --white-whisper:      rgba(240, 237, 232, 0.2);
+  --white-ghost:        rgba(240, 237, 232, 0.08);
+
+  /* ═══ GOLD ACCENT - Precise, used sparingly ═══ */
+  --gold-primary:       #C9A84C;
+  --gold-light:         #E0C06A;
+  --gold-bright:        #F4D03F;
+  --gold-dark:          #a38934;
+  --gold-glow:          rgba(201, 168, 76, 0.25);
+  --gold-subtle:        rgba(201, 168, 76, 0.15);
+  --gold-whisper:       rgba(201, 168, 76, 0.08);
+
+  /* ═══ METALLIC GRADIENTS - Premium materials ═══ */
+  --gold-gradient: linear-gradient(
+    135deg,
+    #C9A84C 0%,
+    #E0C06A 25%,
+    #F4D03F 50%,
+    #E0C06A 75%,
+    #C9A84C 100%
+  );
+
+  --gold-gradient-radial: radial-gradient(
+    circle at 30% 30%,
+    #F4D03F 0%,
+    #E0C06A 40%,
+    #C9A84C 100%
+  );
+
+  --silver-gradient: linear-gradient(
+    135deg,
+    #e8e8e8 0%,
+    #f7f6f3 30%,
+    #ffffff 50%,
+    #f7f6f3 70%,
+    #d8d8d8 100%
+  );
+
+  /* ═══ GLASS MORPHISM - Translucent surfaces ═══ */
+  --glass-dark:         rgba(17, 17, 21, 0.8);
+  --glass-darker:       rgba(10, 10, 12, 0.9);
+  --glass-light:        rgba(240, 237, 232, 0.08);
+  --glass-gold:         rgba(201, 168, 76, 0.12);
+
+  /* ═══ BORDERS - Subtle separation ═══ */
+  --border-subtle:      rgba(255, 255, 255, 0.06);
+  --border-default:     rgba(255, 255, 255, 0.1);
+  --border-strong:      rgba(255, 255, 255, 0.16);
+  --border-gold:        rgba(201, 168, 76, 0.3);
+  --border-gold-bright: rgba(201, 168, 76, 0.6);
+
+  /* ═══ SHADOWS - Elevated surfaces with glow ═══ */
+  --shadow-sm:          0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-md:          0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg:          0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-xl:          0 24px 64px rgba(0, 0, 0, 0.7);
+
+  --shadow-gold-sm:     0 4px 16px rgba(201, 168, 76, 0.2);
+  --shadow-gold-md:     0 8px 32px rgba(201, 168, 76, 0.3);
+  --shadow-gold-lg:     0 16px 48px rgba(201, 168, 76, 0.4);
+  --shadow-gold-glow:   0 0 40px rgba(201, 168, 76, 0.5);
+
+  /* ═══ SEMANTIC COLORS ═══ */
+  --success:            #4ADE80;
+  --warning:            #FBBF24;
+  --error:              #EF4444;
+  --info:               #60A5FA;
+
+  /* ═══ BACKDROP BLUR STRENGTHS ═══ */
+  --blur-sm:            8px;
+  --blur-md:            16px;
+  --blur-lg:            24px;
+  --blur-xl:            32px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NOISE TEXTURE OVERLAY - Premium signal (avoid flat vector look)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.grain-texture {
+  position: relative;
+  isolation: isolate;
+}
+
+.grain-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.grain-texture-light::before {
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM GLASS CARDS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.glass-card {
+  background: var(--glass-dark);
+  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  pointer-events: none;
+}
+
+.glass-card-gold {
+  background: var(--glass-gold);
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--shadow-gold-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RIM LIGHT EFFECT - Physical lighting simulation
+   ═══════════════════════════════════════════════════════════════════ */
+
+.rim-light {
+  position: relative;
+}
+
+.rim-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 168, 76, 0.8) 20%,
+    rgba(244, 208, 63, 1) 50%,
+    rgba(201, 168, 76, 0.8) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.6);
+}
+
+.rim-light-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 168, 76, 0.6) 30%,
+    rgba(201, 168, 76, 0.8) 50%,
+    rgba(201, 168, 76, 0.6) 70%,
+    transparent 100%
+  );
+  box-shadow: 0 0 16px rgba(201, 168, 76, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   METALLIC SURFACE MATERIALS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.surface-gold {
+  background: var(--gold-gradient);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    var(--shadow-gold-md);
+}
+
+.surface-dark-metal {
+  background: linear-gradient(
+    135deg,
+    #1a1a1c 0%,
+    #0f0f12 50%,
+    #1a1a1c 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    var(--shadow-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOW EFFECTS - Light as design element
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(201, 168, 76, 0.6);
+  }
+}
+
+.glow-gold {
+  box-shadow: var(--shadow-gold-glow);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.glow-gold-static {
+  box-shadow: 0 0 30px rgba(201, 168, 76, 0.4);
+}
+
+.glow-white {
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FRESNEL RIM LIGHT (CSS approximation)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.fresnel-card {
+  position: relative;
+  background: var(--black-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.fresnel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 100% 0%,
+    rgba(201, 168, 76, 0.15) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.fresnel-card:hover::before {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CUSTOM SECTION DIVIDERS - Organic curves
+   ═══════════════════════════════════════════════════════════════════ */
+
+.divider-curve {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  overflow: hidden;
+}
+
+.divider-curve svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BLEND MODES - Premium cursor and overlays
+   ═══════════════════════════════════════════════════════════════════ */
+
+.blend-difference {
+  mix-blend-mode: difference;
+}
+
+.blend-overlay {
+  mix-blend-mode: overlay;
+}
+
+.blend-screen {
+  mix-blend-mode: screen;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ANTI-PATTERNS PREVENTION - Ensure premium feel
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* NO default purple-blue gradients */
+.gradient-purple-blue {
+  display: none !important;
+  /* This class should never exist in premium code */
+}
+
+/* NO Bootstrap/Material shadows */
+.shadow-bootstrap {
+  display: none !important;
+  /* Use custom shadows only */
+}
+
+/* NO centered hero + 3-icon grid pattern */
+.template-default-pattern {
+  display: none !important;
+  /* Break the grid deliberately instead */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE REFINEMENTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  :root {
+    --blur-lg: 16px;
+    --blur-xl: 24px;
+  }
+
+  .grain-texture::before {
+    opacity: 0.3;
+  }
+
+  .glass-card {
+    backdrop-filter: blur(var(--blur-md));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE ENHANCEMENTS (if needed)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Already optimized for dark mode */
+  }
+}
+
+/* Light mode overrides (if implemented) */
+[data-theme="light"] {
+  --black-true:         #f7f6f3;
+  --black-soft:         #F0EDE8;
+  --white-true:         #0a0a0c;
+  --white-soft:         #111115;
+  /* Invert color system for light mode */
+}

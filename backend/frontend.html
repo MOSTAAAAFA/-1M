@@ -613,7 +613,7 @@ async function register() {
   const password = document.getElementById("regPassword").value;
   if (!name || !email || !password) return showMsg("register-msg", "All fields required.");
   try {
-    const res = await fetch("https://robust-education-production-6271.up.railway.app/api/auth/register", {
+    const res = await fetch("http://localhost:3000/api/auth/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password })
     });
@@ -629,7 +629,7 @@ async function login() {
   const password = document.getElementById("loginPassword").value;
   if (!email || !password) return showMsg("login-msg", "All fields required.");
   try {
-    const res = await fetch("https://robust-education-production-6271.up.railway.app/api/auth/login", {
+    const res = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
@@ -836,7 +836,7 @@ async function infoNext() {
   document.getElementById("btn-info-next").disabled = true;
 
   try {
-    const res = await fetch("https://robust-education-production-6271.up.railway.app/api/create-payment-intent", {
+    const res = await fetch("http://localhost:3000/api/create-payment-intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

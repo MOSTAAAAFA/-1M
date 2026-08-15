@@ -10,8 +10,10 @@ Your role:
 - Be concise: 1–3 sentences max per response unless asked for detail
 - Never apologize or say you "can't" — always guide the customer forward`;
 
-// ✅ CHANGED: points to your backend proxy instead of Anthropic directly
-const API_URL = 'https://velocitas-production.up.railway.app/api/chat';
+// ✅ Backend API endpoint — local backend in dev, deployed URL in production
+const API_URL = process.env.NODE_ENV === 'production'
+  ? (process.env.REACT_APP_CHAT_URL || 'https://1m-motors-production.up.railway.app/api/chat')
+  : 'http://localhost:5000/api/chat';
 
 export default function AIAssistant() {
   const [open, setOpen] = useState(false);
@@ -98,6 +100,7 @@ export default function AIAssistant() {
       {/* Floating AI Core Button */}
       <button
         onClick={() => setOpen(!open)}
+        className="ai-floating-button"
         style={{
           position: 'fixed',
           bottom: 25,
@@ -105,15 +108,29 @@ export default function AIAssistant() {
           width: 64,
           height: 64,
           borderRadius: '50%',
-          background: 'radial-gradient(circle at 30% 30%, #c9a84c, #000)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          color: '#fff',
-          fontWeight: 'bold',
+          background: 'rgba(10,10,14,0.82)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(201,168,76,0.5)',
+          color: '#E0C06A',
+          fontWeight: 700,
           cursor: 'pointer',
           zIndex: 9999,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(201,168,76,0.18)',
           fontSize: 13,
-          letterSpacing: '0.05em'
+          letterSpacing: '0.05em',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 12px 48px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.4)';
+          e.currentTarget.style.borderColor = 'rgba(224,192,106,0.9)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(201,168,76,0.18)';
+          e.currentTarget.style.borderColor = 'rgba(201,168,76,0.5)';
         }}
       >
         {open ? '✕' : 'AI'}
@@ -128,15 +145,25 @@ export default function AIAssistant() {
           width: 380,
           height: 540,
           background: 'rgba(10,10,14,0.96)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid rgba(201,168,76,0.25)',
           borderRadius: 18,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
           backdropFilter: 'blur(20px)',
           zIndex: 9999,
-          boxShadow: '0 30px 80px rgba(0,0,0,0.8)'
+          boxShadow: '0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(201,168,76,0.08)'
         }}>
+          {/* Gold top accent line */}
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            height: 2,
+            background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 25%, #E0C06A 50%, rgba(201,168,76,0.5) 75%, transparent)',
+            boxShadow: '0 0 18px rgba(201,168,76,0.6)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}/>
 
           {/* Header */}
           <div style={{
@@ -147,8 +174,17 @@ export default function AIAssistant() {
             alignItems: 'center'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: '#c9a84c', fontWeight: 700, fontSize: 14, letterSpacing: '0.1em' }}>
-                VEL0CITAS AI
+              <span style={{
+                color: '#c9a84c',
+                fontWeight: 700,
+                fontSize: 14,
+                letterSpacing: '0.1em',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '2px'
+              }}>
+                <span style={{ fontSize: '14px' }}>1</span>
+                <span style={{ fontSize: '14px' }}>M</span>
               </span>
               <span style={{
                 width: 7, height: 7, borderRadius: '50%',
