@@ -1,0 +1,133 @@
+/* Design Tokens - Auto-generated */
+/* Do not edit directly - modify tokens.json instead */
+
+/* === PRIMITIVES === */
+:root {
+  --primitive-color-black-base: #050507;
+  --primitive-color-black2: #0A0A0E;
+  --primitive-color-black3: #0F0F15;
+  --primitive-color-gold: #C9A84C;
+  --primitive-color-goldLight: #E0C06A;
+  --primitive-color-goldBright: #F4D03F;
+  --primitive-color-goldDim: rgba(201,168,76,0.15);
+  --primitive-color-goldGlow: rgba(201,168,76,0.25);
+  --primitive-color-white: #F0EDE8;
+  --primitive-color-white70: rgba(240,237,232,0.70);
+  --primitive-color-white62: rgba(240,237,232,0.62);
+  --primitive-color-white48: rgba(240,237,232,0.48);
+  --primitive-color-white32: rgba(240,237,232,0.32);
+  --primitive-color-white20: rgba(240,237,232,0.20);
+  --primitive-color-white10: rgba(240,237,232,0.10);
+  --primitive-color-surface: #111117;
+  --primitive-color-surface2: #18181F;
+  --primitive-color-surface3: #1F1F28;
+  --primitive-color-border: rgba(255,255,255,0.06);
+  --primitive-color-border2: rgba(255,255,255,0.10);
+  --primitive-color-border3: rgba(255,255,255,0.16);
+  --primitive-color-success: #4ADE80;
+  --primitive-color-error: #EF4444;
+  --primitive-fontFamily-display: 'Cormorant Garamond', Georgia, serif;
+  --primitive-fontFamily-ui: 'Space Grotesk', sans-serif;
+  --primitive-fontFamily-body: 'Inter', sans-serif;
+  --primitive-fontSize-xs: 10px;
+  --primitive-fontSize-sm: 12px;
+  --primitive-fontSize-base: 15px;
+  --primitive-fontSize-lg: 17px;
+  --primitive-fontSize-xl: 20px;
+  --primitive-fontSize-2xl: 26px;
+  --primitive-fontSize-3xl: 32px;
+  --primitive-fontSize-4xl: 42px;
+  --primitive-fontSize-5xl: 56px;
+  --primitive-fontSize-6xl: 72px;
+  --primitive-fontWeight-light: 300;
+  --primitive-fontWeight-regular: 400;
+  --primitive-fontWeight-medium: 500;
+  --primitive-fontWeight-semibold: 600;
+  --primitive-fontWeight-bold: 700;
+  --primitive-spacing-xs: 4px;
+  --primitive-spacing-sm: 8px;
+  --primitive-spacing-md: 12px;
+  --primitive-spacing-lg: 16px;
+  --primitive-spacing-xl: 20px;
+  --primitive-spacing-2xl: 24px;
+  --primitive-spacing-3xl: 32px;
+  --primitive-spacing-4xl: 40px;
+  --primitive-spacing-5xl: 48px;
+  --primitive-spacing-6xl: 64px;
+  --primitive-spacing-7xl: 80px;
+  --primitive-radius-sm: 6px;
+  --primitive-radius-md: 12px;
+  --primitive-radius-lg: 20px;
+  --primitive-radius-xl: 32px;
+  --primitive-radius-full: 9999px;
+  --primitive-shadow-sm: 0 4px 16px rgba(0,0,0,0.4);
+  --primitive-shadow-md: 0 8px 40px rgba(0,0,0,0.55);
+  --primitive-shadow-lg: 0 20px 80px rgba(0,0,0,0.7);
+  --primitive-shadow-gold: 0 0 40px rgba(201,168,76,0.20);
+  --primitive-shadow-goldLg: 0 0 80px rgba(201,168,76,0.30);
+  --primitive-duration-fast: 0.15s;
+  --primitive-duration-normal: 0.25s;
+  --primitive-duration-default: 0.35s;
+  --primitive-duration-slow: 0.5s;
+  --primitive-duration-slower: 0.7s;
+  --primitive-easing-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --primitive-easing-inOut: cubic-bezier(0.45, 0, 0.55, 1);
+  --primitive-breakpoint-mobile: 600px;
+  --primitive-breakpoint-tablet: 900px;
+  --primitive-breakpoint-desktop: 1100px;
+  --primitive-breakpoint-wide: 1400px;
+  --primitive-layout-navHeight: 72px;
+  --primitive-layout-containerMax: 1400px;
+}
+
+/* === SEMANTIC === */
+:root {
+  --color-background: #050507;
+  --color-foreground: #F0EDE8;
+  --color-primary: #C9A84C;
+  --color-primaryHover: #E0C06A;
+  --color-primaryActive: #F4D03F;
+  --color-onPrimary: #050507;
+  --color-textPrimary: #F0EDE8;
+  --color-textSecondary: rgba(240,237,232,0.62);
+  --color-textMuted: rgba(240,237,232,0.48);
+  --color-textDisabled: rgba(240,237,232,0.32);
+  --color-surface: #111117;
+  --color-surfaceRaised: #18181F;
+  --color-surfaceHover: #1F1F28;
+  --color-border: rgba(255,255,255,0.06);
+  --color-borderStrong: rgba(255,255,255,0.10);
+  --color-success: #4ADE80;
+  --color-destructive: #EF4444;
+  --fontFamily-display: 'Cormorant Garamond', Georgia, serif;
+  --fontFamily-ui: 'Space Grotesk', sans-serif;
+  --fontFamily-body: 'Inter', sans-serif;
+  --spacing-section: 64px;
+  --spacing-component: 32px;
+}
+
+/* === COMPONENTS === */
+:root {
+  --button-bg: #C9A84C;
+  --button-fg: #050507;
+  --button-hoverBg: #E0C06A;
+  --button-activeBg: #F4D03F;
+  --button-paddingX: 32px;
+  --button-paddingY: 12px;
+  --button-radius: 6px;
+  --button-shadow: 0 0 40px rgba(201,168,76,0.20);
+  --input-bg: #0A0A0E;
+  --input-border: rgba(255,255,255,0.10);
+  --input-focusRing: #C9A84C;
+  --input-paddingX: 16px;
+  --input-paddingY: 12px;
+  --input-radius: 6px;
+  --card-bg: #111117;
+  --card-border: rgba(255,255,255,0.06);
+  --card-padding: 32px;
+  --card-radius: 20px;
+  --card-shadow: 0 8px 40px rgba(0,0,0,0.55);
+  --glass-bg: rgba(17,17,23,0.75);
+  --glass-blur: 24px;
+  --glass-border: rgba(255,255,255,0.06);
+}

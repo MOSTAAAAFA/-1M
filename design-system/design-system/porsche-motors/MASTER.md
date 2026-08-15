@@ -1,4 +1,4 @@
-# Design System Master File
+# Design System Master File — 1M Motors
 
 > **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
 > If that file exists, its rules **override** this Master file.
@@ -6,9 +6,10 @@
 
 ---
 
-**Project:** Porsche Motors
-**Generated:** 2026-08-15 10:16:52
-**Category:** Automotive/Car Dealership
+**Project:** 1M Motors — Luxury Car Dealership
+**Generated:** 2026-08-15
+**Category:** Automotive/Car Dealership — Premium Luxury
+**Source of Truth:** `assets/design-tokens.json` + `assets/design-tokens.css` + `frontend/src/styles/designTokens.js`
 
 ---
 
@@ -18,57 +19,53 @@
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#1E293B` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| On Secondary | `#FFFFFF` | `--color-on-secondary` |
-| Accent/CTA | `#DC2626` | `--color-accent` |
-| On Accent/CTA | `#FFFFFF` | `--color-on-accent` |
-| Background | `#F8FAFC` | `--color-background` |
-| Foreground | `#0F172A` | `--color-foreground` |
-| Card | `#FFFFFF` | `--color-card` |
-| Card Foreground | `#0F172A` | `--color-card-foreground` |
-| Muted | `#E9EDF1` | `--color-muted` |
-| Muted Foreground | `#475569` | `--color-muted-foreground` |
-| Border | `#E2E8F0` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#1E293B` | `--color-ring` |
+| Background | `#050507` | `--color-background` |
+| Foreground / Text | `#F0EDE8` | `--color-foreground` |
+| Primary (Gold) | `#C9A84C` | `--color-primary` |
+| Primary Hover | `#E0C06A` | `--color-primary-hover` |
+| Primary Active | `#F4D03F` | `--color-primary-active` |
+| On Primary | `#050507` | `--color-on-primary` |
+| Secondary Text | `rgba(240,237,232,0.62)` | `--color-text-secondary` |
+| Muted | `rgba(240,237,232,0.48)` | `--color-text-muted` |
+| Surface | `#111117` | `--color-surface` |
+| Surface Raised | `#18181F` | `--color-surface-raised` |
+| Border | `rgba(255,255,255,0.06)` | `--color-border` |
+| Success | `#4ADE80` | `--color-success` |
+| Destructive | `#EF4444` | `--color-destructive` |
 
-**Color Notes:** Premium dark + action red
+**Color Notes:** Dark luxury + signature gold. Gold text on black = 9.2:1 (AAA). Never use light/red palettes.
 
 ### Typography
 
-- **Heading Font:** Bodoni Moda
-- **Body Font:** Jost
-- **Mood:** luxury, minimalist, high-end, sophisticated, refined, premium
-- **Google Fonts:** [Bodoni Moda + Jost](https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap)
+- **Display Font:** Cormorant Garamond (headlines, hero, big numbers)
+- **UI Font:** Space Grotesk (buttons, labels, nav, eyebrows)
+- **Body Font:** Inter (paragraphs)
+- **Mood:** luxury, cinematic, minimal, precise, understated power
+- **Signature cue:** uppercase labels with 2-5px letter-spacing in gold
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap');
-```
-
-### Spacing Variables
+### Spacing Variables (8pt grid)
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| `--space-xs` | 4px | Tight gaps |
+| `--space-sm` | 8px | Icon gaps, inline spacing |
+| `--space-md` | 12px | Standard padding |
+| `--space-lg` | 16px | Element gaps |
+| `--space-xl` | 20px | Compact cards |
+| `--space-2xl` | 24px | Card padding |
+| `--space-3xl` | 32px | Section padding |
+| `--space-5xl` | 48px | Section gaps |
+| `--space-6xl` | 64px | Large section margins |
 
 ### Shadow Depths
 
 | Level | Value | Usage |
 |-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+| `--shadow-sm` | `0 4px 16px rgba(0,0,0,0.4)` | Subtle lift |
+| `--shadow-md` | `0 8px 40px rgba(0,0,0,0.55)` | Cards, buttons |
+| `--shadow-lg` | `0 20px 80px rgba(0,0,0,0.7)` | Modals, hero |
+| `--shadow-gold` | `0 0 40px rgba(201,168,76,0.20)` | Gold emphasis |
+| `--shadow-gold-lg` | `0 0 80px rgba(201,168,76,0.30)` | Hero, featured |
 
 ---
 
@@ -77,31 +74,32 @@
 ### Buttons
 
 ```css
-/* Primary Button */
-.btn-primary {
-  background: #DC2626;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
+/* Gold Primary Button */
+.btn-gold {
+  background: linear-gradient(135deg, #C9A84C, #E0C06A 50%, #F4D03F);
+  color: #050507;
+  padding: 12px 32px;
+  border-radius: 6px;
   font-weight: 600;
-  transition: all 200ms ease;
+  transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
+.btn-gold:hover {
   transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(201,168,76,0.20);
 }
 
-/* Secondary Button */
-.btn-secondary {
+/* Ghost Button */
+.btn-ghost {
   background: transparent;
-  color: #1E293B;
-  border: 2px solid #1E293B;
-  padding: 12px 24px;
-  border-radius: 8px;
+  color: #F0EDE8;
+  border: 1px solid rgba(240,237,232,0.25);
+  padding: 12px 32px;
+  border-radius: 6px;
   font-weight: 600;
-  transition: all 200ms ease;
   cursor: pointer;
 }
 ```
@@ -110,17 +108,17 @@
 
 ```css
 .card {
-  background: #F8FAFC;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
+  background: #111117;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.55);
+  transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.7);
 }
 ```
 
@@ -128,35 +126,30 @@
 
 ```css
 .input {
+  background: #0A0A0E;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 6px;
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
+  font-size: 15px;
+  color: #F0EDE8;
+  transition: border-color 0.25s ease;
 }
 
 .input:focus {
-  border-color: #1E293B;
+  border-color: #C9A84C;
   outline: none;
-  box-shadow: 0 0 0 3px #1E293B20;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.25);
 }
 ```
 
-### Modals
+### Glass
 
 ```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
+.glass {
+  background: rgba(17,17,23,0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 ```
 
@@ -164,51 +157,52 @@
 
 ## Style Guidelines
 
-**Style:** Motion-Driven
+**Style:** Cinematic Luxury / Motion-Driven
 
-**Keywords:** Animation-heavy, microinteractions, smooth transitions, scroll effects, parallax, entrance anim, page transitions
+**Keywords:** Ken Burns, parallax, gold shimmer, letter reveal, glassmorphism, noise texture, light sweep, staggered reveals, ripple buttons
 
-**Best For:** Portfolio sites, storytelling platforms, interactive experiences, entertainment apps, creative, SaaS
+**Key Effects:** Scroll anim (Intersection Observer) 300-400ms, Ken Burns slow zoom, gold dust particles, letter-by-letter headline, ripple CTA
 
-**Key Effects:** Scroll anim (Intersection Observer), hover (300-400ms), entrance, parallax (3-5 layers), page transitions
+### Motion Rules
+
+- Signature easing: `cubic-bezier(0.22, 1, 0.36, 1)` (expo out)
+- Durations: 0.15s micro / 0.35s standard / 0.5s emphasis / 0.7s cinematic
+- Hover 150-300ms; never instant state changes
+- `prefers-reduced-motion: reduce` → disable Ken Burns, light sweeps, marquees, dust
+- No emojis as icons — SVG line icons (#C9A84C), stroke 1.5-2px
 
 ### Page Pattern
 
-**Pattern Name:** Hero-Centric Design
+**Pattern Name:** Hero-Centric Luxury
 
-- **Conversion Strategy:** One primary CTA. Let the hero dominate the initial viewport without hiding the next content cue. Use a static hero and non-pulsing CTA when reduced motion is requested; provide video controls. Pause hero media offscreen/hidden and keep the final hero message and CTA static under reduced motion.
-- **CTA Placement:** Hero dominant (center/bottom) + Sticky nav CTA
-- **Section Order:** Full-bleed Hero (headline + visual) > Single value prop strip > Key benefit or proof > Primary CTA
+- **Conversion Strategy:** Cinematic hero with one primary CTA. Specs strip below hero (Power / 0-60 / Top Speed / Powertrain). Collection → Featured → Brands → CTA.
+- **CTA Placement:** Hero primary CTA + sticky nav CTA
+- **Section Order:** Full-bleed cinematic hero (headline + accent + specs strip) > Stats bar > Brand marquee > Featured collection > Brands > Collection preview > Allocation countdown > CTA banner
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Static product pages
-- ❌ Poor UX
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+- ❌ Emojis as icons (use SVG: stroke 1.5-2px, #C9A84C)
+- ❌ Light-mode palettes (red/blue defaults) — this brand is dark + gold
+- ❌ Missing cursor:pointer on clickable elements
+- ❌ Layout-shifting hovers (scale transforms that shift layout)
+- ❌ Low contrast text (< 4.5:1)
+- ❌ Instant state changes (always 150-300ms transitions)
+- ❌ Invisible focus states (focus ring: 2px solid #C9A84C, offset 2px)
+- ❌ Hardcoded hex in components — use tokens/designTokens.js
 
 ---
 
 ## Pre-Delivery Checklist
 
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
+- [ ] No emojis used as icons (SVG only)
+- [ ] All icons consistent line style (stroke 1.5-2px, gold)
+- [ ] `cursor:pointer` on all clickable elements
 - [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
+- [ ] Text contrast 4.5:1 minimum (gold on black 9.2:1)
+- [ ] Focus states visible for keyboard nav (2px gold ring)
 - [ ] `prefers-reduced-motion` respected
 - [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
+- [ ] No content hidden behind fixed navbars (nav 72px)
 - [ ] No horizontal scroll on mobile

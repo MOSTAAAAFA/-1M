@@ -406,11 +406,20 @@ export default function Compare() {
                           color: 'rgba(240,237,232,0.4)',
                           cursor: 'pointer',
                           fontSize: '14px',
+                          minWidth: '32px',
+                          minHeight: '32px',
                           padding: '4px',
-                          transition: 'color 0.2s',
+                          borderRadius: '50%',
+                          transition: 'color 0.2s, background 0.2s',
                         }}
-                        onMouseEnter={(e) => (e.target.style.color = '#EF4444')}
-                        onMouseLeave={(e) => (e.target.style.color = 'rgba(240,237,232,0.4)')}
+                        onMouseEnter={(e) => {
+                          e.target.style.color = '#EF4444';
+                          e.target.style.background = 'rgba(239,68,68,0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.color = 'rgba(240,237,232,0.4)';
+                          e.target.style.background = 'none';
+                        }}
                       >
                         ✕
                       </button>

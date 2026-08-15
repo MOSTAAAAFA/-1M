@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
@@ -6,13 +6,9 @@ import ImageGallery from '../components/ImageGallery';
 import SocialShare from '../components/SocialShare';
 import TestDriveBooking from '../components/TestDriveBooking';
 import { StockAlert, PriceAlert } from '../components/FlashSaleCountdown';
-import { modelSrcForCar } from '../utils/carModels';
 import FinanceCalculator from '../components/FinanceCalculator';
 import ReviewsSection from '../components/ReviewsSection';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Lazy: pulls three.js out of the main bundle — loaded only when a car page opens
-const Car360Viewer = lazy(() => import('../components/Car360Viewer'));
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -240,7 +236,8 @@ export default function CarDetails() {
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '6px',
               color: 'rgba(240,237,232,0.7)',
-              padding: '9px 16px',
+              padding: '10px 16px',
+              minHeight: '44px',
               cursor: 'pointer',
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '12px',
@@ -315,32 +312,28 @@ export default function CarDetails() {
           }}>
             {/* Left column */}
             <div>
-              {/* Interactive 360° studio */}
+              {/* Showcase image */}
               <div style={{ marginBottom: '40px' }}>
-                <p className="section-eyebrow" style={{ marginBottom: '16px' }}>Interactive Studio</p>
-                <Suspense fallback={
-                  <div style={{
-                    height: 380,
-                    borderRadius: 16,
-                    background: '#000',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <div style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: '50%',
-                      border: '2px solid rgba(201,168,76,0.2)',
-                      borderTopColor: '#c9a84c',
-                      animation: 'studio-load 0.9s linear infinite',
-                    }} />
-                    <style>{`@keyframes studio-load { to { transform: rotate(360deg); } }`}</style>
-                  </div>
-                }>
-                  <Car360Viewer image={car.heroImage || car.image} alt={car.name} modelSrc={modelSrcForCar(car)} />
-                </Suspense>
+                <div style={{
+                  height: 380,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  background: '#000',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <img
+                    src={car.heroImage || car.image}
+                    alt={car.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Tagline */}

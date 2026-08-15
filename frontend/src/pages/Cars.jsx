@@ -194,6 +194,7 @@ export default function Cars() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={styles.searchInput}
+              className="cars-search"
             />
             <span style={styles.searchIcon}><SearchIcon size={20} color="rgba(240,237,232,0.5)" /></span>
           </div>
@@ -204,6 +205,7 @@ export default function Cars() {
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
               style={styles.filterSelect}
+              className="cars-select"
             >
               {brands.map(brand => (
                 <option key={brand} value={brand}>Brand: {brand}</option>
@@ -214,6 +216,7 @@ export default function Cars() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               style={styles.filterSelect}
+              className="cars-select"
             >
               {categories.map(category => (
                 <option key={category} value={category}>Category: {category}</option>
@@ -224,6 +227,7 @@ export default function Cars() {
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               style={styles.filterSelect}
+              className="cars-select"
             >
               {years.map(year => (
                 <option key={year} value={year}>Year: {year}</option>
@@ -234,6 +238,7 @@ export default function Cars() {
               value={minHp}
               onChange={(e) => setMinHp(Number(e.target.value))}
               style={styles.filterSelect}
+              className="cars-select"
             >
               {HP_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -244,6 +249,7 @@ export default function Cars() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={styles.filterSelect}
+              className="cars-select"
             >
               <option value="featured">Sort: Featured</option>
               <option value="price-asc">Price: Low to High</option>
@@ -264,6 +270,7 @@ export default function Cars() {
               onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
               aria-label="Minimum price"
               style={styles.priceInput}
+              className="cars-price-input"
             />
             <span style={{ color: 'rgba(240,237,232,0.3)', fontSize: 13 }}>—</span>
             <input
@@ -275,6 +282,7 @@ export default function Cars() {
               aria-label="Maximum price"
               placeholder="Max"
               style={styles.priceInput}
+              className="cars-price-input"
             />
             <span style={styles.priceRangeHint}>
               {fmt(priceRange[0])} – {priceRange[1] >= MAX_PRICE ? 'No Limit' : fmt(priceRange[1])}
@@ -380,13 +388,23 @@ export default function Cars() {
           </motion.div>
         )}
       </div>
+      <style>{`
+        /* Focus states for inline-styled controls */
+        .cars-search:focus,
+        .cars-select:focus,
+        .cars-price-input:focus {
+          border-color: #E0C06A !important;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(201, 168, 76, 0.4), 0 0 30px rgba(201, 168, 76, 0.25) !important;
+          outline: none;
+        }
+        .cars-search::placeholder { color: rgba(240, 237, 232, 0.35); }
+      `}</style>
     </PageTransition>
   );
 }
 
 // Car Card Component - Memoized for performance
 const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite, onAddToCart, onClick }) {
-  const [isHovered, setIsHovered] = useState(false);
   const glareRef = useRef(null);
 
   // Track cursor position directly on the DOM node (no React re-renders)
@@ -403,6 +421,7 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
   const animationDelay = isMobile ? 0 : Math.min(index * 0.03, 0.3);
 
   return (
+    <div className="hm-car-card">
     <motion.div
       layout={!isMobile}
       role="button"
@@ -419,13 +438,8 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
       style={{
         ...styles.card,
         outline: 'none',
-        border: isHovered && !isMobile ? '1px solid rgba(201,168,76,0.45)' : styles.card.border,
-        boxShadow: isHovered && !isMobile
-          ? '0 24px 64px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.12)'
-          : styles.card.boxShadow,
+        height: '100%',
       }}
-      onMouseEnter={() => !isMobile && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onMouseMove={handleGlare}
       onClick={onClick}
       onKeyDown={(e) => {
@@ -440,26 +454,22 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
           src={car.image}
           alt={`${car.brand} ${car.name}`}
           objectFit="cover"
+          className="hm-card-img"
           style={{
             position: 'absolute',
             top: 0, left: 0,
             width: '100%',
             height: '100%',
-            transform: isHovered && !isMobile ? 'scale(1.05)' : 'scale(1)',
-            transition: 'transform 0.4s ease-out, filter 0.5s ease-out',
-            filter: isHovered && !isMobile ? 'saturate(1.18) brightness(1.05)' : 'saturate(0.88)',
           }}
         />
         <div
-          style={{
-            ...styles.cardOverlay,
-            opacity: isHovered ? 1 : 0,
-            transition: 'opacity 0.3s ease'
-          }}
+          className="hm-card-overlay"
+          style={styles.cardOverlay}
         />
 
         {/* Cursor-following gold glare */}
         <div
+          className="hm-glare"
           style={{
             position: 'absolute',
             inset: 0,
@@ -467,8 +477,6 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
             pointerEvents: 'none',
             background: 'radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(201,168,76,0.22) 0%, transparent 55%)',
             mixBlendMode: 'screen',
-            opacity: isHovered && !isMobile ? 1 : 0,
-            transition: 'opacity 0.35s ease',
           }}
         />
 
@@ -476,11 +484,10 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
         <button
           aria-label={isFavorite ? `Remove ${car.brand} ${car.name} from favorites` : `Add ${car.brand} ${car.name} to favorites`}
           aria-pressed={isFavorite}
+          className="hm-fav-btn"
           style={{
             ...styles.favoriteButton,
             ...(isFavorite ? styles.favoriteButtonActive : {}),
-            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-            transition: 'all 0.2s ease'
           }}
           onClick={(e) => onToggleFavorite(car, e)}
         >
@@ -528,6 +535,7 @@ const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite
         </div>
       </div>
     </motion.div>
+    </div>
   );
 });
 
@@ -786,9 +794,8 @@ const styles = {
     borderRadius: radius.lg,
     overflow: 'hidden',
     border: `1px solid ${colors.goldDim}`,
-    backdropFilter: 'blur(20px)',
     cursor: 'pointer',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+    transition: 'transform 0.3s ease',
     boxShadow: shadows.md,
     willChange: 'transform',
     display: 'flex',
@@ -954,6 +961,7 @@ const styles = {
   },
   addToCartButton: {
     padding: `${spacing.sm} ${spacing.xl}`,
+    minHeight: '44px',
     background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
     border: 'none',
     borderRadius: radius.sm,

@@ -75,8 +75,10 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 /* ACCESSIBILITY: Global focus styles for keyboard navigation */
+/* `!important` overrides inline `outline: none` on style-attr controls
+   so keyboard focus is never invisible. */
 :focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--focus-ring) !important;
   outline-offset: var(--focus-offset);
 }
 
@@ -626,5 +628,102 @@ select option:checked {
   select option:checked {
     background: linear-gradient(90deg, rgba(201, 168, 76, 0.3), rgba(201, 168, 76, 0.15));
     color: #E0C06A;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERFORMANT CARD MOTION
+   Only transform + opacity are animated (compositor/GPU friendly).
+   All glow/ring effects live on a ::before layer that fades via
+   opacity instead of animating box-shadow. Hover only applies on
+   devices with a hover pointer so touch stays buttery smooth.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Wrapper: holds the hover lift + glow (not clipped by card overflow) */
+.hm-card,
+.hm-car-card {
+  position: relative;
+  border-radius: 20px;
+}
+
+/* Glow ring + shadow layer (opacity fade only — no box-shadow animation) */
+.hm-card::before,
+.hm-car-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(201, 168, 76, 0.5);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(201, 168, 76, 0.15),
+    0 0 40px rgba(201, 168, 76, 0.18);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+/* Card body sits above the glow layer */
+.hm-card > *,
+.hm-car-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hm-card:hover,
+.hm-car-card:hover {
+  transform: translateY(-6px);
+}
+
+.hm-card:hover::before,
+.hm-car-card:hover::before {
+  opacity: 1;
+}
+
+/* Image zoom inside the card (transform only, GPU) */
+.hm-card .hm-card-img,
+.hm-car-card .hm-card-img {
+  transition: transform 0.55s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.hm-card:hover .hm-card-img,
+.hm-car-card:hover .hm-card-img {
+  transform: scale(1.06);
+}
+
+/* Gold top accent line */
+.hm-card-line {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.hm-card:hover .hm-card-line,
+.hm-car-card:hover .hm-card-line {
+  opacity: 1;
+}
+
+/* Cursor glare layer (vars set via JS, opacity via CSS) */
+.hm-glare,
+.hm-card-overlay {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.hm-car-card:hover .hm-glare,
+.hm-car-card:hover .hm-card-overlay {
+  opacity: 1;
+}
+
+/* Only apply hover motion when the pointer supports hover */
+@media (hover: hover) {
+  .hm-card:hover,
+  .hm-car-card:hover {
+    transform: translateY(-6px);
+  }
+
+  /* Favorite button pop (transform only) */
+  .hm-fav-btn {
+    transition: transform 0.2s ease;
+  }
+  .hm-car-card:hover .hm-fav-btn {
+    transform: scale(1.08);
   }
 }

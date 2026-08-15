@@ -7,12 +7,11 @@ import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import Brand1M from '../components/Brand1M';
 import ScrollReveal from '../components/ScrollReveal';
 import { TextRevealByWord } from '../components/TextReveal';
-import Card3DTilt from '../components/Card3DTilt';
 import OptimizedImage from '../components/OptimizedImage';
 import AnimatedCounter from '../components/AnimatedCounter';
 import { shouldEnableKenBurns } from '../utils/performanceOptimization';
 import { compactPrice } from '../utils/finance';
-import { colors, spacing, radius, typography, shadows, transitions, components } from '../styles/designTokens';
+import { colors, spacing, radius, typography, transitions, components } from '../styles/designTokens';
 
 const HERO_SLIDES = [
   { carId: 11, headline: 'Pure', accent: 'Racing DNA', sub: 'The race track distilled into a road car.' },
@@ -132,50 +131,6 @@ export default function Home() {
 
         {/* Grid decoration */}
         <DottedGrid />
-
-        {/* Scroll cue */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            left: 48,
-            bottom: 34,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            zIndex: 10,
-            opacity: 0.55,
-            pointerEvents: 'none',
-          }}
-        >
-          <span style={{
-            display: 'block',
-            width: 1,
-            height: 40,
-            background: 'linear-gradient(to bottom, transparent, #C9A84C)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            <span style={{
-              position: 'absolute',
-              top: -6,
-              left: 0,
-              width: 1,
-              height: 10,
-              background: '#F4D03F',
-              boxShadow: '0 0 8px rgba(244,208,63,0.9)',
-              animation: 'scrollCue 2s cubic-bezier(0.22, 1, 0.36, 1) infinite',
-            }}/>
-          </span>
-          <span style={{
-            fontFamily: 'var(--font-ui)',
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: '4px',
-            textTransform: 'uppercase',
-            color: 'rgba(240,237,232,0.62)',
-          }}>Scroll</span>
-        </div>
 
         {/* Slide indicators */}
         <div
@@ -456,12 +411,6 @@ export default function Home() {
                 }
               }
 
-              @keyframes scrollCue {
-                0% { transform: translateY(0); opacity: 0; }
-                30% { opacity: 1; }
-                100% { transform: translateY(36px); opacity: 0; }
-              }
-
               @keyframes goldDustFloat {
                 0%, 100% {
                   opacity: 0;
@@ -508,12 +457,6 @@ export default function Home() {
                 /* Hide vertical slide counter on mobile */
                 div[role="tablist"],
                 .hero-slide-counter {
-                  display: none !important;
-                }
-              }
-
-              @media (max-width: 1360px) {
-                .hero-glass-card {
                   display: none !important;
                 }
               }
@@ -586,41 +529,9 @@ export default function Home() {
                 </div>
               </div>
             </ScrollReveal>
-
-            {/* Classy-style glass card */}
-            <HeroGlassCard car={heroCar} />
           </div>
         </div>
 
-        {/* Scroll cue */}
-        <button
-          onClick={() => carsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          aria-label="Scroll to collection"
-          style={{
-          position: 'absolute', bottom: 104, left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-          opacity: 0.55, animation: 'float 3s ease-in-out infinite',
-          cursor: 'none', zIndex: 10,
-          background: 'none', border: 'none', padding: 0,
-        }}>
-          <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(240,237,232,0.5)' }}>Scroll</span>
-          {/* Mouse icon */}
-          <div style={{
-            width: 22, height: 34,
-            border: '1px solid rgba(201,168,76,0.5)',
-            borderRadius: 12,
-            display: 'flex', justifyContent: 'center',
-            paddingTop: 6,
-          }}>
-            <div style={{
-              width: 2, height: 7,
-              background: 'linear-gradient(to bottom, #E0C06A, #C9A84C)',
-              borderRadius: 2,
-              animation: 'scrollWheel 1.6s ease-in-out infinite',
-              boxShadow: '0 0 8px rgba(201,168,76,0.8)',
-            }}/>
-          </div>
-        </button>
       </section>
 
       {/* ══ STATS BAR ══ */}
@@ -1049,12 +960,11 @@ function FeaturedSection() {
 
 function FeaturedCard({ car, index, visible }) {
   const { addToCart, toggleFavorite, isFavorite } = useApp();
-  const [hov, setHov] = useState(false);
 
   return (
-    <Card3DTilt intensity={12} shine={true} style={{ height: '100%' }}>
-      <motion.div
-        className="car-card"
+    <div className="hm-card">
+    <motion.div
+      className="car-card"
       initial={{ opacity: 0, y: 30 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{
@@ -1062,34 +972,22 @@ function FeaturedCard({ car, index, visible }) {
         delay: index * 0.08, // Reduced delay
         ease: [0.19, 1, 0.22, 1]
       }}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      onTouchStart={() => setHov(true)}
-      onTouchEnd={() => setTimeout(() => setHov(false), 300)}
       style={{
         borderRadius: radius.lg,
         overflow: 'hidden',
-        background: hov ? 'rgba(22,22,29,0.92)' : 'rgba(17,17,23,0.6)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: hov ? '1px solid rgba(201,168,76,0.45)' : `1px solid ${colors.border2}`,
-        transition: `all ${transitions.duration.default} ${transitions.easeOut}`,
-        transform: hov ? 'translateY(-6px)' : 'translateY(0)',
-        boxShadow: hov ? `${shadows.lg}, 0 0 0 1px rgba(201,168,76,0.15), ${shadows.gold}` : shadows.sm,
+        background: 'rgba(17,17,23,0.9)',
+        border: `1px solid ${colors.border2}`,
         cursor: 'none',
         position: 'relative',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        willChange: hov ? 'transform' : 'auto',
       }}
     >
       {/* Top gold accent line on hover */}
-      <div style={{
+      <div className="hm-card-line" style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 3,
         background: 'linear-gradient(to right, transparent, #E0C06A, #F4D03F, #E0C06A, transparent)',
-        opacity: hov ? 1 : 0,
-        transition: 'opacity 0.4s ease',
         boxShadow: '0 0 18px rgba(201,168,76,0.7)',
         pointerEvents: 'none',
       }}/>
@@ -1104,12 +1002,10 @@ function FeaturedCard({ car, index, visible }) {
           src={car.image}
           alt={car.name}
           objectFit="cover"
+          className="hm-card-img"
           style={{
             width: '100%',
             height: '100%',
-            transform: hov ? 'scale(1.05)' : 'scale(1)',
-            transition: 'transform 0.5s cubic-bezier(0.33, 1, 0.68, 1), filter 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
-            filter: hov ? 'saturate(1.18) brightness(1.05)' : 'saturate(0.88)',
           }}
         />
 
@@ -1255,7 +1151,7 @@ function FeaturedCard({ car, index, visible }) {
         </div>
       </div>
     </motion.div>
-    </Card3DTilt>
+    </div>
   );
 }
 
@@ -1690,25 +1586,16 @@ function CollectionPreview() {
 }
 
 function MiniCard({ car, index, visible }) {
-  const [hov, setHov] = useState(false);
-
   return (
+    <div className="hm-card" style={{ borderRadius: radius.md, height: '100%' }}>
     <Link to={`/car/${car.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div
         className="car-card"
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        onTouchStart={() => setHov(true)}
-        onTouchEnd={() => setTimeout(() => setHov(false), 300)}
         style={{
           borderRadius: radius.md,
           overflow: 'hidden',
-          border: hov ? '1px solid rgba(201,168,76,0.45)' : `1px solid ${colors.border2}`,
-          background: hov ? 'rgba(24,24,31,0.7)' : 'rgba(17,17,23,0.5)',
-          backdropFilter: 'blur(10px)',
-          transition: `all 0.4s ${transitions.easeOut}`,
-          transform: hov ? 'translateY(-6px)' : 'translateY(0)',
-          boxShadow: hov ? `${shadows.md}, 0 0 32px rgba(201,168,76,0.12)` : 'none',
+          border: `1px solid ${colors.border2}`,
+          background: 'rgba(17,17,23,0.85)',
           opacity: visible ? 1 : 0,
           animation: visible ? `fadeUp 0.6s ${index * 0.08}s ${transitions.easeOut} both` : 'none',
           cursor: 'none',
@@ -1723,12 +1610,10 @@ function MiniCard({ car, index, visible }) {
               src={car.image}
               alt={car.name}
               objectFit="cover"
+              className="hm-card-img"
               style={{
                 width: '100%',
                 height: '100%',
-                transition: `transform ${transitions.duration.slow} ${transitions.easeOut}, filter 0.5s ${transitions.easeOut}`,
-                transform: hov ? 'scale(1.08)' : 'scale(1)',
-                filter: hov ? 'saturate(1.18) brightness(1.05)' : 'saturate(0.88)',
               }}
             />
           </div>
@@ -1763,6 +1648,7 @@ function MiniCard({ car, index, visible }) {
         </div>
       </div>
     </Link>
+    </div>
   );
 }
 
@@ -2102,93 +1988,5 @@ function RippleButton({ children, className = '', style, onClick, ...props }) {
         />
       ))}
     </button>
-  );
-}
-
-function HeroGlassCard({ car }) {
-  if (!car) return null;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 1.6, ease: [0.22, 1, 0.36, 1] }}
-      className="hero-glass-card"
-      style={{
-        position: 'absolute',
-        right: 130,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 8,
-        width: 288,
-        padding: '22px 22px 18px',
-        borderRadius: 18,
-        background: 'rgba(12,12,16,0.38)',
-        backdropFilter: 'blur(18px)',
-        WebkitBackdropFilter: 'blur(18px)',
-        border: '1px solid rgba(201,168,76,0.22)',
-        boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.06)',
-      }}
-    >
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14,
-      }}>
-        <div style={{ fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(240,237,232,0.55)' }}>
-          Now Showing
-        </div>
-        <div style={{
-          width: 34, height: 34, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 800, color: '#050507',
-          boxShadow: '0 4px 14px rgba(201,168,76,0.5)',
-        }}>
-          <Brand1M style={{ fontSize: 10, fontWeight: 800, color: '#050507' }} />
-        </div>
-      </div>
-
-      <div style={{
-        fontFamily: 'var(--font-display)', fontSize: 19, fontWeight: 600, color: '#fff',
-        lineHeight: 1.2, marginBottom: 4, letterSpacing: '0.2px',
-      }}>
-        {car.name}
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase',
-        color: 'var(--gold)', marginBottom: 14,
-      }}>
-        {car.brand} · {car.year}
-      </div>
-
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
-        padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.08)', borderBottom: '1px solid rgba(255,255,255,0.08)',
-        marginBottom: 14,
-      }}>
-        {[
-          { v: car.specs?.horsepowerStr || '–', l: 'Power' },
-          { v: car.specs?.accelStr || '–', l: '0–60' },
-          { v: car.specs?.topSpeedStr || '–', l: 'Top' },
-        ].map((s, i) => (
-          <div key={i} style={{ textAlign: 'center', minWidth: 0 }}>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 600, color: '#fff',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>{s.v}</div>
-            <div style={{ fontFamily: 'var(--font-ui)', fontSize: 8, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,237,232,0.45)', marginTop: 2 }}>{s.l}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <span style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '1.5px', color: 'rgba(240,237,232,0.55)' }}>
-          From <span style={{ color: '#F4D03F', fontWeight: 700, fontSize: 11 }}>{car.price ? `$${car.price.toLocaleString()}` : '–'}</span>
-        </span>
-        <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 700, cursor: 'pointer' }}>
-          Configure →
-        </span>
-      </div>
-    </motion.div>
   );
 }
