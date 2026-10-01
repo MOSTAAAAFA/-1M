@@ -8,6 +8,7 @@
 @import './styles/premium-animations.css';
 @import './styles/ultra-premium.css';
 @import './styles/design-tokens.css';
+@import './styles/car-card.css';
 @import './styles/motion-enhancements.css';
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

@@ -1,10 +1,9 @@
-import React, { useState, useMemo, memo, useCallback, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import { cars } from '../data/cars';
-import { parseHp, compactPrice } from '../utils/finance';
-import OptimizedImage from '../components/OptimizedImage';
+import { parseHp } from '../utils/finance';
+import CarCard from '../components/CarCard';
 import { SearchIcon } from '../components/icons';
 import { colors, spacing, radius, typography, shadows, transitions } from '../styles/designTokens';
 
@@ -25,7 +24,6 @@ const HP_OPTIONS = [
 
 export default function Cars() {
   const navigate = useNavigate();
-  const { favorites, toggleFavorite, addToCart } = useApp();
   const [searchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
@@ -84,18 +82,6 @@ export default function Cars() {
 
     return filtered;
   }, [searchQuery, selectedBrand, selectedCategory, priceRange, selectedYear, minHp, sortBy]);
-
-  const handleAddToCart = useCallback((car, e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(car);
-  }, [addToCart]);
-
-  const handleToggleFavorite = useCallback((car, e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleFavorite(car);
-  }, [toggleFavorite]);
 
   return (
     <>
@@ -371,16 +357,16 @@ export default function Cars() {
             style={styles.grid}
             layout
           >
+            {/* The catalogue renders the same canonical CarCard as the home rail
+                and /favorites. The first three images load eagerly so the LCP
+                candidate is not waiting on IntersectionObserver. */}
             <AnimatePresence mode="popLayout">
               {filteredCars.map((car, index) => (
                 <CarCard
                   key={car.id}
                   car={car}
                   index={index}
-                  isFavorite={favorites.includes(car.id)}
-                  onToggleFavorite={handleToggleFavorite}
-                  onAddToCart={handleAddToCart}
-                  onClick={() => navigate(`/car/${car.id}`)}
+                  priority={index < 3}
                 />
               ))}
             </AnimatePresence>
@@ -401,142 +387,6 @@ export default function Cars() {
     </>
   );
 }
-
-// Car Card Component - Memoized for performance
-const CarCard = memo(function CarCard({ car, index, isFavorite, onToggleFavorite, onAddToCart, onClick }) {
-  const glareRef = useRef(null);
-
-  // Track cursor position directly on the DOM node (no React re-renders)
-  const handleGlare = useCallback((e) => {
-    const el = glareRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty('--gx', `${((e.clientX - rect.left) / rect.width) * 100}%`);
-    el.style.setProperty('--gy', `${((e.clientY - rect.top) / rect.height) * 100}%`);
-  }, []);
-
-  // Use simpler animations on mobile
-  const isMobile = window.innerWidth < 768;
-  const animationDelay = isMobile ? 0 : Math.min(index * 0.03, 0.3);
-
-  return (
-    <div className="hm-car-card">
-    <motion.div
-      layout={!isMobile}
-      role="button"
-      tabIndex={0}
-      aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{
-        duration: 0.3,
-        delay: animationDelay,
-        layout: { duration: 0.2 }
-      }}
-      style={{
-        ...styles.card,
-        outline: 'none',
-        height: '100%',
-      }}
-      onMouseMove={handleGlare}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-    >
-      <div ref={glareRef} style={styles.cardImageWrapper}>
-        <OptimizedImage
-          src={car.image}
-          alt={`${car.brand} ${car.name}`}
-          objectFit="cover"
-          className="hm-card-img"
-          style={{
-            position: 'absolute',
-            top: 0, left: 0,
-            width: '100%',
-            height: '100%',
-          }}
-        />
-        <div
-          className="hm-card-overlay"
-          style={styles.cardOverlay}
-        />
-
-        {/* Cursor-following gold glare */}
-        <div
-          className="hm-glare"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 2,
-            pointerEvents: 'none',
-            background: 'radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(201,168,76,0.22) 0%, transparent 55%)',
-            mixBlendMode: 'screen',
-          }}
-        />
-
-        {/* Favorite Button */}
-        <button
-          aria-label={isFavorite ? `Remove ${car.brand} ${car.name} from favorites` : `Add ${car.brand} ${car.name} to favorites`}
-          aria-pressed={isFavorite}
-          className="hm-fav-btn"
-          style={{
-            ...styles.favoriteButton,
-            ...(isFavorite ? styles.favoriteButtonActive : {}),
-          }}
-          onClick={(e) => onToggleFavorite(car, e)}
-        >
-          {isFavorite ? '♥' : '♡'}
-        </button>
-
-        {/* Stock Badge */}
-        <div style={car.inStock ? styles.stockBadge : { ...styles.stockBadge, ...styles.preOrderBadge }}>
-          {car.inStock ? 'In Stock' : 'Pre-Order'}
-        </div>
-      </div>
-
-      <div style={styles.cardContent}>
-        <div style={styles.cardHeader}>
-          <p style={styles.cardBrand}>{car.brand}</p>
-          <p style={styles.cardModel}>{car.name}</p>
-          <p style={styles.cardYear}>{car.year}</p>
-        </div>
-
-        {/* Specs Preview */}
-        <div style={styles.specsPreview}>
-          <div style={styles.specItem}>
-            <span style={styles.specLabel}>HP</span>
-            <span style={styles.specValue}>{car.specs?.horsepower || 'N/A'}</span>
-          </div>
-          <div style={styles.specDivider} />
-          <div style={styles.specItem}>
-            <span style={styles.specLabel}>0-60</span>
-            <span style={styles.specValue}>{car.specs?.acceleration || 'N/A'}</span>
-          </div>
-        </div>
-
-        {/* Gold price strip */}
-        <div style={styles.priceStrip}>
-          <div style={styles.priceStripLine} />
-          <div style={styles.price}>{compactPrice(car.price)}</div>
-          <button
-            style={styles.addToCartButton}
-            onClick={(e) => onAddToCart(car, e)}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
-    </motion.div>
-    </div>
-  );
-});
 
 // Styles
 const styles = {
@@ -788,204 +638,11 @@ const styles = {
     padding: '0 20px',
     willChange: 'contents',
   },
-  card: {
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    border: `1px solid ${colors.goldDim}`,
-    cursor: 'pointer',
-    transition: 'transform 0.3s ease',
-    boxShadow: shadows.md,
-    willChange: 'transform',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  cardImageWrapper: {
-    position: 'relative',
-    width: '100%',
-    paddingTop: '60%',
-    overflow: 'hidden',
-    background: 'linear-gradient(180deg, rgba(10, 10, 14, 0.5), rgba(5, 5, 7, 0.8))',
-    boxShadow: 'inset 0 0 55px rgba(5,5,7,0.9), inset 0 -12px 30px rgba(5,5,7,0.85)',
-  },
-  cardOverlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(180deg, transparent 0%, rgba(201, 168, 76, 0.1) 100%)',
-    pointerEvents: 'none',
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    width: '44px',
-    height: '44px',
-    borderRadius: radius.full,
-    border: 'none',
-    background: 'rgba(0, 0, 0, 0.5)',
-    backdropFilter: 'blur(10px)',
-    color: colors.gold,
-    fontSize: typography.fontSize.xl,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: transitions.default,
-    boxShadow: shadows.sm,
-  },
-  favoriteButtonActive: {
-    background: colors.goldDim,
-    boxShadow: `0 4px 16px ${colors.goldGlow}, 0 0 20px ${colors.goldGlow}`,
-  },
-  stockBadge: {
-    position: 'absolute',
-    top: spacing.lg,
-    left: spacing.lg,
-    padding: `${spacing.sm} ${spacing.md}`,
-    background: 'rgba(0, 200, 100, 0.15)',
-    backdropFilter: 'blur(10px)',
-    border: `1px solid ${colors.green}`,
-    borderRadius: radius.lg,
-    color: colors.green,
-    fontSize: 11,
-    fontWeight: typography.fontWeight.semibold,
-    letterSpacing: typography.letterSpacing.tight,
-    textTransform: 'uppercase',
-  },
-  preOrderBadge: {
-    background: 'rgba(239,68,68,0.16)',
-    border: `1px solid ${colors.red}`,
-    color: colors.red,
-  },
-  cardContent: {
-    padding: spacing['2xl'],
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-  },
-  cardHeader: {
-    marginBottom: spacing.lg,
-  },
-  cardBrand: {
-    fontSize: 11,
-    letterSpacing: typography.letterSpacing.widest,
-    textTransform: 'uppercase',
-    color: colors.white40,
-    marginBottom: spacing.xs,
-    fontWeight: typography.fontWeight.semibold,
-  },
-  cardModel: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.white,
-    marginBottom: spacing.xs,
-    letterSpacing: typography.letterSpacing.wide,
-  },
-  cardYear: {
-    fontSize: typography.fontSize.sm,
-    color: colors.white40,
-  },
-  specsPreview: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.lg,
-    padding: `${spacing.lg} 0`,
-    borderTop: `1px solid ${colors.border}`,
-    borderBottom: `1px solid ${colors.border}`,
-    marginBottom: spacing.xl,
-  },
-  specItem: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.xs,
-  },
-  specLabel: {
-    fontSize: typography.fontSize.xs,
-    letterSpacing: typography.letterSpacing.wider,
-    textTransform: 'uppercase',
-    color: colors.white40,
-    fontWeight: typography.fontWeight.semibold,
-  },
-  specValue: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.gold,
-  },
-  specDivider: {
-    width: '1px',
-    height: '30px',
-    background: colors.goldDim,
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  priceStrip: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.lg,
-    flexWrap: 'wrap',
-    rowGap: spacing.sm,
-    padding: '14px 24px',
-    background: 'linear-gradient(to top, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.02) 100%)',
-    // Full-bleed strip: break out of the card's 24px padding so the gold
-    // band touches the card edges on all sides and sits flush at the bottom.
-    margin: 'auto -24px -24px',
-    borderTop: '1px solid rgba(201,168,76,0.28)',
-  },
-  priceStripLine: {
-    position: 'absolute',
-    top: -1, left: 0, right: 0,
-    height: 1,
-    background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 25%, #E0C06A 50%, rgba(201,168,76,0.5) 75%, transparent)',
-  },
-  price: {
-    fontFamily: typography.fontDisplay,
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    background: 'linear-gradient(135deg, #C9A84C, #E0C06A 60%, #F4D03F)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-    letterSpacing: typography.letterSpacing.wide,
-    lineHeight: 1.1,
-    flex: '1 1 auto',
-    minWidth: 0,
-    whiteSpace: 'nowrap',
-  },
-  addToCartButton: {
-    padding: `${spacing.sm} ${spacing.xl}`,
-    minHeight: '44px',
-    background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
-    border: 'none',
-    borderRadius: radius.xl,
-    color: colors.black,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: typography.letterSpacing.tight,
-    textTransform: 'uppercase',
-    cursor: 'pointer',
-    boxShadow: shadows.sm,
-    transition: 'transform 0.2s ease',
-    willChange: 'transform',
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-  },
   emptyState: {
     textAlign: 'center',
     padding: '100px 20px',
     maxWidth: '500px',
     margin: '60px auto',
-  },
-  emptyIcon: {
-    fontSize: '80px',
-    marginBottom: '24px',
-    filter: 'grayscale(100%) opacity(0.3)',
   },
   emptyTitle: {
     fontSize: '32px',

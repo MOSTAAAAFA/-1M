@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
-import AnimatedCard from '../components/AnimatedCard';
+import CarCard from '../components/CarCard';
 
 export default function Favorites() {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ export default function Favorites() {
             style={styles.grid}
           >
             {favoriteCars.map((car, i) => (
-              <AnimatedCard key={car.id} car={car} index={i} />
+              <CarCard key={car.id} car={car} index={i} priority={i < 3} />
             ))}
           </motion.div>
         )}

@@ -5,7 +5,7 @@ import { cars } from '../data/cars';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import Brand1M from '../components/Brand1M';
 import Crest1M from '../components/Crest1M';
-import AnimatedCard from '../components/AnimatedCard';
+import CarCard from '../components/CarCard';
 import ScrollReveal from '../components/ScrollReveal';
 import { TextRevealByWord } from '../components/TextReveal';
 import OptimizedImage from '../components/OptimizedImage';
@@ -930,7 +930,7 @@ function FeaturedSection() {
           gap: 28
         }}>
           {featured.map((car, i) => (
-            <AnimatedCard key={car.id} car={car} index={i} />
+            <CarCard key={car.id} car={car} index={i} priority={i < 3} />
           ))}
         </div>
       </div>

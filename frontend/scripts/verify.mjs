@@ -49,6 +49,25 @@ const consoleErrors = [];
 page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));
 page.on('pageerror', (e) => consoleErrors.push('PAGEERROR: ' + e.message));
 
+// Failed subresource requests, with the offending URL. Console messages alone
+// don't say *which* hotlinked asset 404s, so record the network truth too.
+const netFailures = [];
+const isMedia = (url, type) => /^(image|video|font)\//.test(type) || /\.(jpe?g|png|webp|avif|gif|svg|mp4|webm|woff2?)(\?|$)/i.test(url);
+// ERR_BLOCKED_BY_ORB: Opaque Response Blocking. The server answered, but with a
+// content-type the browser refuses to paint as an image (usually an HTML error
+// page). Node fetch sees "200 OK" here, so this only shows up in a real browser.
+const BROWSER_BLOCKS = /ERR_BLOCKED_BY_ORB|ERR_BLOCKED_BY_RESPONSE|ERR_BLOCKED_BY_CLIENT/;
+page.on('response', (r) => {
+  if (r.status() >= 400 && isMedia(r.url(), r.headers()['content-type'] || '')) {
+    netFailures.push({ status: r.status(), url: r.url(), via: 'response' });
+  }
+});
+page.on('requestfailed', (r) => {
+  const u = r.url();
+  const err = (r.failure()?.errorText || 'failed').slice(0, 40);
+  if (isMedia(u, r.resourceType()) || BROWSER_BLOCKS.test(err)) netFailures.push({ status: err, url: u, via: 'requestfailed' });
+});
+
 // Splash screen is skipped after first visit; clear it so runs are repeatable.
 async function goto(path) {
   await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' });
@@ -100,26 +119,76 @@ try {
   // Cards navigate imperatively (onClick -> navigate('/car/:id')), so there is
   // no <a href="/car/..."> to select. Click the first card in the grid instead.
   await goto('/cars');
-  const card = page.locator('[role="button"][aria-label^="View details for"]').first();
+  const cards = await page.locator('.car-card').count();
+  const card = page.locator('.car-card-link').first();
   if (await card.count()) {
     await card.click();
     await page.waitForTimeout(2600);
     const url = page.url();
     const h1 = await page.locator('main h1').first().textContent().catch(() => null);
     url.includes('/car/') && h1 && h1.trim().length > 0
-      ? ok('car detail loads', `${h1.trim().slice(0, 40)} (${url.replace(BASE, '')})`)
+      ? ok('car detail loads', `${h1.trim().slice(0, 40)} (${url.replace(BASE, '')}, ${cards} cards)`)
       : bad('car detail loads', `url=${url} h1=${h1}`);
-  } else bad('car detail loads', 'no car card found on /cars');
+  } else bad('car detail loads', 'no .car-card-link on /cars');
 
-  // ---- 4b. Car cards are keyboard reachable --------------------------
+  // ---- 4b. Cards are real, keyboard-reachable links -------------------
+  // The card is NOT role="button": the title renders a real <a> stretched over
+  // the card, so it must be focusable and Enter-activated natively.
   await goto('/cars');
-  const kbdCard = page.locator('[role="button"][aria-label^="View details for"]').first();
-  await kbdCard.focus();
+  const link = page.locator('.car-card-link').first();
+  const href = await link.getAttribute('href').catch(() => null);
+  await link.focus();
+  const focused = await page.evaluate(() => document.activeElement?.className?.includes('car-card-link'));
   await page.keyboard.press('Enter');
   await page.waitForTimeout(2400);
-  page.url().includes('/car/')
-    ? ok('card keyboard-activates (Enter)')
-    : bad('card keyboard-activates (Enter)', page.url());
+  href && href.startsWith('/car/') && focused && page.url().includes('/car/')
+    ? ok('card is a focusable link', `href=${href} Enter -> ${page.url().replace(BASE, '')}`)
+    : bad('card is a focusable link', `href=${href} focused=${focused} url=${page.url()}`);
+
+  // ---- 4c. Nested controls sit above the stretched link ---------------
+  // A stretched ::after overlay must not swallow the favorite / garage clicks.
+  await goto('/cars');
+  const fav = page.locator('.car-card-fav').first();
+  const favBefore = await fav.getAttribute('aria-pressed');
+  await fav.click();
+  await page.waitForTimeout(400);
+  const favAfter = await fav.getAttribute('aria-pressed');
+  await page.waitForTimeout(400);
+  const stillOnCars = page.url().endsWith('/cars');
+  favBefore !== favAfter && stillOnCars
+    ? ok('card favorite toggles without navigating', `aria-pressed ${favBefore} -> ${favAfter}`)
+    : bad('card favorite toggles without navigating', `${favBefore} -> ${favAfter}, url=${page.url()}`);
+
+  // ---- 4d. Every rendered card image actually decodes ----------------
+  // A URL can 200 and still be unusable (wrong content-type, HTML error page,
+  // or a stray control character). naturalWidth > 0 proves real pixels.
+  await goto('/cars');
+  await page.waitForTimeout(2500);
+  await page.evaluate(() =>
+    Promise.all(
+      [...document.querySelectorAll('.car-card img')].map((img) =>
+        img.complete
+          ? null
+          : new Promise((r) => {
+              img.addEventListener('load', r, { once: true });
+              img.addEventListener('error', r, { once: true });
+            })
+      )
+    )
+  );
+  const imgReport = await page.evaluate(() => {
+    const imgs = [...document.querySelectorAll('.car-card img')];
+    const broken = imgs
+      .filter((i) => !i.complete || i.naturalWidth === 0)
+      .map((i) => i.currentSrc || i.src || i.getAttribute('data-src') || '(no src)');
+    return { total: imgs.length, broken };
+  });
+  imgReport.broken.length === 0 && imgReport.total > 0
+    ? ok('all card images decode', `${imgReport.total} images`)
+    : bad(
+        'all card images decode',
+        `${imgReport.broken.length}/${imgReport.total} broken: ${[...new Set(imgReport.broken)].slice(0, 3).join(' | ').slice(0, 220)}`
+      );
 
   // ---- 5. Filtering narrows the grid ----------------------------------
   await goto('/cars');
@@ -199,5 +268,19 @@ console.log(`${results.length - failed}/${results.length} passed`);
 if (consoleErrors.length) {
   console.log(`\nconsole errors (${consoleErrors.length}):`);
   [...new Set(consoleErrors)].slice(0, 10).forEach((e) => console.log('  ' + e.slice(0, 180)));
+}
+if (netFailures.length) {
+  console.log(`\nmedia network failures (${netFailures.length}):`);
+  const byStatus = new Map();
+  for (const f of netFailures) {
+    if (!byStatus.has(f.status)) byStatus.set(f.status, new Set());
+    byStatus.get(f.status).add(f.url);
+  }
+  for (const [status, set] of byStatus) {
+    console.log(`  ${status}  (${set.size} url(s))`);
+    [...set].slice(0, 5).forEach((u) => console.log('     ' + u.slice(0, 150)));
+  }
+} else {
+  console.log('\nmedia network failures: none');
 }
 process.exit(failed ? 1 : 0);

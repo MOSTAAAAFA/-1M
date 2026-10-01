@@ -1,0 +1,417 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CANONICAL CAR CARD  ·  components/CarCard.jsx
+   One card for every car on the site: home featured rail, /cars catalogue,
+   /favorites. Replaces four parallel implementations.
+
+   Lighting model (all compositor-only, no filter/blur on the card root):
+     .car-card-rim    inner top hairline  → reads as a light bar above the car
+     .car-card-sweep  diagonal specular   → light travelling across polished paint
+     .car-card-glare  pointer-tracked    → gold pool following the cursor
+     .car-card-scrim  bottom gradient    → carries badge contrast, not the car
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.car-card-perspective {
+  perspective: 1200px;
+  height: 100%;
+}
+
+.car-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--card-radius);
+  background: rgba(17, 17, 23, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transform-origin: 50% 60%;
+  transition:
+    border-color var(--duration-slow) var(--ease-cinematic),
+    box-shadow var(--duration-slow) var(--ease-cinematic),
+    background var(--duration-slow) var(--ease-cinematic);
+}
+
+.car-card[data-hovered] {
+  background: rgba(22, 22, 30, 0.98);
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.75),
+    0 0 60px rgba(201, 168, 76, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ── Media ───────────────────────────────────────────────────────────── */
+.car-card-media {
+  position: relative;
+  /* aspect-ratio reserves the box before the image loads → no layout shift */
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #1a1a1a, #0f0f15);
+}
+
+/* OptimizedImage renders its own container; fill it without inline styles */
+.car-card-media > .optimized-image-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.car-card-img {
+  transition: transform var(--duration-slower) var(--ease-cinematic);
+}
+
+.car-card[data-hovered] .car-card-img img {
+  transform: scale(1.055);
+}
+
+/* B2 · Rim light — 1px specular edge along the top of the frame. Reads as a
+   softbox above the vehicle rather than a border. */
+.car-card-rim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 60px rgba(0, 0, 0, 0.35);
+  transition: box-shadow var(--duration-slow) var(--ease-cinematic);
+}
+
+.car-card[data-hovered] .car-card-rim {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 70px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(201, 168, 76, 0.28);
+}
+
+/* Specular sweep — a narrow highlight travelling across the paint on hover.
+   transform-only, so it stays on the compositor. */
+.car-card-sweep {
+  position: absolute;
+  top: -30%;
+  left: -60%;
+  width: 45%;
+  height: 160%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0) rotate(14deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.055) 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.055) 60%,
+    transparent 100%
+  );
+  transition: opacity var(--duration-normal) var(--ease-default);
+}
+
+.car-card[data-hovered] .car-card-sweep {
+  opacity: 1;
+  transform: translateX(320%) rotate(14deg);
+  transition:
+    opacity var(--duration-normal) var(--ease-default),
+    transform 1.1s var(--ease-cinematic);
+}
+
+.car-card-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(17, 17, 23, 0.95) 0%, rgba(17, 17, 23, 0.28) 42%, transparent 72%);
+}
+
+/* B1 · Pointer-tracked gold pool. --gx/--gy are written to the DOM node by the
+   component on mousemove, so this costs one style write per frame and no React
+   render. mix-blend-mode: screen keeps it GPU-composited. */
+.car-card-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    380px circle at var(--gx, 50%) var(--gy, 50%),
+    rgba(201, 168, 76, 0.2) 0%,
+    rgba(244, 208, 63, 0.07) 38%,
+    transparent 68%
+  );
+  transition: opacity var(--duration-slow) var(--ease-default);
+}
+
+.car-card[data-hovered] .car-card-glare {
+  opacity: 1;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+.car-card-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.14);
+  border: 1px solid rgba(201, 168, 76, 0.42);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 16px rgba(201, 168, 76, 0.14);
+}
+
+.car-card-badge--preorder {
+  left: auto;
+  right: 14px;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.16);
+}
+
+.car-card-fav {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 6; /* above the stretched link so it stays clickable */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--white-40);
+  background: rgba(5, 5, 7, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all var(--duration-normal) var(--ease-cinematic);
+}
+
+.car-card-fav:hover {
+  transform: scale(1.1);
+  color: var(--gold);
+  border-color: rgba(201, 168, 76, 0.55);
+}
+
+.car-card-fav[data-on] {
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.22);
+  border-color: rgba(201, 168, 76, 0.7);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.45);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────── */
+.car-card-body {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 24px;
+}
+
+.car-card-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 7px;
+}
+
+.car-card-year {
+  color: var(--white-20);
+  letter-spacing: 2px;
+}
+
+.car-card-title {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--white);
+  margin-bottom: 9px;
+  /* The title's link is stretched over the whole card (see below) */
+  position: relative;
+}
+
+.car-card-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--duration-normal) var(--ease-default);
+}
+
+/* Stretched link: turns the entire card surface into the link's hit area
+   without nesting buttons inside an anchor (invalid HTML). */
+.car-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--card-radius);
+}
+
+.car-card[data-hovered] .car-card-link {
+  color: var(--gold);
+}
+
+.car-card-tagline {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--white-40);
+  font-style: italic;
+  margin-bottom: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.car-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.car-spec {
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all var(--duration-slow) var(--ease-default);
+}
+
+.car-spec[data-active] {
+  background: rgba(201, 168, 76, 0.05);
+  border-color: rgba(201, 168, 76, 0.18);
+}
+
+.car-spec-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white-20);
+  margin-bottom: 3px;
+}
+
+.car-spec-value {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.car-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color var(--duration-slow) var(--ease-default);
+}
+
+.car-card[data-hovered] .car-card-foot {
+  border-top-color: rgba(201, 168, 76, 0.24);
+}
+
+.car-card-foot-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white-20);
+  margin-bottom: 2px;
+}
+
+.car-card-price {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 55%, var(--gold-bright) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.car-card-cta {
+  position: relative;
+  z-index: 6; /* above the stretched link */
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--black);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  box-shadow: 0 4px 18px rgba(201, 168, 76, 0.28);
+  transition: transform var(--duration-fast) var(--ease-cinematic),
+    box-shadow var(--duration-fast) var(--ease-cinematic);
+}
+
+.car-card-cta:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(201, 168, 76, 0.42);
+}
+
+.car-card-cta:active {
+  transform: scale(0.98);
+}
+
+/* The card is not a link itself, so suppress the global button pointer only
+   where a real control exists. */
+.car-card-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+  border-radius: var(--card-radius);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .car-card-body {
+    padding: 18px 18px 20px;
+  }
+  .car-card-title {
+    font-size: 23px;
+  }
+  .car-card-tagline {
+    -webkit-line-clamp: 1;
+  }
+  .car-card-price {
+    font-size: 19px;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* No sweep, no glare. The card still responds to hover via colour/border. */
+  .car-card-sweep,
+  .car-card-glare {
+    display: none;
+  }
+  .car-card[data-hovered] .car-card-img img {
+    transform: none;
+  }
+}
