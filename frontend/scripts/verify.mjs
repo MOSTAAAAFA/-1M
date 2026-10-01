@@ -234,6 +234,95 @@ try {
   rmOpacity > 0.95 ? ok('reduced-motion resolves opaque', String(rmOpacity)) : bad('reduced-motion resolves opaque', String(rmOpacity));
   await rmCtx.close();
 
+  // ---- 6b. Cinematic lighting: spotlight tracks, glass applied, gold halo ---
+  // Pointer tracking writes CSS custom properties, so assert the vars actually
+  // move on pointermove (a stubbed rAF or a missing listener would leave them
+  // at their initial 50%/50%).
+  await goto('/');
+  const heroSel = 'main .spotlight-surface';
+  const hasHero = await page.locator(heroSel).count();
+  if (hasHero) {
+    const box = await page.locator(heroSel).boundingBox();
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.3);
+    await page.waitForTimeout(250);
+    const at = async () =>
+      page.locator(heroSel).evaluate((el) => ({
+        x: parseFloat(getComputedStyle(el).getPropertyValue('--spot-x')),
+        y: parseFloat(getComputedStyle(el).getPropertyValue('--spot-y')),
+        active: getComputedStyle(el).getPropertyValue('--spot-active').trim(),
+      }));
+    const a = await at();
+    await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7);
+    await page.waitForTimeout(250);
+    const b = await at();
+    const moved = Math.abs(a.x - b.x) > 20 && Math.abs(a.y - b.y) > 20;
+    const lit = a.active === '1' || b.active === '1';
+    moved && lit
+      ? ok('hero spotlight tracks pointer', `x ${Math.round(a.x)}->${Math.round(b.x)} y ${Math.round(a.y)}->${Math.round(b.y)}`)
+      : bad('hero spotlight tracks pointer', `x ${a.x}->${b.x} y ${a.y}->${b.y} active=${a.active}/${b.active}`);
+  } else bad('hero spotlight tracks pointer', 'no .spotlight-surface on /');
+
+  // Nav glass must actually be applied, not just present in the stylesheet.
+  // Over the hero the nav is deliberately transparent, so scroll past the hero
+  // first to reach the `solid` state where the material engages.
+  const navRead = () =>
+    page.evaluate(() => {
+      const n = document.querySelector('.site-nav');
+      if (!n) return null;
+      const s = getComputedStyle(n);
+      return { solid: n.dataset.solid, blur: s.backdropFilter || s.webkitBackdropFilter, bg: s.backgroundColor };
+    });
+  const navTop = await navRead();
+  await page.evaluate(() => window.scrollTo({ top: window.innerHeight * 1.2, behavior: 'instant' }));
+  await page.waitForTimeout(900);
+  const navScrolled = await navRead();
+  if (navTop && navTop.solid === 'false' && /none/.test(navTop.blur)) {
+    navScrolled && navScrolled.solid === 'true' && /blur/.test(navScrolled.blur)
+      ? ok('nav glass engages on scroll', `transparent -> ${navScrolled.blur} on ${navScrolled.bg}`)
+      : bad('nav glass engages on scroll', JSON.stringify(navScrolled));
+  } else {
+    bad('nav glass engages on scroll', `unexpected top state: ${JSON.stringify(navTop)}`);
+  }
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await page.waitForTimeout(400);
+
+  // The light layer must not sit above the hero copy (it would wash out text).
+  const stacking = await page.evaluate(() => {
+    const layer = document.querySelector('.spotlight-layer');
+    if (!layer) return null;
+    const z = Number(getComputedStyle(layer).zIndex);
+    const cs = getComputedStyle(layer).pointerEvents;
+    return { z, pe: cs };
+  });
+  stacking && stacking.pe === 'none'
+    ? ok('spotlight layer is inert to pointer', `z=${stacking.z} pointer-events=${stacking.pe}`)
+    : bad('spotlight layer is inert to pointer', JSON.stringify(stacking));
+
+  // ---- 6c. Reduced motion pins the spotlight and does not track --------
+  const rmSpotCtx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
+  const rms = await rmSpotCtx.newPage();
+  await rms.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
+  await rms.evaluate(() => sessionStorage.setItem('1m_splash_seen', '1'));
+  await rms.waitForTimeout(3200);
+  const rmBox = await rms.locator(heroSel).boundingBox().catch(() => null);
+  if (rmBox) {
+    await rms.mouse.move(rmBox.x + 20, rmBox.y + 20);
+    await rms.waitForTimeout(250);
+    const rmSpot = await rms
+      .locator(heroSel)
+      .evaluate((el) => ({
+        active: getComputedStyle(el).getPropertyValue('--spot-active').trim(),
+        x: getComputedStyle(el).getPropertyValue('--spot-x').trim(),
+      }))
+      .catch(() => null);
+    // Under reduced motion the hook never attaches, so --spot-x keeps its
+    // pinned CSS value and the layer stays statically lit rather than moving.
+    rmSpot && rmSpot.active !== '1'
+      ? ok('reduced motion pins spotlight', `--spot-active=${rmSpot.active} x=${rmSpot.x}`)
+      : bad('reduced motion pins spotlight', JSON.stringify(rmSpot));
+  } else bad('reduced motion pins spotlight', 'no .spotlight-surface');
+  await rmSpotCtx.close();
+
   // ---- 7. Mobile viewport --------------------------------------------
   const mCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const m = await mCtx.newPage();

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cars } from '../data/cars';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
+import usePointerSpotlight from '../hooks/usePointerSpotlight';
 import Brand1M from '../components/Brand1M';
 import Crest1M from '../components/Crest1M';
 import CarCard from '../components/CarCard';
@@ -28,6 +29,11 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
   const carsRef = useRef(null);
+  const heroRef = useRef(null);
+
+  // Pointer-tracked light over the hero backdrop (B1). Writes CSS vars only, so
+  // pointer movement never re-renders this page.
+  usePointerSpotlight(heroRef, { radius: 520 });
 
   // Hero autoplay controls
   const [autoplayPaused, setAutoplayPaused] = useState(false);
@@ -90,6 +96,8 @@ export default function Home() {
     <div style={{ background: 'transparent', minHeight: '100vh', position: 'relative', zIndex: 0 }}>
       {/* ══ HERO ══ */}
       <section
+        ref={heroRef}
+        className="spotlight-surface"
         onMouseEnter={() => setHeroHovered(true)}
         onMouseLeave={() => setHeroHovered(false)}
         onFocus={() => setHeroFocused(true)}
@@ -106,6 +114,11 @@ export default function Home() {
 
         {/* Background image with cinematic crossfade + zoom transition */}
         <HeroBackdrop slide={slide} prevSlide={prevSlide} enableKenBurns={enableKenBurns} />
+
+        {/* Tracked light. z-index 0 sits above the backdrop (which sets its own
+            stacking) and below the legibility gradients, so the light reveals
+            the photo without reducing text contrast. */}
+        <div className="spotlight-layer" aria-hidden="true" />
 
         {/* Gradient overlays (minimum needed for legibility) */}
         <div style={{
