@@ -169,7 +169,7 @@ export default function AIAssistant() {
     });
   }, []);
 
-  // Azure Speech Service TTS (Egyptian Arabic Neural)
+  // Google Cloud TTS (Arabic Wavenet Neural) - NO browser fallback
   const speak = useCallback(async (text, onEnded) => {
     if (!text) {
       if (onEnded) onEnded();
@@ -177,7 +177,7 @@ export default function AIAssistant() {
     }
 
     try {
-      console.log('[Voice] Calling Azure Speech Service...');
+      console.log('[Voice] Calling Google Cloud TTS...');
       const res = await fetch(VOICE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -186,68 +186,21 @@ export default function AIAssistant() {
 
       const contentType = res.headers.get('content-type') || '';
 
-      // Check if fallback JSON (Azure not configured or failed)
+      // Check if fallback JSON (Google TTS not configured or failed)
       if (contentType.includes('application/json')) {
         const data = await res.json();
-        console.warn('[Voice] TTS fallback:', data.message);
+        console.warn('[Voice] Google TTS not available:', data.message);
 
-        // Fallback to browser TTS only if Azure fails
-        if ('speechSynthesis' in window) {
-          console.log('[Voice] Using browser Egyptian Arabic TTS as fallback');
-          window.speechSynthesis.cancel();
-
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'ar-EG';
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-          utterance.volume = 1.0;
-
-          const selectVoice = () => {
-            const voices = window.speechSynthesis.getVoices();
-            const egyptian = voices.find(v => v.lang && v.lang.toLowerCase().includes('ar-eg'));
-            if (egyptian) {
-              utterance.voice = egyptian;
-              console.log('[Voice] Using Egyptian voice:', egyptian.name);
-            } else {
-              const arabic = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ar'));
-              if (arabic) utterance.voice = arabic;
-            }
-          };
-
-          selectVoice();
-          window.speechSynthesis.onvoiceschanged = selectVoice;
-
-          utterance.onstart = () => {
-            speakingRef.current = true;
-            setSpeaking(true);
-          };
-
-          utterance.onend = () => {
-            speakingRef.current = false;
-            setSpeaking(false);
-            if (onEnded) onEnded();
-          };
-
-          utterance.onerror = (err) => {
-            console.error('[Voice] Speech synthesis error:', err);
-            speakingRef.current = false;
-            setSpeaking(false);
-            if (onEnded) onEnded();
-          };
-
-          window.speechSynthesis.speak(utterance);
-        } else {
-          // No browser TTS support
-          setMessages(prev => [...prev, {
-            role: 'ai',
-            text: data.message || 'معذرة، الصوت مش متاح دلوقتي'
-          }]);
-          if (onEnded) onEnded();
-        }
+        // NO browser TTS fallback — just show text message
+        setMessages(prev => [...prev, {
+          role: 'system',
+          text: data.message || 'معذرة، الصوت مش متاح دلوقتي. لازم تضبط Google Cloud TTS الأول.'
+        }]);
+        if (onEnded) onEnded();
         return;
       }
 
-      // Success: Azure returned audio
+      // Success: Google TTS returned audio
       if (contentType.includes('audio')) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
@@ -260,7 +213,7 @@ export default function AIAssistant() {
         setSpeaking(true);
 
         audio.onended = () => {
-          console.log('[Voice] Azure audio playback ended');
+          console.log('[Voice] Google TTS audio playback ended');
           URL.revokeObjectURL(url);
           speakingRef.current = false;
           setSpeaking(false);
@@ -269,7 +222,7 @@ export default function AIAssistant() {
         };
 
         audio.onerror = (e) => {
-          console.error('[Voice] Azure audio playback error:', e);
+          console.error('[Voice] Google TTS audio playback error:', e);
           URL.revokeObjectURL(url);
           speakingRef.current = false;
           setSpeaking(false);
