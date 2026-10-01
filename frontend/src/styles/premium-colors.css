@@ -72,15 +72,11 @@
   --border-gold-bright: rgba(201, 168, 76, 0.6);
 
   /* ═══ SHADOWS - Elevated surfaces with glow ═══ */
-  /* Now using shadow tokens from design system */
-  --shadow-sm:          var(--shadow-sm);
-  --shadow-md:          var(--shadow-md);
-  --shadow-lg:          var(--shadow-lg);
+  /* Shadow scale is owned by design-tokens.css + index.css. Do NOT redefine
+     --shadow-* here: a property whose value references itself is invalid at
+     computed-value time, so every consuming var() silently resolved to unset.
+     --shadow-xl and --shadow-gold-glow are unique to this file and stay. */
   --shadow-xl:          0 24px 64px rgba(0, 0, 0, 0.7);
-
-  --shadow-gold-sm:     var(--shadow-gold-sm);
-  --shadow-gold-md:     var(--shadow-gold-md);
-  --shadow-gold-lg:     var(--shadow-gold-lg);
   --shadow-gold-glow:   0 0 40px rgba(201, 168, 76, 0.5);
 
   /* ═══ SEMANTIC COLORS ═══ */

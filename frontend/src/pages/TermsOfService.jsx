@@ -124,7 +124,7 @@ const styles = {
   container: {
     minHeight: '100vh',
     background: 'var(--black)',
-    paddingTop: 'var(--nav-h)',
+    paddingTop: 'var(--nav-offset)',
     padding: '120px 24px 80px',
   },
   content: {

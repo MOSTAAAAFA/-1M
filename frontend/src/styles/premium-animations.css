@@ -10,27 +10,19 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
+  /* Duration and easing tokens are owned by design-tokens.css + index.css.
+     Do NOT redefine them here: a property whose value references itself is
+     invalid at computed-value time, so every consuming var() resolved to unset.
+     Only the derived aliases unique to this file stay. */
+
   /* Confident deceleration - primary easing */
   --ease-premium: var(--ease-cinematic);
 
   /* Sharp entry, smooth exit - for reveals */
   --ease-reveal: var(--ease-default);
 
-  /* Weighted bounce - for interactive elements */
-  --ease-bounce: var(--ease-bounce);
-
   /* Magnetic pull - for cursor interactions */
   --ease-magnetic: var(--ease-in-out);
-
-  /* Cinematic slow-mo */
-  --ease-cinematic: var(--ease-cinematic);
-
-  /* Duration tokens */
-  --duration-fast: var(--duration-fast);
-  --duration-normal: var(--duration-normal);
-  --duration-default: var(--duration-default);
-  --duration-slow: var(--duration-slow);
-  --duration-slower: var(--duration-slower);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

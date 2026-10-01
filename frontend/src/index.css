@@ -8,6 +8,7 @@
 @import './styles/premium-animations.css';
 @import './styles/ultra-premium.css';
 @import './styles/design-tokens.css';
+@import './styles/motion-enhancements.css';
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -56,6 +57,15 @@
   --fg-secondary: var(--color-white-500);
   --fg-muted: var(--color-white-600);
 
+  /* UI UX Pro Max - Generated Design System (repointed to brand) */
+  --color-primary: #0a0a0e;
+  --color-on-primary: #F0EDE8;
+  --color-secondary: #18181f;
+  --color-on-secondary: #F0EDE8;
+  --color-accent: #C9A84C;
+  --color-on-accent: #08080a;
+  --color-ring: #C9A84C;
+
   /* Spacing Scale */
   --space-1: 4px;
   --space-2: 8px;
@@ -86,10 +96,10 @@
 
   /* Border Radius */
   --radius-none: 0;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 20px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
   --radius-2xl: 32px;
   --radius-full: 9999px;
 
@@ -146,6 +156,17 @@
   --nav-height: 72px;
   --nav-bg: rgba(5,5,7,0.85);
   --nav-backdrop: blur(24px);
+  /* Announcement bar height. SiteSettingsContext sets --announce-offset to this
+     value whenever the bar is enabled (on by default), so --announce-height is
+     the neutral default. */
+  --announce-height: 36px;
+  --announce-offset: 0px;
+  /* ═══ FIXED CHROME OFFSET ═══
+     The single token every page must use to clear the fixed announcement bar
+     + navbar. Previously pages used paddingTop: var(--nav-h) (72px) while the
+     real occupied height was 108px, so content started 36px underneath the
+     navbar on 4 pages and behind it entirely on ~19 others. */
+  --nav-offset: calc(var(--announce-offset) + var(--nav-height));
 
   /* Legacy tokens (backward compatibility) */
   --black:          var(--color-black-600);
@@ -166,6 +187,7 @@
   --white-70:       var(--color-white-400);
   --white-60:       var(--color-white-500);
   --white-40:       var(--color-white-700);
+  --white-30:       rgba(240,237,232,0.30);
   --white-20:       var(--color-white-900);
   --white-10:       rgba(240,237,232,0.10);
   --text-primary:   var(--color-white-200);
@@ -176,21 +198,15 @@
   --red:            #EF4444;
   --focus-ring:     2px solid var(--color-gold-500);
   --focus-offset:   2px;
-  --font-display:   'Cormorant Garamond', 'Georgia', serif;
-  --font-ui:        'Space Grotesk', 'Rajdhani', sans-serif;
-  --font-body:      'Inter', 'Helvetica Neue', sans-serif;
+  --font-display:   'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
+  --font-ui:        'Space Grotesk', sans-serif;
+  --font-body:      'Space Grotesk', 'Inter', sans-serif;
+  --font-data:      'Space Mono', 'SF Mono', 'Consolas', monospace;
   --nav-h:          var(--nav-height);
   --ease-out:       var(--ease-default);
   --trans:          var(--duration-default) var(--ease-default);
-  --radius-sm:      var(--radius-sm);
-  --radius-md:      var(--radius-lg);
-  --radius-lg:      var(--radius-xl);
-  --radius-xl:      var(--radius-2xl);
-  --shadow-sm:      var(--shadow-sm);
-  --shadow-md:      var(--shadow-md);
-  --shadow-lg:      var(--shadow-lg);
-  --shadow-gold:    var(--shadow-gold-md);
-  --shadow-gold-lg: var(--shadow-gold-lg);
+  /* --radius-* and --shadow-* are declared once above; not restated here. */
+  --shadow-gold:    0 8px 32px rgba(201,168,76,0.30);
 }
 
 html { scroll-behavior: smooth; }
@@ -210,6 +226,11 @@ html.lenis, html.lenis body { height: auto; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Restore native cursor when the custom cursor effect is disabled */
+  * { cursor: auto !important; }
+  .particle-canvas { display: none !important; }
+  .custom-cursor-dot { display: none !important; }
+  .custom-cursor-ring { display: none !important; }
 }
 
 /* ACCESSIBILITY: Global focus styles for keyboard navigation */
@@ -246,6 +267,206 @@ button:disabled, [disabled] { cursor: not-allowed; }
 
 .skip-to-content:focus {
   top: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SITE FRAME + GLOBAL FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Column frame: pins the footer to the viewport bottom on short pages while
+   letting long pages scroll naturally. min-height uses dvh so mobile browser
+   chrome collapsing doesn't leave a gap under the footer. */
+.site-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* The transitioning route region. flex-grow pushes it to fill, flex-shrink 0
+   stops long pages from being compressed. */
+.site-main {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  position: relative;
+  flex-shrink: 0;
+  background: rgba(5, 5, 7, 0.98);
+  padding: 64px 0 32px;
+  margin-top: 96px;
+}
+
+/* A soft gold hairline instead of a flat 1px border: reads as light spilling
+   over the edge of the footer. Decorative, hidden from AT. */
+.footer-lightline {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 168, 76, 0.05) 20%,
+    rgba(201, 168, 76, 0.55) 50%,
+    rgba(201, 168, 76, 0.05) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 48px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+
+.footer-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.footer-wordmark-text {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.footer-description {
+  font-size: 13.5px;
+  color: var(--white-40);
+  max-width: 34ch;
+  line-height: 1.6;
+}
+
+/* Display italic for the tagline — the one place a serif gets to be lyrical. */
+.footer-tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--white-30);
+  margin-top: 14px;
+  max-width: 32ch;
+  line-height: 1.5;
+}
+
+.footer-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.footer-list-data li {
+  font-family: var(--font-data);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.footer-address {
+  color: var(--white-30);
+  line-height: 1.6;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: rgba(240, 237, 232, 0.5);
+}
+
+.footer-motto {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.5);
+}
+
+/* ═══ LINK UNDERLINE ═══
+   One affordance shared by footer + nav. Scales in from the left on hover AND
+   :focus-visible so keyboard users get the same signal as mouse users — the
+   previous nav underline was :hover-only. */
+.link-underline {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white-40);
+  text-decoration: none;
+  padding-bottom: 3px;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-normal) var(--ease-cinematic);
+}
+
+.link-underline:hover,
+.link-underline:focus-visible {
+  color: var(--gold);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (max-width: 900px) {
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .site-footer {
+    padding-top: 52px;
+    margin-top: 64px;
+  }
+}
+
+@media (max-width: 560px) {
+  .footer-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 20px;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 body {
@@ -344,20 +565,28 @@ p {
 }
 
 .text-gold {
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--gold);
   font-weight: 700;
 }
 
-.eyebrow {
-  font-family: var(--font-ui);
+/* ─── Serial / telemetry label (catalogue plate voice) ─── */
+.serial-label {
+  font-family: var(--font-data);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 4px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 /* ─── Glassmorphism ─── */
 .glass {
@@ -379,17 +608,20 @@ p {
   align-items: center;
   gap: 8px;
   padding: 14px 32px;
-  border-radius: var(--radius-xl);
+  border-radius: 9999px;
   font-family: var(--font-ui);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   border: none;
   outline: none;
   text-decoration: none;
-  transition: var(--trans);
+  transition: transform var(--duration-normal) var(--ease-default),
+              background var(--duration-normal) var(--ease-default),
+              box-shadow var(--duration-normal) var(--ease-default),
+              color var(--duration-normal) var(--ease-default);
   position: relative;
   overflow: hidden;
   white-space: nowrap;
@@ -402,58 +634,57 @@ p {
   outline-offset: 3px;
 }
 
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-  transform: translateX(-100%);
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
-}
-.btn:hover::before {
-  transform: translateX(200%);
-}
-.btn-gold {
-  background: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
-  background-size: 200% 100%;
-  color: var(--black);
-  box-shadow: 0 8px 32px rgba(201,168,76,0.4);
-  animation: goldShimmer 4s ease-in-out infinite;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-.btn-gold:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 12px 48px rgba(201,168,76,0.6), 0 0 60px rgba(244,208,63,0.3);
-}
-.btn-gold:active {
-  transform: translateY(0) scale(0.98);
+@media (hover: hover) and (pointer: fine) {
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 20%, rgba(255,255,255,0.35) 50%, transparent 80%);
+    transform: translateX(-120%);
+    transition: transform var(--duration-slow) var(--ease-cinematic);
+    pointer-events: none;
+  }
+  .btn:hover::before {
+    transform: translateX(120%);
+  }
 }
 
-@keyframes goldShimmer {
-  0%, 100% { background-position: 0% center; }
-  50% { background-position: 100% center; }
+.btn-gold {
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  color: var(--black);
+  box-shadow: none;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  background: var(--gold-light);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.4);
+}
+.btn-gold:active {
+  transform: translateY(0) scale(0.985);
 }
 .btn-ghost {
-  background: rgba(201, 168, 76, 0.08);
+  background: rgba(201, 168, 76, 0.06);
   color: var(--white);
-  border: 1px solid rgba(201, 168, 76, 0.4);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(240,237,232,0.2);
 }
 .btn-ghost:hover {
-  border-color: rgba(201, 168, 76, 0.8);
-  background: rgba(201, 168, 76, 0.15);
-  color: var(--gold);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(201, 168, 76, 0.3), inset 0 0 40px rgba(201, 168, 76, 0.1);
+  border-color: rgba(201, 168, 76, 0.6);
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold-light);
+  transform: translateY(-2px);
 }
 .btn-outline-gold {
-  background: var(--gold-dim);
+  background: transparent;
   color: var(--gold);
-  border: 1px solid rgba(201,168,76,0.4);
+  border: 1px solid rgba(201,168,76,0.5);
 }
-.btn-outline-gold:hover { background: rgba(201,168,76,0.25); transform: translateY(-2px); }
+.btn-outline-gold:hover {
+  background: rgba(201,168,76,0.1);
+  transform: translateY(-2px);
+}
 
 /* ─── Section divider ─── */
 .divider {
@@ -809,52 +1040,53 @@ select option:checked {
   z-index: 1;
 }
 
-.hm-card:hover,
-.hm-car-card:hover {
-  transform: translateY(-6px);
-}
-
-.hm-card:hover::before,
-.hm-car-card:hover::before {
-  opacity: 1;
-}
-
-/* Image zoom inside the card (transform only, GPU) */
-.hm-card .hm-card-img,
-.hm-car-card .hm-card-img {
-  transition: transform 0.55s cubic-bezier(0.33, 1, 0.68, 1);
-}
-.hm-card:hover .hm-card-img,
-.hm-car-card:hover .hm-card-img {
-  transform: scale(1.06);
-}
-
-/* Gold top accent line */
-.hm-card-line {
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.hm-card:hover .hm-card-line,
-.hm-car-card:hover .hm-card-line {
-  opacity: 1;
-}
-
-/* Cursor glare layer (vars set via JS, opacity via CSS) */
+/* Cursor glare layer base state (opacity elevated on hover only) */
 .hm-glare,
 .hm-card-overlay {
   opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.hm-car-card:hover .hm-glare,
-.hm-car-card:hover .hm-card-overlay {
-  opacity: 1;
 }
 
-/* Only apply hover motion when the pointer supports hover */
-@media (hover: hover) {
+/* Hover-only motion is gated to hover-capable pointers so touch
+   devices never get stuck in a "hovered" state. */
+@media (hover: hover) and (pointer: fine) {
   .hm-card:hover,
   .hm-car-card:hover {
     transform: translateY(-6px);
+  }
+
+  /* Card glow layer */
+  .hm-card:hover::before,
+  .hm-car-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Image zoom inside the card (transform only, GPU) */
+  .hm-card .hm-card-img,
+  .hm-car-card .hm-card-img {
+    transition: transform 0.55s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .hm-card:hover .hm-card-img,
+  .hm-car-card:hover .hm-card-img {
+    transform: scale(1.06);
+  }
+
+  /* Gold top accent line */
+  .hm-card-line {
+    transition: opacity 0.35s ease;
+  }
+  .hm-card:hover .hm-card-line,
+  .hm-car-card:hover .hm-card-line {
+    opacity: 1;
+  }
+
+  /* Cursor glare layer (vars set via JS, opacity via CSS) */
+  .hm-glare,
+  .hm-card-overlay {
+    transition: opacity 0.35s ease;
+  }
+  .hm-car-card:hover .hm-glare,
+  .hm-car-card:hover .hm-card-overlay {
+    opacity: 1;
   }
 
   /* Favorite button pop (transform only) */

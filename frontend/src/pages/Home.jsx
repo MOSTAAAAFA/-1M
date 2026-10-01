@@ -4,16 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cars } from '../data/cars';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import Brand1M from '../components/Brand1M';
+import Crest1M from '../components/Crest1M';
 import AnimatedCard from '../components/AnimatedCard';
 import ScrollReveal from '../components/ScrollReveal';
 import { TextRevealByWord } from '../components/TextReveal';
 import OptimizedImage from '../components/OptimizedImage';
-import AnimatedCounter from '../components/AnimatedCounter';
 import { shouldEnableKenBurns } from '../utils/performanceOptimization';
 import { compactPrice } from '../utils/finance';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 import { colors, spacing, radius, typography, transitions, components } from '../styles/designTokens';
 
 const HERO_SLIDES = [
+  { carId: 20, headline: 'Absolute', accent: 'Power', sub: 'Absolute power. Absolute art.' },
   { carId: 11, headline: 'Pure', accent: 'Racing DNA', sub: 'The race track distilled into a road car.' },
   { carId: 36, headline: 'Absolute', accent: 'Performance', sub: 'Eat the track.' },
   { carId: 56, headline: 'The last', accent: 'pure Lotus', sub: 'Precision engineered for pure driving emotion.' },
@@ -22,22 +24,41 @@ const HERO_SLIDES = [
 ];
 
 export default function Home() {
+  const { settings } = useSiteSettings();
   const [slide, setSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
   const carsRef = useRef(null);
+
+  // Hero autoplay controls
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
+  const [heroHovered, setHeroHovered] = useState(false);
+  const [heroFocused, setHeroFocused] = useState(false);
+  const [prefersReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
   const navigate = useNavigate();
 
   // Performance optimization flags
   const enableKenBurns = shouldEnableKenBurns();
 
-  // Auto slide transition every 8 seconds
+  // Auto slide transition every 6 seconds (pauses on toggle, hover, focus, hidden tab, reduced-motion)
+  const autoplayBlocked = autoplayPaused || heroHovered || heroFocused;
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (prefersReducedMotion || autoplayBlocked) return;
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled || autoplayBlocked) return;
+      if (document.hidden) {
+        // Tab is in the background: keep re-arming so autoplay resumes on return
+        timer = setTimeout(tick, 1000);
+        return;
+      }
       setPrevSlide(slide);
       setSlide(s => (s + 1) % HERO_SLIDES.length);
-    }, 6000);
-    return () => clearTimeout(timer);
-  }, [slide]);
+    };
+    let timer = setTimeout(tick, 4000);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [slide, autoplayBlocked, prefersReducedMotion]);
 
   const goToSlide = (i) => {
     if (i === slide) return;
@@ -45,82 +66,56 @@ export default function Home() {
     setSlide(i);
   };
 
+  // Keyboard navigation — arrow keys cycle the hero (ignored while typing)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      e.preventDefault();
+      const next = e.key === 'ArrowRight'
+        ? (slide + 1) % HERO_SLIDES.length
+        : (slide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length;
+      setPrevSlide(slide);
+      setSlide(next);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [slide]);
+
   const current = HERO_SLIDES[slide];
   const heroCar = cars.find(c => c.id === current.carId);
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', position: 'relative', zIndex: 0 }}>
       {/* ══ HERO ══ */}
-      <section style={{
-        position: 'relative',
-        zIndex: 1,
-        height: '100vh',
-        minHeight: 700,
-        overflow: 'hidden',
-        paddingTop: 'var(--nav-h)', // Fix navbar overlap
-      }}>
+      <section
+        onMouseEnter={() => setHeroHovered(true)}
+        onMouseLeave={() => setHeroHovered(false)}
+        onFocus={() => setHeroFocused(true)}
+        onBlur={() => setHeroFocused(false)}
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          height: '100vh',
+          minHeight: 700,
+          overflow: 'hidden',
+          paddingTop: 'var(--nav-offset)', // clears announcement bar + navbar
+        }}
+      >
 
         {/* Background image with cinematic crossfade + zoom transition */}
         <HeroBackdrop slide={slide} prevSlide={prevSlide} enableKenBurns={enableKenBurns} />
 
-        {/* Gradient overlays */}
+        {/* Gradient overlays (minimum needed for legibility) */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(5,5,7,0.92) 28%, rgba(5,5,7,0.5) 62%, rgba(5,5,7,0.15) 100%)',
+          background: 'linear-gradient(to right, rgba(5,5,7,0.92) 30%, rgba(5,5,7,0.5) 62%, rgba(5,5,7,0.12) 100%)',
         }}/>
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.95) 16%, rgba(5,5,7,0.62) 38%, rgba(5,5,7,0.28) 60%, transparent 78%)',
+          background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.95) 16%, rgba(5,5,7,0.6) 40%, rgba(5,5,7,0.22) 62%, transparent 80%)',
         }}/>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 55% 60% at 22% 48%, rgba(201,168,76,0.07) 0%, transparent 60%)',
-        }}/>
-
-        {/* Cinematic vignette */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(0,0,0,0.55) 100%)',
-          pointerEvents: 'none',
-        }}/>
-
-        {/* Ambient gold glow (bottom) */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 70% 45% at 50% 115%, rgba(201,168,76,0.14) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }}/>
-
-        {/* Classy-style textures: noise + light sweep */}
-        <NoiseOverlay />
-        <LightBeamSweep />
-
-        {/* Floating gold dust */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', overflow: 'hidden' }}>
-          {[
-            { x: '12%', y: '22%', s: 3, d: 0, dur: 7 },
-            { x: '28%', y: '68%', s: 2, d: 1.2, dur: 9 },
-            { x: '45%', y: '34%', s: 4, d: 2.1, dur: 11 },
-            { x: '60%', y: '75%', s: 2, d: 0.6, dur: 8 },
-            { x: '72%', y: '28%', s: 3, d: 1.8, dur: 10 },
-            { x: '85%', y: '58%', s: 2, d: 0.9, dur: 7.5 },
-            { x: '20%', y: '45%', s: 2, d: 2.6, dur: 12 },
-            { x: '52%', y: '15%', s: 2, d: 1.5, dur: 9.5 },
-            { x: '90%', y: '20%', s: 3, d: 3, dur: 8.5 },
-            { x: '35%', y: '85%', s: 2, d: 2.3, dur: 10.5 },
-          ].map((p, i) => (
-            <span key={i} style={{
-              position: 'absolute',
-              left: p.x, top: p.y,
-              width: p.s, height: p.s,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, #F4D03F 0%, rgba(201,168,76,0.6) 50%, transparent 100%)',
-              boxShadow: '0 0 12px rgba(201,168,76,0.9), 0 0 24px rgba(201,168,76,0.4)',
-              opacity: 0,
-              animation: `goldDustFloat ${p.dur}s ease-in-out ${p.d}s infinite`,
-            }}/>
-          ))}
-        </div>
 
         {/* Bottom fade edge - hero (dissolves hard image edge) */}
         <div style={{
@@ -130,9 +125,6 @@ export default function Home() {
           pointerEvents: 'none',
           zIndex: 3,
         }}/>
-
-        {/* Grid decoration */}
-        <DottedGrid />
 
         {/* Slide indicators */}
         <div
@@ -182,6 +174,41 @@ export default function Home() {
               </button>
             );
           })}
+          {!prefersReducedMotion && (
+            <button
+              onClick={() => setAutoplayPaused(p => !p)}
+              aria-pressed={autoplayPaused}
+              aria-label={autoplayPaused ? 'Play slideshow' : 'Pause slideshow'}
+              title={autoplayPaused ? 'Play' : 'Pause'}
+              style={{
+                marginTop: 8,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'rgba(5,5,7,0.55)',
+                border: '1px solid rgba(201,168,76,0.45)',
+                color: 'var(--gold)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                transition: 'all 0.3s',
+                boxShadow: autoplayPaused ? '0 0 14px rgba(201,168,76,0.45)' : 'none',
+              }}
+            >
+              {autoplayPaused ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -189,13 +216,15 @@ export default function Home() {
           height: '100%',
           maxWidth: 'none',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-end',
           justifyContent: 'flex-start',
           position: 'relative',
           zIndex: 5,
-          paddingTop: 'var(--nav-h)',
+          paddingTop: 'var(--nav-offset)',
+          paddingLeft: 28,
+          paddingBottom: 'clamp(104px, 13vh, 140px)',
         }}>
-          <div style={{ maxWidth: 720, textAlign: 'left', width: '100%' }}>
+          <div style={{ maxWidth: 660, textAlign: 'left', width: '100%' }}>
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -211,151 +240,98 @@ export default function Home() {
                 alignItems: 'center',
                 gap: 14,
               }}>
-                {/* Gold Circle Logo with 1M - Same as Navbar */}
+                {/* Signature gold crest — same emblem as the footer */}
                 <div style={{
                   position: 'relative',
-                  width: 44,
-                  height: 44,
+                  width: 50,
+                  height: 50,
                   flexShrink: 0,
-                  filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.6)) drop-shadow(0 0 16px rgba(201,168,76,0.4))',
-                  animation: 'shieldGlowPulse 1s ease-in-out infinite',
                 }}>
-                  {/* Main circle */}
-                  <div style={{
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: 'var(--black)',
-                    letterSpacing: '-0.3px',
-                    boxShadow: '0 4px 20px rgba(201,168,76,0.6), 0 0 40px rgba(244,208,63,0.4), inset 0 2px 3px rgba(255,255,255,0.3)',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                  }}>
-                    <Brand1M style={{ fontSize: 13, fontWeight: 900, color: 'var(--black)' }} />
-                  </div>
+                  <Crest1M size={50} />
                 </div>
 
                 {/* Vertical divider */}
                 <div style={{
                   width: 1,
                   height: 28,
-                  background: 'linear-gradient(to bottom, transparent, rgba(201,168,76,0.6), transparent)',
+                  background: 'rgba(201,168,76,0.4)',
                   flexShrink: 0,
                 }}/>
 
                 {/* Eyebrow text */}
                 <div>
                   <p style={{
-                    fontFamily: 'var(--font-ui)', fontSize: 10, fontWeight: 700,
-                    letterSpacing: '5px', textTransform: 'uppercase',
+                    fontFamily: 'var(--font-data)', fontSize: 11, fontWeight: 400,
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
                     color: '#C9A84C',
                     margin: 0,
                     lineHeight: 1.4,
                   }}>
-                    <Brand1M style={{ fontSize: 11, fontWeight: 700, color: '#C9A84C' }} /> MOTORS
+                    <Brand1M name={settings.siteName} style={{ fontSize: 11, fontWeight: 400, color: '#C9A84C' }} /> {settings.siteSuffix || 'MOTORS'}
                   </p>
                   <p style={{
-                    fontFamily: 'var(--font-ui)', fontSize: 11, fontWeight: 500,
-                    letterSpacing: '3px', textTransform: 'uppercase',
+                    fontFamily: 'var(--font-data)', fontSize: 10, fontWeight: 400,
+                    letterSpacing: '0.18em', textTransform: 'uppercase',
                     color: 'rgba(240,237,232,0.62)',
                     margin: 0,
                     lineHeight: 1.4,
                   }}>
-                    Luxury · Performance · Est. 2026
+                    {settings.heroEyebrowTop || 'Luxury Performance'} · {settings.heroEyebrowBottom || 'Est. 2026'}
                   </p>
                 </div>
               </div>
 
-              <style>{`
-              @keyframes shimmerSweep {
-                0% {
-                  background-position: 200% 0;
-                }
-                100% {
-                  background-position: -200% 0;
-                }
-              }
-
-              @keyframes shieldGlowPulse {
-                  0%, 100% {
-                    filter: drop-shadow(0 0 8px rgba(212,175,55,0.6)) drop-shadow(0 0 16px rgba(212,175,55,0.4));
-                  }
-                  50% {
-                    filter: drop-shadow(0 0 12px rgba(212,175,55,0.85)) drop-shadow(0 0 24px rgba(212,175,55,0.6));
-                  }
-                }
-              `}</style>
-
               <h1 style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2.9rem, 6.4vw, 6rem)',
-                fontWeight: 300,
-                lineHeight: 1.12,
+                fontSize: 'clamp(2.3rem, 5vw, 4.6rem)',
+                fontWeight: 400,
+                lineHeight: 1.08,
                 color: 'var(--white)',
-                marginBottom: 22,
-                letterSpacing: '-0.5px',
+                marginBottom: 18,
+                letterSpacing: '-0.02em',
                 wordBreak: 'keep-all',
                 overflowWrap: 'normal',
                 whiteSpace: 'normal',
               }}>
-                <span style={{
-                  display: 'inline-block',
-                  background: 'linear-gradient(90deg, #F0EDE8 0%, #F0EDE8 36%, #F4D03F 48%, #E0C06A 52%, #C9A84C 56%, #F0EDE8 64%, #F0EDE8 100%)',
-                  backgroundSize: '250% 100%',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  animation: 'shimmerSweep 4.5s linear infinite',
-                }}>
-                  {current.headline}
-                </span>
+                {current.headline}
                 <br/>
-                <em key={current.accent} style={{
+                <em style={{
                   fontStyle: 'italic',
-                  background: 'linear-gradient(135deg, #C9A84C, #E0C06A 50%, #F4D03F)',
-                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                  textShadow: '0 0 60px rgba(201,168,76,0.25)',
-                  display: 'inline-block',
+                  color: '#C9A84C',
+                  fontWeight: 400,
                 }}>
-                  <LetterReveal text={current.accent} />
+                  {current.accent}
                 </em>
               </h1>
 
-              {/* Gold divider line */}
+              {/* Gold tick */}
               <div style={{
-                width: 72,
+                width: 48,
                 height: 1,
-                background: 'linear-gradient(to right, #C9A84C, #E0C06A, transparent)',
-                boxShadow: '0 0 16px rgba(201,168,76,0.5)',
-                marginBottom: 26,
+                background: '#C9A84C',
+                marginBottom: 24,
               }}/>
 
               <p style={{
-                fontSize: 18, fontWeight: 300,
+                fontSize: 16, fontWeight: 300,
                 color: 'rgba(240,237,232,0.72)',
-                lineHeight: 1.75, marginBottom: 44, maxWidth: 480,
+                lineHeight: 1.75, marginBottom: 40, maxWidth: 440,
                 letterSpacing: '0.2px',
               }}>{current.sub}</p>
 
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 <RippleButton
-                  className="btn btn-gold"
+                  className="btn btn-gold hover-lift"
                   onClick={() => navigate(`/car/${heroCar?.id}`)}
                   data-hover
                   data-no-magnetic
-                >View Vehicle <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1 }}>→</span></RippleButton>
+                >View Vehicle</RippleButton>
                 <RippleButton
-                  className="btn btn-ghost"
+                  className="btn btn-ghost hover-lift"
                   onClick={() => carsRef.current?.scrollIntoView({ behavior: 'smooth' })}
                   data-hover
                   data-no-magnetic
-                >Explore Collection <span aria-hidden="true" style={{ fontSize: 12, lineHeight: 1 }}>↓</span></RippleButton>
+                >Explore Collection</RippleButton>
               </div>
               </motion.div>
             </AnimatePresence>
@@ -413,22 +389,6 @@ export default function Home() {
                 }
               }
 
-              @keyframes goldDustFloat {
-                0%, 100% {
-                  opacity: 0;
-                  transform: translateY(12px) scale(0.8);
-                }
-                25% {
-                  opacity: 0.9;
-                }
-                50% {
-                  opacity: 0.4;
-                }
-                75% {
-                  opacity: 0.8;
-                }
-              }
-
               @keyframes scrollWheel {
                 0% {
                   opacity: 1;
@@ -442,13 +402,6 @@ export default function Home() {
                   opacity: 0.2;
                   transform: translateY(12px);
                 }
-              }
-
-              @keyframes heroLightSweep {
-                0% { transform: translateX(0) rotate(14deg); opacity: 0; }
-                12% { opacity: 1; }
-                88% { opacity: 1; }
-                100% { transform: translateX(420vw) rotate(14deg); opacity: 0; }
               }
 
               @media (max-width: 900px) {
@@ -559,8 +512,8 @@ export default function Home() {
       {/* ══ CTA BANNER ══ */}
       <CTABanner />
 
-      {/* ══ FOOTER ══ */}
-      <Footer />
+      {/* Footer is mounted globally in App.js's route frame, not per-page, so
+          every public route gets it. */}
     </div>
   );
 }
@@ -572,18 +525,27 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
   const target = useRef({ x: 0, y: 0 });
   const current = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
+  const isHidden = useRef(false);
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const onScroll = () => { scrollY.current = window.scrollY; };
     const onMouse = (e) => {
       target.current.x = (e.clientX / window.innerWidth - 0.5) * 15;
       target.current.y = (e.clientY / window.innerHeight - 0.5) * 15;
     };
+    const onVisibility = () => { isHidden.current = document.hidden; };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('mousemove', onMouse, { passive: true });
+    document.addEventListener('visibilitychange', onVisibility);
 
     const animate = () => {
+      // Always schedule the next frame first so the loop survives tab switches
+      rafRef.current = requestAnimationFrame(animate);
+      if (isHidden.current) return; // skip work while tab is in the background
+
       // Smooth easing (same feel as the original useMouseParallax hook)
       current.current.x += (target.current.x - current.current.x) * 0.1;
       current.current.y += (target.current.y - current.current.y) * 0.1;
@@ -593,14 +555,13 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
       parallaxLayers.current.forEach((el) => {
         if (el) el.style.transform = `translate(${tx}px, ${ty}px)`;
       });
-
-      rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('mousemove', onMouse);
+      document.removeEventListener('visibilitychange', onVisibility);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -632,6 +593,10 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
                   src={car?.heroImage || car?.image}
                   alt=""
                   loading={i === 0 ? "eager" : "lazy"}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://placehold.co/1920x1080/111117/C9A84C?text=${encodeURIComponent(car ? `${car.brand} ${car.name}` : '1M Motors')}`;
+                  }}
                   style={{
                     width: '100%', height: '100%', objectFit: 'cover',
                     objectPosition: 'center 35%',
@@ -895,7 +860,19 @@ function BrandMarquee() {
             transition: 'color 0.3s',
           }}>
             {brand}
-            <span style={{ marginLeft: '72px', color: 'rgba(201,168,76,0.6)', textShadow: 'none' }}>✦</span>
+            <span
+              aria-hidden="true"
+              style={{
+                marginLeft: '72px',
+                color: 'rgba(201,168,76,0.6)',
+                textShadow: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z" />
+              </svg>
+            </span>
           </span>
         ))}
       </div>
@@ -928,27 +905,28 @@ function FeaturedSection() {
         <div style={{ marginBottom: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <span style={{ width: 44, height: 1, background: 'linear-gradient(to right, transparent, #C9A84C)', boxShadow: '0 0 8px rgba(201,168,76,0.5)' }}/>
+              <span style={{ width: 28, height: 1, background: '#C9A84C' }}/>
               <p className="eyebrow" style={{ margin: 0 }}>Editor's Selection</p>
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4vw, 58px)', fontWeight: 300, color: 'var(--white)', lineHeight: 1.1 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4vw, 58px)', fontWeight: 400, color: 'var(--white)', lineHeight: 1.1 }}>
               <TextRevealByWord delay={0} stagger={0.1}>
                 Most Coveted
               </TextRevealByWord>
               <br/>
-              <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#C9A84C,#E0C06A 55%,#F4D03F)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>
                 <TextRevealByWord delay={0.3} stagger={0.1}>
                   Machines
                 </TextRevealByWord>
               </em>
             </h2>
           </div>
-          <Link to="/cars" className="btn btn-ghost" data-hover>View All Collection →</Link>
+          <Link to="/cars" className="btn btn-ghost" data-hover>View All Collection</Link>
         </div>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
+          gridAutoRows: '1fr',
           gap: 28
         }}>
           {featured.map((car, i) => (
@@ -1088,33 +1066,53 @@ function BrandsSection() {
   useEffect(() => {
     if (!visible) return;
 
+    let cancelled = false;
+    const timers = [];
+
+    const later = (fn, ms) => {
+      const t = setTimeout(() => { if (!cancelled) fn(); }, ms);
+      timers.push(t);
+      return t;
+    };
+
     const runSequence = () => {
+      if (cancelled || document.hidden) return;
       let index = 0;
       const interval = setInterval(() => {
+        if (cancelled || document.hidden) {
+          clearInterval(interval);
+          return;
+        }
         if (index < brands.length) {
           setCurrentIndex(index);
           index++;
         } else {
           clearInterval(interval);
           // Light all brands after sequence completes
-          setTimeout(() => {
+          later(() => {
+            if (cancelled || document.hidden) return;
             setAllLit(true);
 
             // Hold all lit for 3 seconds, then restart
-            setTimeout(() => {
+            later(() => {
+              if (cancelled || document.hidden) return;
               setAllLit(false);
               setCurrentIndex(-1);
               // Wait 500ms then restart the sequence
-              setTimeout(() => {
-                runSequence();
-              }, 500);
+              later(runSequence, 500);
             }, 3000); // Hold for 3 seconds
           }, 500);
         }
       }, 400); // 400ms between each brand lighting
+      timers.push(interval);
     };
 
     runSequence();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(t => clearTimeout(t));
+    };
   }, [visible, brands.length]);
 
   return (
@@ -1195,6 +1193,10 @@ function BrandsSection() {
                       WebkitUserSelect: 'none',
                       WebkitTouchCallout: 'none',
                     }}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = `https://placehold.co/120x120/111117/C9A84C?text=${encodeURIComponent(brand.name)}`;
+                    }}
                   />
 
                   {/* Hover Glow Effect */}
@@ -1212,67 +1214,7 @@ function BrandsSection() {
                   )}
                 </div>
 
-                {/* Brand Name */}
-                <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 28,
-                  fontWeight: 400,
-                  color: isLit ? brand.color : 'var(--white)',
-                  letterSpacing: '2px',
-                  lineHeight: 1,
-                  marginBottom: 8,
-                  opacity: isLit ? 1 : 0.4,
-                  textShadow: clickedBrand === brand.name
-                    ? `0 0 30px ${brand.glow}, 0 0 60px ${brand.glow}, 0 0 90px ${brand.glow}`
-                    : hoveredBrand === brand.name
-                    ? `0 0 25px ${brand.glow}, 0 0 50px ${brand.glow}, 0 0 75px ${brand.glow}`
-                    : allLit
-                    ? `0 0 20px ${brand.glow}, 0 0 40px ${brand.glow}`
-                    : 'none',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  position: 'relative',
-                  zIndex: 1,
-                  animation: allLit && !clickedBrand && !hoveredBrand ? 'textGlow 2s ease-in-out infinite' : 'none',
-                  transform: clickedBrand === brand.name
-                    ? 'scale(1.1)'
-                    : hoveredBrand === brand.name
-                    ? 'scale(1.05)'
-                    : 'scale(1)',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                }}>
-                  {brand.name}
                 </div>
-
-                {/* Model Count */}
-                <p style={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  letterSpacing: '3px',
-                  color: isLit ? brand.color : 'var(--white-40)',
-                  opacity: isLit ? 1 : 0.4,
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  textShadow: clickedBrand === brand.name
-                    ? `0 0 20px ${brand.glow}, 0 0 40px ${brand.glow}`
-                    : hoveredBrand === brand.name
-                    ? `0 0 18px ${brand.glow}, 0 0 35px ${brand.glow}`
-                    : allLit
-                    ? `0 0 15px ${brand.glow}`
-                    : 'none',
-                  position: 'relative',
-                  zIndex: 1,
-                  textTransform: 'uppercase',
-                  transform: clickedBrand === brand.name
-                    ? 'scale(1.05)'
-                    : hoveredBrand === brand.name
-                    ? 'scale(1.03)'
-                    : 'scale(1)',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                }}>
-                  <AnimatedCounter to={brand.count} duration={1400} suffix=" MODELS" />
-                </p>
-              </div>
             );
           })}
         </div>
@@ -1373,7 +1315,7 @@ function CollectionPreview() {
               <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#C9A84C,#E0C06A 55%,#F4D03F)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Machines</em>
             </h2>
           </div>
-          <Link to="/cars" className="btn btn-outline-gold" data-hover>Browse All →</Link>
+          <Link to="/cars" className="btn btn-outline-gold" data-hover>View All Collection →</Link>
         </div>
 
         <div style={{
@@ -1467,6 +1409,7 @@ function PrivateAllocationCountdown() {
     target.setHours(23, 59, 59, 0);
 
     const tick = () => {
+      if (document.hidden) return;
       const diff = target - new Date();
       setTimeLeft(diff > 0 ? {
         d: Math.floor(diff / 86400000),
@@ -1616,7 +1559,7 @@ function CTABanner() {
             Let our AI concierge guide you, or explore the full collection at your own pace.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/cars" className="btn btn-gold" data-hover data-magnetic>Browse Collection</Link>
+            <Link to="/cars" className="btn btn-gold" data-hover data-magnetic>View All Collection</Link>
             <Link to="/compare" className="btn btn-ghost" data-hover data-magnetic>Compare Models</Link>
           </div>
         </div>
@@ -1625,130 +1568,8 @@ function CTABanner() {
   );
 }
 
-/* ── Footer ── */
-function Footer() {
-  return (
-    <footer role="contentinfo" aria-label="Site footer" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '52px 0 36px', background: 'rgba(5,5,7,0.98)' }}>
-      <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
-          <div>
-            <p style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 26,
-              fontWeight: 600,
-              color: 'var(--white)',
-              marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}>
-              <Brand1M style={{
-                fontSize: 26,
-                fontWeight: 600,
-                background: 'linear-gradient(135deg,var(--gold),var(--gold-light))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }} />
-              <span style={{ fontSize: 26, fontWeight: 600 }}>MOTORS</span>
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--white-40)', maxWidth: 280 }}>The world's most exclusive automotive experience.</p>
-          </div>
-          <div style={{ display: 'flex', gap: 32 }}>
-            {[['Collection', '/cars'], ['Compare', '/compare'], ['Favorites', '/favorites'], ['Configurator', '/configurator']].map(([label, to]) => (
-              <Link key={label} to={to} style={{ fontFamily: 'var(--font-ui)', fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--white-40)', textDecoration: 'none', transition: 'color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--white-40)'}
-              >{label}</Link>
-            ))}
-          </div>
-        </div>
-        <div className="divider" style={{ marginBottom: 24 }}/>
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 24, marginBottom: 24 }}>
-          {[['Contact', '/contact'], ['Privacy Policy', '/privacy-policy'], ['Terms of Service', '/terms-of-service'], ['Loyalty', '/loyalty']].map(([label, to]) => (
-            <Link key={label} to={to} style={{ fontFamily: 'var(--font-ui)', fontSize: 10.5, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--white-40)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'var(--white-40)'}
-            >{label}</Link>
-          ))}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <p style={{ fontSize: 12, color: 'var(--white-20)' }}>© 2026 1M Motors. All rights reserved.</p>
-          <p style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: '2.5px', color: 'var(--white-20)' }}>LUXURY · PERFORMANCE · EXCELLENCE</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
 
 /* ── Grid lines decoration ── */
-/* ── Classy-style hero textures (ported aesthetic from 21st "Classy Hero") ── */
-
-function NoiseOverlay() {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-        opacity: 0.06, mixBlendMode: 'overlay',
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        backgroundRepeat: 'repeat',
-        backgroundSize: '150px 150px',
-      }}
-    />
-  );
-}
-
-function LightBeamSweep() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 3, pointerEvents: 'none' }} aria-hidden="true">
-      <div style={{
-        position: 'absolute',
-        top: '-50%', bottom: '-50%',
-        width: '36%',
-        left: '-40%',
-        background: 'linear-gradient(115deg, transparent 30%, rgba(244,208,63,0.05) 45%, rgba(201,168,76,0.03) 55%, transparent 70%)',
-        transform: 'rotate(14deg)',
-        animation: 'heroLightSweep 9s ease-in-out infinite',
-      }}/>
-      <div style={{
-        position: 'absolute',
-        top: '-50%', bottom: '-50%',
-        width: '20%',
-        left: '-40%',
-        background: 'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.035) 50%, transparent 70%)',
-        transform: 'rotate(14deg)',
-        animation: 'heroLightSweep 9s ease-in-out 1.6s infinite',
-      }}/>
-    </div>
-  );
-}
-
-function DottedGrid() {
-  return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', opacity: 0.055,
-      backgroundImage: 'radial-gradient(circle, #C9A84C 1px, transparent 1px)',
-      backgroundSize: '34px 34px',
-    }}/>
-  );
-}
-
-function LetterReveal({ text, style, delay = 0 }) {
-  return (
-    <span style={{ display: 'inline-block', whiteSpace: 'nowrap', ...style }}>
-      {text.split('').map((ch, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ delay: delay + i * 0.035, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ display: 'inline-block' }}
-        >{ch === ' ' ? '\u00A0' : ch}</motion.span>
-      ))}
-    </span>
-  );
-}
 
 function RippleButton({ children, className = '', style, onClick, ...props }) {
   const [ripples, setRipples] = useState([]);

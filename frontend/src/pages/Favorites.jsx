@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
 import AnimatedCard from '../components/AnimatedCard';
-import PageTransition from '../components/PageTransition';
 
 export default function Favorites() {
   const navigate = useNavigate();
@@ -13,8 +12,7 @@ export default function Favorites() {
   const favoriteCars = cars.filter(car => favorites.includes(car.id));
 
   return (
-    <PageTransition>
-      <div style={styles.page}>
+    <div style={styles.page}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -81,7 +79,6 @@ export default function Favorites() {
           </motion.div>
         )}
       </div>
-    </PageTransition>
   );
 }
 

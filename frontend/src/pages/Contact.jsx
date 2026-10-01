@@ -9,7 +9,7 @@ export default function Contact() {
         minHeight: '100vh',
         background: 'var(--black, #050507)',
         color: 'var(--white, #ffffff)',
-        paddingTop: 'calc(var(--nav-h, 88px) + 96px)',
+        paddingTop: 'calc(var(--nav-offset, 72px) + 96px)',
         paddingBottom: 120,
         paddingLeft: 48,
         paddingRight: 48,

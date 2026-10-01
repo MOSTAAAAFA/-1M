@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { cars } from '../data/cars';
 import { parseHp, compactPrice } from '../utils/finance';
-import PageTransition from '../components/PageTransition';
 import OptimizedImage from '../components/OptimizedImage';
 import { SearchIcon } from '../components/icons';
 import { colors, spacing, radius, typography, shadows, transitions } from '../styles/designTokens';
@@ -99,7 +98,7 @@ export default function Cars() {
   }, [toggleFavorite]);
 
   return (
-    <PageTransition>
+    <>
       <div style={styles.page}>
         {/* Back Button */}
         <button
@@ -399,7 +398,7 @@ export default function Cars() {
         }
         .cars-search::placeholder { color: rgba(240, 237, 232, 0.35); }
       `}</style>
-    </PageTransition>
+    </>
   );
 }
 

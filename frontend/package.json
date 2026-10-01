@@ -30,6 +30,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "verify": "npm run build && node scripts/verify.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-import { ReducedMotionProvider } from './context/ReducedMotionContext';
+import { ReducedMotionProvider, useReducedMotion } from './context/ReducedMotionContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { NotificationProvider } from './context/NotificationContext';
-import { AnimatePresence } from 'framer-motion';
+import { SiteSettingsProvider, useSiteSettings } from './context/SiteSettingsContext';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import Brand1M from './components/Brand1M';
 import soundManager from './utils/soundManager';
 import LazyLoadWrapper from './components/LazyLoadWrapper';
@@ -18,11 +19,14 @@ import Toast from './components/Toast';
 import CustomCursor from './components/CustomCursor';
 import { ParticleTrail } from './components/MouseTrail';
 import AIAssistant from './components/AiAssistant';
+import AnnouncementBar from './components/AnnouncementBar';
 import BrandWatermarkBackground from './components/BrandWatermarkBackground';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import ThemeToggle from './components/ThemeToggle';
 import WhatsAppButton from './components/WhatsAppButton';
 import CookieConsent from './components/CookieConsent';
+import Footer from './components/Footer';
+import { routeVariants } from './components/PageTransition';
 
 // Critical path - load immediately
 import Home from './pages/Home';
@@ -46,6 +50,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminCars = lazy(() => import('./pages/AdminCars'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminSettings = lazy(() => import('./pages/AdminSettings'));
 
 // User & informational pages - lazy load (less frequent)
 const Contact = lazy(() => import('./pages/Contact'));
@@ -363,12 +368,32 @@ function SplashScreen({ onDone }) {
   );
 }
 
+/* ══ SITE CHROME (settings-driven floating widgets) ══ */
+function SiteChrome() {
+  const { settings } = useSiteSettings();
+  return (
+    <>
+      <AnnouncementBar />
+      {settings.aiAssistantEnabled !== false && <AIAssistant />}
+      <WhatsAppButton phoneNumber={settings.whatsapp || '+201050933078'} />
+    </>
+  );
+}
+
 /* ══ ANIMATED ROUTES ══ */
 function AnimatedRoutes() {
   const location = useLocation();
+  const reducedMotion = useReducedMotion();
 
   // Check if current route is admin route
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  // Anchored: a bare startsWith('/admin') also matched '/adminxyz' and
+  // suppressed the entire public chrome on unrelated paths.
+  const isAdminRoute = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
+
+  // Particle/dust effects only for capable pointers, and never under reduced motion
+  const showPointerEffects = !reducedMotion &&
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   return (
     <>
@@ -380,8 +405,8 @@ function AnimatedRoutes() {
       {/* Custom Cursor - works everywhere */}
       <CustomCursor />
 
-      {/* Subtle gold particles behind cursor */}
-      <ParticleTrail color="#C9A84C" particleCount={2} />
+      {/* Subtle gold particles behind cursor (- fine pointers only) */}
+      {showPointerEffects && <ParticleTrail color="#C9A84C" particleCount={2} />}
 
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-to-content">
@@ -396,18 +421,36 @@ function AnimatedRoutes() {
           <Navbar />
           <CartSidebar />
           <Toast />
-          <AIAssistant />
           <ThemeToggle />
-          <WhatsAppButton phoneNumber="+201050933078" />
           <CookieConsent />
+          <SiteChrome />
         </>
       )}
 
       {/* Global Components for all routes */}
-
-      <AnimatePresence mode="wait">
-        <main id="main-content" role="main" aria-label="Main content">
-          <Routes location={location} key={location.pathname}>
+      <MotionConfig reducedMotion="user">
+      {/*
+        Route frame. The <motion.main> below is keyed by pathname and is the
+        DIRECT child of AnimatePresence — that is what makes exit animations
+        actually run. (Wrapping an unkeyed <Routes> in a plain <main> left
+        AnimatePresence inert and 21 of 23 routes with no transition at all.)
+        The footer sits outside the transitioning region so it never fades with
+        a page, and the frame's flex column pins it to the bottom of short pages.
+      */}
+      <div className="site-frame">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.main
+            key={location.pathname}
+            className="site-main"
+            id="main-content"
+            role="main"
+            aria-label="Main content"
+            variants={routeVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <Routes location={location}>
             {/* Public Routes - Critical path (no lazy loading) */}
             <Route path="/" element={<Home />} />
             <Route path="/cars" element={<Cars />} />
@@ -502,6 +545,11 @@ function AnimatedRoutes() {
                 <AdminUsers />
               </LazyLoadWrapper>
             } />
+            <Route path="/admin/settings" element={
+              <LazyLoadWrapper fallbackMessage="Loading Settings...">
+                <AdminSettings />
+              </LazyLoadWrapper>
+            } />
 
             {/* 404 - Fallback for any unknown route */}
             <Route path="*" element={
@@ -510,8 +558,14 @@ function AnimatedRoutes() {
               </LazyLoadWrapper>
             } />
           </Routes>
-        </main>
-      </AnimatePresence>
+          </motion.main>
+        </AnimatePresence>
+
+        {/* Public footer — mounted once here instead of inside Home, so all 12
+            other public pages get one. Admin pages have their own in AdminLayout. */}
+        {!isAdminRoute && <Footer />}
+      </div>
+      </MotionConfig>
     </>
   );
 }
@@ -545,7 +599,8 @@ export default function App() {
       <ThemeProvider>
         <LanguageProvider>
           <NotificationProvider>
-            <AppProvider>
+<AppProvider>
+            <SiteSettingsProvider>
               {splash && <SplashScreen onDone={() => {
                 try { sessionStorage.setItem('1m_splash_seen', '1'); } catch { /* ignore */ }
                 setSplash(false);
@@ -554,7 +609,8 @@ export default function App() {
               <Router>
                 <AnimatedRoutes />
               </Router>
-            </AppProvider>
+            </SiteSettingsProvider>
+          </AppProvider>
           </NotificationProvider>
         </LanguageProvider>
       </ThemeProvider>
@@ -620,7 +676,6 @@ function WelcomeMessage({ onClose }) {
             background: 'rgba(17,17,23,0.6)',
             color: 'var(--gold)',
             fontSize: 18,
-            cursor: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
