@@ -174,6 +174,18 @@ function CarCard({ car, index = 0, priority = false }) {
               <p className="car-card-foot-label">From</p>
               <p className="car-card-price">{compactPrice(car.price)}</p>
             </div>
+            {/* Explicit "View Details" next to the price. The stretched link
+                already makes the whole card clickable, but the price is the
+                place people actually reach for when deciding, and a control
+                that is visibly a control is worth more than an invisible
+                hit area. Sits above the stretched link via z-index. */}
+            <Link
+              to={`/car/${car.id}`}
+              className="car-card-details"
+              aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
+            >
+              View Details
+            </Link>
             <button
               className="car-card-cta"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(car); }}

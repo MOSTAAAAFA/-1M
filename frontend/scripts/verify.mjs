@@ -145,6 +145,64 @@ try {
     ? ok('card is a focusable link', `href=${href} Enter -> ${page.url().replace(BASE, '')}`)
     : bad('card is a focusable link', `href=${href} focused=${focused} url=${page.url()}`);
 
+  // ---- 4b. The whole card surface is the hit area --------------------
+  // The title link's ::after is meant to stretch over the entire card. It
+  // silently shrank to title-size (272x30) once a positioned ancestor
+  // (the body) became its containing block, which left the photo dead to
+  // clicks while every other assertion still passed.
+  await goto('/cars');
+  // elementFromPoint only resolves inside the viewport, and the grid starts
+  // below the fold, so scroll the first card in before sampling.
+  await page.locator('.car-card').first().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const hit = await page.locator('.car-card').first().evaluate((el) => {
+    const card = el.getBoundingClientRect();
+    const after = getComputedStyle(el.querySelector('.car-card-link'), '::after');
+    const w = parseFloat(after.width);
+    const h = parseFloat(after.height);
+    // Sample the real topmost element at three points that a user would aim at.
+    const at = (fx, fy) => {
+      const hit = document.elementFromPoint(card.x + card.width * fx, card.y + card.height * fy);
+      return hit ? hit.classList.contains('car-card-link') : false;
+    };
+    return {
+      covers: w >= card.width - 2 && h >= card.height - 2,
+      got: `overlay ${Math.round(w)}x${Math.round(h)} vs card ${Math.round(card.width)}x${Math.round(card.height)}`,
+      image: at(0.5, 0.25),
+      top: at(0.5, 0.03),
+      body: at(0.92, 0.6),
+    };
+  });
+  hit.covers && hit.image && hit.top && hit.body
+    ? ok('whole card is clickable', `${hit.got}; image/top/body all hit the link`)
+    : bad('whole card is clickable', `${hit.got}; image=${hit.image} top=${hit.top} body=${hit.body}`);
+
+  // And prove it end to end: a real click on the photo must navigate.
+  await page.locator('.car-card').first().scrollIntoViewIfNeeded();
+  const box = await page.locator('.car-card').first().boundingBox();
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.25);
+  await page.waitForTimeout(1200);
+  page.url().includes('/car/')
+    ? ok('clicking the photo opens the car', page.url().replace(BASE, ''))
+    : bad('clicking the photo opens the car', `url=${page.url()}`);
+
+  // ---- 4b2. View Details is present on every card ---------------------
+  await goto('/cars');
+  const totalCards = await page.locator('.car-card').count();
+  const detailsLinks = await page.locator('.car-card-details').count();
+  const firstHref = await page.locator('.car-card-details').first().getAttribute('href').catch(() => null);
+  totalCards > 0 && detailsLinks === totalCards && /^\/car\/\d+$/.test(firstHref || '')
+    ? ok('every card has View Details', `${detailsLinks}/${totalCards}, first=${firstHref}`)
+    : bad('every card has View Details', `${detailsLinks}/${totalCards}, first=${firstHref}`);
+
+  // The details link must be operable, not swallowed by the stretched link.
+  await page.locator('.car-card').first().scrollIntoViewIfNeeded();
+  await page.locator('.car-card-details').first().click();
+  await page.waitForTimeout(1200);
+  page.url().includes('/car/')
+    ? ok('View Details navigates', page.url().replace(BASE, ''))
+    : bad('View Details navigates', `url=${page.url()}`);
+
   // ---- 4c. Nested controls sit above the stretched link ---------------
   // A stretched ::after overlay must not swallow the favorite / garage clicks.
   await goto('/cars');
@@ -427,16 +485,23 @@ try {
     const strip = await bPage.evaluate(() => {
       const g = document.querySelector('.stats-grid');
       if (!g) return null;
+      const gr = g.getBoundingClientRect();
+      const stripCols = getComputedStyle(g).gridTemplateColumns.split(' ').length;
       const tiles = [...g.children].map((c) => {
         const b = c.getBoundingClientRect();
         return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width) };
       });
+      const rows = new Set(tiles.map((t) => t.y)).size;
       return {
         count: tiles.length,
         widths: tiles.map((t) => t.w),
         // Left-to-right, then top-to-bottom: the source order as painted.
         order: [...tiles].sort((a, b) => (a.y - b.y) || (a.x - b.x)).map((t) => `${t.x},${t.y}`),
         paintOrder: tiles.map((t) => `${t.x},${t.y}`),
+        rows,
+        // A tile can be laid out on one column yet be much wider than the
+        // track it was placed in, which is how the stacking bug hid.
+        overflowsTrack: tiles.some((t) => t.w > (gr.width + 1) / stripCols),
         overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
       };
     });
@@ -452,8 +517,15 @@ try {
     } else if (strip.order.join('|') !== strip.paintOrder.join('|')) {
       // Reordering tiles on screen would break the promised sequence.
       bad(`stats strip @${w}`, 'tiles reordered from source order');
+    } else if (w > 1024 && strip.rows > 1) {
+      // "Side by side" is the actual requirement. A leftover gridColumn span
+      // or a min-width that outgrows the track made these stack into one
+      // column while still reporting equal widths, so check the row count.
+      bad(`stats strip @${w}`, `tiles stacked over ${strip.rows} rows, expected 1`);
+    } else if (w > 1024 && strip.overflowsTrack) {
+      bad(`stats strip @${w}`, 'tiles wider than their grid track');
     } else {
-      ok(`stats strip @${w}`, `4 equal tiles, order kept, w=${strip.widths[0]}`);
+      ok(`stats strip @${w}`, `4 equal tiles in ${strip.rows} row(s), order kept, w=${strip.widths[0]}`);
     }
     await bCtx.close();
   }

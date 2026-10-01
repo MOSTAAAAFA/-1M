@@ -676,11 +676,10 @@ function StatsBar() {
           <div
             key={label}
             className="premium-feature-card"
-            // Lead tile spans half the row; the rest pair up beside it. The
-            // last tile then runs full width to close the composition.
-            data-bento="equal"
+            // No explicit span: the grid places these one per column, which is
+            // what "four side by side" means. A span here overrides placement
+            // and stacks them instead.
             style={{
-              gridColumn: 'span 3',
               padding: '40px 28px',
               background: 'transparent',
               backdropFilter: 'blur(4px)',

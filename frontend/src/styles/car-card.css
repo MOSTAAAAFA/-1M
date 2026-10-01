@@ -212,7 +212,11 @@
 
 /* ── Body ────────────────────────────────────────────────────────────── */
 .car-card-body {
-  position: relative;
+  /* NOT position:relative. It is a flex item, so z-index already applies to
+     it without positioning — and keeping it static is what lets the title
+     link's ::after resolve against .car-card (the full 322x571 surface)
+     instead of this body alone. Position it and the overlay shrinks to the
+     body, leaving the photo dead to clicks. */
   z-index: 2;
   flex: 1;
   display: flex;
@@ -244,8 +248,10 @@
   line-height: 1.1;
   color: var(--white);
   margin-bottom: 9px;
-  /* The title's link is stretched over the whole card (see below) */
-  position: relative;
+  /* Deliberately NOT position:relative. The link's ::after uses inset:0 to
+     cover the whole card, and a positioned ancestor here would become its
+     containing block — the overlay would then be title-sized (272x30) and
+     clicking the image would do nothing. .car-card is the intended one. */
 }
 
 .car-card-link {
@@ -331,6 +337,51 @@
 
 .car-card[data-hovered] .car-card-foot {
   border-top-color: rgba(201, 168, 76, 0.24);
+}
+
+/* View Details — quieter than the gold Add to Garage pill, so the foot still
+   has one clear primary action. */
+.car-card-details {
+  position: relative;
+  z-index: 6; /* above the stretched link, or the card's own hit area eats it */
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--white-70);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default),
+    background var(--duration-fast) var(--ease-default);
+}
+
+.car-card-details:hover,
+.car-card-details:focus-visible {
+  color: var(--gold);
+  border-color: rgba(201, 168, 76, 0.55);
+  background: rgba(201, 168, 76, 0.1);
+}
+
+.car-card-details:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Three controls in the foot do not fit one row on a narrow card; letting the
+   price keep its own line reads better than shrinking all three. */
+@media (max-width: 420px) {
+  .car-card-foot {
+    flex-wrap: wrap;
+  }
+  .car-card-foot > div:first-child {
+    flex: 1 0 100%;
+  }
 }
 
 .car-card-foot-label {
