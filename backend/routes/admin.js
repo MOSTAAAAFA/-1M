@@ -4,6 +4,8 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const User = require("../models/User");
 const Review = require("../models/Review");
+const Activity = require("../models/Activity");
+const Loyalty = require("../models/Loyalty");
 const authMiddleware = require("../middleware/authMiddleware");
 const { asyncHandler } = require("../middleware/errorHandler");
 
@@ -120,32 +122,41 @@ router.get("/stats", authMiddleware, adminMiddleware, asyncHandler(async (req, r
   const todayUsers = await User.countDocuments({ createdAt: { $gte: today } });
   const todayReviews = await Review.countDocuments({ createdAt: { $gte: today } });
 
+  // Cart / engagement / loyalty metrics (real activity data)
+  const todayCartAdds = await Activity.countDocuments({ type: 'cart', createdAt: { $gte: today } });
+  const totalCartAdds = await Activity.countDocuments({ type: 'cart' });
+  const totalViews = await Activity.countDocuments({ type: 'view' });
+  const totalWishlists = await Activity.countDocuments({ type: 'wishlist' });
+  const loyaltyMembers = await Loyalty.countDocuments();
+  const loyaltyAgg = await Loyalty.aggregate([
+    { $group: { _id: null, points: { $sum: '$points' }, totalEarned: { $sum: '$totalEarned' } } }
+  ]);
+
   // Average order value
   const avgOrderValue = await Order.aggregate([
     { $group: { _id: null, avg: { $avg: "$total" } } }
   ]);
 
-  // Top products by revenue (from orders)
+  // Top products by revenue (from orders) — grouped by item name so it works
+  // even when order items carry catalog ids instead of Mongo ObjectIds.
   const topProductsByRevenue = await Order.aggregate([
     { $unwind: "$items" },
     {
+      $match: { "items.name": { $ne: null } }
+    },
+    {
       $group: {
-        _id: "$items.product",
-        totalSold: { $sum: "$items.quantity" },
-        revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        _id: { $ifNull: ["$items.name", "Unknown Product"] },
+        name: { $first: { $ifNull: ["$items.name", "Unknown Product"] } },
+        totalSold: { $sum: { $ifNull: ["$items.quantity", 1] } },
+        revenue: { $sum: { $multiply: [
+          { $ifNull: ["$items.price", 0] },
+          { $ifNull: ["$items.quantity", 1] }
+        ] } }
       }
     },
     { $sort: { revenue: -1 } },
-    { $limit: 10 },
-    {
-      $lookup: {
-        from: "products",
-        localField: "_id",
-        foreignField: "_id",
-        as: "productDetails"
-      }
-    },
-    { $unwind: { path: "$productDetails", preserveNullAndEmptyArrays: true } }
+    { $limit: 10 }
   ]);
 
   // Recent orders
@@ -209,6 +220,54 @@ router.get("/stats", authMiddleware, adminMiddleware, asyncHandler(async (req, r
     });
   });
 
+  // Recent cart activity (real data)
+  const recentCartActivity = await Activity.find({ type: 'cart' })
+    .sort({ createdAt: -1 })
+    .limit(3)
+    .populate('user', 'name email');
+
+  recentCartActivity.forEach(a => {
+    recentActivity.push({
+      type: 'cart',
+      message: `${a.user?.name ? a.user.name : 'A guest'} added ${a.carName || 'a vehicle'} to cart (${a.brand || 'N/A'})`,
+      user: a.user?.name,
+      time: a.createdAt,
+      icon: 'cart'
+    });
+  });
+
+  // Recent car view activity (real data)
+  const recentViewActivity = await Activity.find({ type: 'view' })
+    .sort({ createdAt: -1 })
+    .limit(2)
+    .populate('user', 'name email');
+
+  recentViewActivity.forEach(a => {
+    recentActivity.push({
+      type: 'view',
+      message: `${a.user?.name ? a.user.name + ' viewed' : 'A guest viewed'} ${a.carName || 'a vehicle'}`,
+      user: a.user?.name,
+      time: a.createdAt,
+      icon: 'eye'
+    });
+  });
+
+  // Recent wishlist activity (real data)
+  const recentWishlistActivity = await Activity.find({ type: 'wishlist' })
+    .sort({ createdAt: -1 })
+    .limit(2)
+    .populate('user', 'name email');
+
+  recentWishlistActivity.forEach(a => {
+    recentActivity.push({
+      type: 'wishlist',
+      message: `${a.user?.name ? a.user.name + ' added' : 'A guest added'} ${a.carName || 'a vehicle'} to wishlist`,
+      user: a.user?.name,
+      time: a.createdAt,
+      icon: 'heart'
+    });
+  });
+
   // Sort all activity by time
   recentActivity.sort((a, b) => new Date(b.time) - new Date(a.time));
 
@@ -250,6 +309,21 @@ router.get("/stats", authMiddleware, adminMiddleware, asyncHandler(async (req, r
         revenue: todayRevenue[0]?.total || 0,
         users: todayUsers,
         reviews: todayReviews
+      },
+
+      // Engagement (real cart/view/wishlist activity)
+      engagement: {
+        todayCartAdds,
+        totalCartAdds,
+        totalViews,
+        totalWishlists
+      },
+
+      // Loyalty (real points)
+      loyalty: {
+        members: loyaltyMembers,
+        points: loyaltyAgg[0]?.points || 0,
+        totalEarned: loyaltyAgg[0]?.totalEarned || 0
       },
 
       // Trends
@@ -435,7 +509,11 @@ router.get("/orders", authMiddleware, adminMiddleware, asyncHandler(async (req, 
 
   res.json({
     success: true,
-    orders,
+    orders: orders.map(o => ({
+      ...o.toObject(),
+      status: o.status || 'pending',
+      customer: o.customer || {}
+    })),
     totalPages: Math.ceil(count / limit),
     currentPage: page,
     total: count

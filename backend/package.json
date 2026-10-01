@@ -24,6 +24,7 @@
     "ibm-watson": "^12.2.0",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
+    "microsoft-cognitiveservices-speech-sdk": "^1.52.0",
     "mongoose": "^9.6.0",
     "morgan": "^1.11.0",
     "nodemailer": "^9.0.3",

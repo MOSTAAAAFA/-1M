@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import { trackActivity } from '../utils/activity';
 
 const AppContext = createContext(null);
 
@@ -92,6 +93,7 @@ export function AppProvider({ children }) {
   const addToCart = useCallback((car) => {
     dispatch({ type: 'ADD_TO_CART', payload: car });
     dispatch({ type: 'SET_CART_OPEN', payload: true });
+    trackActivity('cart', car);
     addToast({ type: 'success', message: `${car.name} added to your Garage` });
   }, [addToast]);
 
@@ -111,6 +113,7 @@ export function AppProvider({ children }) {
   const toggleFavorite = useCallback((car) => {
     const isFav = state.favorites.includes(car.id);
     dispatch({ type: 'TOGGLE_FAVORITE', payload: car.id });
+    if (!isFav) trackActivity('wishlist', car);
     addToast({
       type: isFav ? 'info' : 'success',
       message: isFav ? `${car.name} removed from Favorites` : `${car.name} saved to Favorites ♥`,

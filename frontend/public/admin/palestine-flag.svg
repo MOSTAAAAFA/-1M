@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600" role="img" aria-label="Flag of Palestine">
+  <title>Flag of Palestine</title>
+  <!--
+    Drawn as geometry rather than shipped as a bitmap: the flag is three equal
+    horizontal bands plus a hoist triangle, so a vector stays crisp at every
+    size the UI uses (44px circle, full-bleed notice header) at a few hundred
+    bytes. Official proportions, 2:1, apex on the centre line.
+  -->
+  <rect x="0" y="0" width="1200" height="200" fill="#000000" />
+  <rect x="0" y="200" width="1200" height="200" fill="#FFFFFF" />
+  <rect x="0" y="400" width="1200" height="200" fill="#007A3D" />
+  <polygon points="0,0 600,300 0,600" fill="#CE1126" />
+</svg>

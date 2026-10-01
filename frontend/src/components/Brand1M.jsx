@@ -5,7 +5,7 @@ import React from 'react';
  * Renders "1M" text with proper vertical alignment
  * Ensures "1" and "M" appear at the same height/baseline
  */
-export default function Brand1M({ className, style, ...props }) {
+export default function Brand1M({ className, style, name = '1M', ...props }) {
   return (
     <span
       className={className}
@@ -19,7 +19,7 @@ export default function Brand1M({ className, style, ...props }) {
       }}
       {...props}
     >
-      1M
+      {name}
     </span>
   );
 }

@@ -169,67 +169,131 @@ export default function AIAssistant() {
     });
   }, []);
 
-  // Browser Web Speech API for Egyptian Arabic TTS
+  // Azure Speech Service TTS (Egyptian Arabic Neural)
   const speak = useCallback(async (text, onEnded) => {
-    if (!text || !('speechSynthesis' in window)) {
+    if (!text) {
       if (onEnded) onEnded();
       return;
     }
 
-    console.log('[Voice] Using browser Egyptian Arabic TTS');
-    window.speechSynthesis.cancel();
+    try {
+      console.log('[Voice] Calling Azure Speech Service...');
+      const res = await fetch(VOICE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: voiceGender })
+      });
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = voiceGender === 'female' ? 'ar-EG' : 'ar-SA'; // ar-EG for female, ar-SA for male
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+      const contentType = res.headers.get('content-type') || '';
 
-    const selectVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
+      // Check if fallback JSON (Azure not configured or failed)
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        console.warn('[Voice] TTS fallback:', data.message);
 
-      // Priority 1: Egyptian Arabic voices
-      const egyptian = voices.find(v =>
-        v.lang && v.lang.toLowerCase().includes('ar-eg')
-      );
-      if (egyptian) {
-        utterance.voice = egyptian;
-        console.log('[Voice] Using Egyptian voice:', egyptian.name);
+        // Fallback to browser TTS only if Azure fails
+        if ('speechSynthesis' in window) {
+          console.log('[Voice] Using browser Egyptian Arabic TTS as fallback');
+          window.speechSynthesis.cancel();
+
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'ar-EG';
+          utterance.rate = 0.9;
+          utterance.pitch = 1.0;
+          utterance.volume = 1.0;
+
+          const selectVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
+            const egyptian = voices.find(v => v.lang && v.lang.toLowerCase().includes('ar-eg'));
+            if (egyptian) {
+              utterance.voice = egyptian;
+              console.log('[Voice] Using Egyptian voice:', egyptian.name);
+            } else {
+              const arabic = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ar'));
+              if (arabic) utterance.voice = arabic;
+            }
+          };
+
+          selectVoice();
+          window.speechSynthesis.onvoiceschanged = selectVoice;
+
+          utterance.onstart = () => {
+            speakingRef.current = true;
+            setSpeaking(true);
+          };
+
+          utterance.onend = () => {
+            speakingRef.current = false;
+            setSpeaking(false);
+            if (onEnded) onEnded();
+          };
+
+          utterance.onerror = (err) => {
+            console.error('[Voice] Speech synthesis error:', err);
+            speakingRef.current = false;
+            setSpeaking(false);
+            if (onEnded) onEnded();
+          };
+
+          window.speechSynthesis.speak(utterance);
+        } else {
+          // No browser TTS support
+          setMessages(prev => [...prev, {
+            role: 'ai',
+            text: data.message || 'معذرة، الصوت مش متاح دلوقتي'
+          }]);
+          if (onEnded) onEnded();
+        }
         return;
       }
 
-      // Priority 2: Any Arabic voice
-      const arabic = voices.find(v =>
-        v.lang && v.lang.toLowerCase().startsWith('ar')
-      );
-      if (arabic) {
-        utterance.voice = arabic;
-        console.log('[Voice] Using Arabic voice:', arabic.name);
+      // Success: Azure returned audio
+      if (contentType.includes('audio')) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        releaseAudio();
+        const audio = new Audio(url);
+        audioRef.current = audio;
+
+        speakingRef.current = true;
+        setSpeaking(true);
+
+        audio.onended = () => {
+          console.log('[Voice] Azure audio playback ended');
+          URL.revokeObjectURL(url);
+          speakingRef.current = false;
+          setSpeaking(false);
+          audioRef.current = null;
+          if (onEnded) onEnded();
+        };
+
+        audio.onerror = (e) => {
+          console.error('[Voice] Azure audio playback error:', e);
+          URL.revokeObjectURL(url);
+          speakingRef.current = false;
+          setSpeaking(false);
+          audioRef.current = null;
+          if (onEnded) onEnded();
+        };
+
+        await audio.play().catch(err => {
+          console.warn('[Voice] Autoplay blocked:', err.message);
+          setMessages(prev => [...prev, {
+            role: 'ai',
+            text: 'اضغط على زرار التشغيل لسماع الرد'
+          }]);
+          speakingRef.current = false;
+          setSpeaking(false);
+          if (onEnded) onEnded();
+        });
       }
-    };
-
-    selectVoice();
-    window.speechSynthesis.onvoiceschanged = selectVoice;
-
-    utterance.onstart = () => {
-      speakingRef.current = true;
-      setSpeaking(true);
-    };
-
-    utterance.onend = () => {
+    } catch (err) {
+      console.error('[Voice] Error:', err.message);
       speakingRef.current = false;
       setSpeaking(false);
       if (onEnded) onEnded();
-    };
-
-    utterance.onerror = (err) => {
-      console.error('[Voice] Speech synthesis error:', err);
-      speakingRef.current = false;
-      setSpeaking(false);
-      if (onEnded) onEnded();
-    };
-
-    window.speechSynthesis.speak(utterance);
+    }
   }, [voiceGender]);
 
   // Execute assistant actions (navigation to real app routes).

@@ -4,6 +4,7 @@ import { cars } from '../data/cars';
 import { useInView } from 'react-intersection-observer';
 import { compactPrice } from '../utils/finance';
 import { SearchIcon } from '../components/icons';
+import Crest1M from '../components/Crest1M';
 
 const SPEC_LABELS = {
   engine: 'Engine',
@@ -244,18 +245,20 @@ export default function Compare() {
         }}
       >
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <div
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '4px',
-              textTransform: 'uppercase',
-              color: '#C9A84C',
-              marginBottom: '12px',
-              fontFamily: 'Space Grotesk, sans-serif',
-            }}
-          >
-            SIDE BY SIDE
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: '12px' }}>
+            <Crest1M size={26} />
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+                color: '#C9A84C',
+                fontFamily: 'Space Grotesk, sans-serif',
+              }}
+            >
+              SIDE BY SIDE
+            </span>
           </div>
           <h1
             style={{

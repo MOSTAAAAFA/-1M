@@ -16,10 +16,9 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE}/orders`, {
+      const response = await fetch(`${API_BASE}/admin/orders?limit=200`, {
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -37,11 +36,10 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE}/orders/${orderId}/status`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE}/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: newStatus }),
@@ -71,6 +69,8 @@ export default function AdminOrders() {
     switch(status) {
       case 'pending': return { bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.3)', color: '#fbbf24' };
       case 'processing': return { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.3)', color: '#3b82f6' };
+      case 'shipped': return { bg: 'rgba(168,85,247,0.1)', border: 'rgba(168,85,247,0.3)', color: '#a855f7' };
+      case 'delivered': return { bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)', color: '#22c55e' };
       case 'completed': return { bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)', color: '#22c55e' };
       case 'cancelled': return { bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)', color: '#ef4444' };
       default: return { bg: 'rgba(255,255,255,0.1)', border: 'rgba(255,255,255,0.2)', color: '#fff' };
@@ -179,6 +179,8 @@ export default function AdminOrders() {
             <option value="all">All Orders</option>
             <option value="pending">Pending</option>
             <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
@@ -219,17 +221,17 @@ export default function AdminOrders() {
                       </td>
                       <td style={{ padding: '16px' }}>
                         <p style={{ fontSize: 14, fontWeight: 600, color: '#fff', margin: 0 }}>
-                          {order.user?.name || 'N/A'}
+                          {order.user?.name || order.customer?.name || 'Guest'}
                         </p>
                         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '4px 0 0 0' }}>
-                          {order.user?.email || 'N/A'}
+                          {order.user?.email || order.customer?.email || 'Not signed in'}
                         </p>
                       </td>
                       <td style={{ padding: '16px', color: '#fff' }}>
-                        {order.products?.map(p => p.name).join(', ') || 'N/A'}
+                        {order.items?.map(p => p.name).join(', ') || 'N/A'}
                       </td>
                       <td style={{ padding: '16px', color: '#fff', fontWeight: 600 }}>
-                        ${order.totalAmount?.toLocaleString() || '0'}
+                        ${(order.total || 0).toLocaleString()}
                       </td>
                       <td style={{ padding: '16px' }}>
                         <span style={{
@@ -261,6 +263,8 @@ export default function AdminOrders() {
                         >
                           <option value="pending">Pending</option>
                           <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
                           <option value="completed">Completed</option>
                           <option value="cancelled">Cancelled</option>
                         </select>

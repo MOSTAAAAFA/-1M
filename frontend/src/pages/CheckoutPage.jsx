@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import API_BASE from '../utils/api';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -49,13 +50,41 @@ export default function CheckoutPage() {
     setTimeout(() => { setStep(next); setAnimating(false); }, 300);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setAnimating(true);
-    setTimeout(() => {
-      setDone(true);
-      clearCart();
+    try {
+      const res = await fetch(`${API_BASE}/orders/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          items: cart,
+          total: Math.round(grandTotal),
+          status: 'pending',
+          customer: {
+            name: `${info.firstName} ${info.lastName}`.trim() || undefined,
+            email: info.email || undefined,
+            phone: info.phone || undefined,
+          },
+        }),
+      });
+      if (res.ok) {
+        setTimeout(() => {
+          setDone(true);
+          clearCart();
+          setAnimating(false);
+        }, 400);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'We could not place your order. Please try again.');
+        setAnimating(false);
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Checkout error:', err);
+      alert('Connection error while placing your order. Please try again.');
       setAnimating(false);
-    }, 400);
+    }
   };
 
   if (done) return <SuccessScreen onHome={() => navigate('/')} total={grandTotal} />;
@@ -247,7 +276,7 @@ function StepProgress({ currentStep }) {
               } : {
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.2)',
+                color: 'rgba(255,255,255,0.35)',
               }),
             }}>
               {currentStep > s.id ? '✓' : s.icon}
@@ -255,7 +284,7 @@ function StepProgress({ currentStep }) {
             <p style={{
               marginTop: 10, fontSize: 10, letterSpacing: '1.5px',
               textTransform: 'uppercase', fontFamily: 'var(--font-ui)',
-              color: currentStep >= s.id ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
+              color: currentStep >= s.id ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
               transition: 'color 0.4s', whiteSpace: 'nowrap',
             }}>{s.label}</p>
           </div>
@@ -342,7 +371,7 @@ function OrderSummary({ cart, cartTotal, tax, grandTotal }) {
           { label: 'Delivery', value: 'Included' },
         ].map(({ label, value }) => (
           <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-ui)' }}>{label}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: 'var(--font-ui)' }}>{label}</span>
             <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-ui)' }}>{value}</span>
           </div>
         ))}
@@ -582,7 +611,7 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>
             Crypto Payment
           </p>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.8 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
             We accept BTC, ETH & USDT.<br />
             A wallet address will be generated after you confirm your order.
           </p>
@@ -864,7 +893,7 @@ function Field({ label, value, onChange, placeholder, type = 'text', span, tag, 
         style={{
         display: 'block', marginBottom: 8,
         fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase',
-        fontFamily: 'var(--font-ui)', color: 'rgba(255,255,255,0.35)',
+        fontFamily: 'var(--font-ui)', color: 'var(--text-secondary)',
       }}>{label}</label>
       {tag === 'select' ? (
         <select

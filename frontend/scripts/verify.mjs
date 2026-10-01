@@ -186,14 +186,29 @@ try {
     ? ok('clicking the photo opens the car', page.url().replace(BASE, ''))
     : bad('clicking the photo opens the car', `url=${page.url()}`);
 
-  // ---- 4b2. View Details is present on every card ---------------------
+  // ---- 4b2. View Details: dropped on /cars, kept elsewhere --------------
+  // The collection grid hides the redundant link, so the count must be zero
+  // there while the rest of the site still renders it.
   await goto('/cars');
   const totalCards = await page.locator('.car-card').count();
-  const detailsLinks = await page.locator('.car-card-details').count();
-  const firstHref = await page.locator('.car-card-details').first().getAttribute('href').catch(() => null);
-  totalCards > 0 && detailsLinks === totalCards && /^\/car\/\d+$/.test(firstHref || '')
-    ? ok('every card has View Details', `${detailsLinks}/${totalCards}, first=${firstHref}`)
-    : bad('every card has View Details', `${detailsLinks}/${totalCards}, first=${firstHref}`);
+  const detailsOnCars = await page.locator('.car-card-details').count();
+  totalCards > 0 && detailsOnCars === 0
+    ? ok('/cars hides the redundant View Details', `0/${totalCards}`)
+    : bad('/cars hides the redundant View Details', `${detailsOnCars}/${totalCards}`);
+
+  // Checked on the home rail, not /favorites: favorites only renders cards for
+  // a signed-in user with saved cars, so it is empty in a clean test profile
+  // and would assert nothing.
+  await goto('/');
+  // Scoped to <article class="car-card">: the home rail also renders the
+  // compact MiniCard, which reuses .car-card for its surface but has no
+  // details control by design. Counting .car-card alone mixes the two.
+  const homeCards = await page.locator('article.car-card').count();
+  const detailsOnHome = await page.locator('article.car-card .car-card-details').count();
+  const firstHref = await page.locator('article.car-card .car-card-details').first().getAttribute('href').catch(() => null);
+  homeCards > 0 && detailsOnHome === homeCards && /^\/car\/\d+$/.test(firstHref || '')
+    ? ok('every card has View Details outside /cars', `${detailsOnHome}/${homeCards}, first=${firstHref}`)
+    : bad('every card has View Details outside /cars', `${detailsOnHome}/${homeCards}, first=${firstHref}`);
 
   // The details link must be operable, not swallowed by the stretched link.
   await page.locator('.car-card').first().scrollIntoViewIfNeeded();

@@ -111,10 +111,10 @@ export const primitive = {
   },
   radius: {
     none: '0',
-    sm: '6px',
-    md: '8px',
-    lg: '12px',
-    xl: '20px',
+    sm: '12px',
+    md: '16px',
+    lg: '20px',
+    xl: '24px',
     '2xl': '32px',
     full: '9999px',
   },
@@ -277,9 +277,10 @@ export const colors = {
 // ═══════════════════════════════════════════════════════════════
 
 export const typography = {
-  fontDisplay: "'Cormorant Garamond', Georgia, serif",
+  fontDisplay: "'Bodoni Moda', 'Cormorant Garamond', Georgia, serif",
   fontUI: "'Space Grotesk', sans-serif",
-  fontBody: "'Inter', sans-serif",
+  fontBody: "'Space Grotesk', 'Inter', sans-serif",
+  fontData: "'Space Mono', 'SF Mono', 'Consolas', monospace",
 
   fontSize: primitive.fontSize,
   fontWeight: primitive.fontWeight,
@@ -312,9 +313,9 @@ export const spacing = {
 
 export const radius = {
   sm: primitive.radius.sm,
-  md: primitive.radius.lg,
-  lg: primitive.radius.xl,
-  xl: primitive.radius['2xl'],
+  md: primitive.radius.md,
+  lg: primitive.radius.lg,
+  xl: primitive.radius.xl,
   full: primitive.radius.full,
 };
 

@@ -1,63 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SparklesIcon, StarIcon } from './icons';
-
-const STORAGE_KEY = '1m_loyalty';
+import API_BASE from '../utils/api';
+import { getCurrentUser } from '../utils/activity';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 const LoyaltyDashboard = () => {
+  const { settings } = useSiteSettings();
   const [loyaltyData, setLoyaltyData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [offline, setOffline] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
 
     const fetchLoyaltyData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          applyFallback('Not signed in');
+        const response = await fetch(`${API_BASE}/loyalty`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) {
+          if (response.status === 401) setError('not-signed-in');
+          else throw new Error(`HTTP ${response.status}`);
           return;
         }
-        const response = await fetch('/api/v1/loyalty', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (!data.success || !data.data) throw new Error('Empty loyalty payload');
         if (cancelled) return;
         setLoyaltyData(data.data);
-        setOffline(false);
-      } catch (error) {
-        console.warn('Loyalty API unavailable, using offline data:', error);
-        applyFallback('Network unavailable');
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Network unavailable');
       } finally {
         if (!cancelled) setLoading(false);
-      }
-    };
-
-    const applyFallback = (reason) => {
-      try {
-        const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.points !== undefined) {
-            if (!cancelled) {
-              setLoyaltyData(parsed);
-              setOffline(true);
-            }
-            return;
-          }
-        }
-      } catch (e) { /* corrupted cache — regenerate */ }
-
-      const seeded = seedFallbackData();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded)); } catch (e) { /* ignore */ }
-      if (!cancelled) {
-        setLoyaltyData(seeded);
-        setOffline(true);
       }
     };
 
@@ -92,16 +68,64 @@ const LoyaltyDashboard = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(240,237,232,0.6)' }}>
-        Loading loyalty data...
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '60px', textAlign: 'center', borderRadius: '20px', background: 'linear-gradient(135deg, rgba(17,17,23,0.95) 0%, rgba(25,25,33,0.95) 100%)', border: '1px solid rgba(201,168,76,0.2)' }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            margin: '0 auto 20px',
+            border: '3px solid rgba(201,168,76,0.2)',
+            borderTop: '3px solid var(--gold)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }} />
+          <p style={{ fontFamily: 'var(--font-ui)', fontSize: 13, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(240,237,232,0.6)' }}>
+            Loading your points...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error === 'not-signed-in' || !getCurrentUser()) {
+    return (
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{
+          padding: '64px 40px',
+          textAlign: 'center',
+          borderRadius: '20px',
+          background: 'linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.02) 100%)',
+          border: '1px solid rgba(201,168,76,0.25)',
+        }}>
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 20px' }}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--gold)', marginBottom: '12px' }}>
+            Unlock Your Rewards
+          </h3>
+          <p style={{ fontFamily: 'var(--font-ui)', fontSize: '15px', color: 'rgba(240,237,232,0.6)', maxWidth: '440px', margin: '0 auto 28px' }}>
+            Sign in to earn real points for every car you view, add to your garage, or order — and watch your rank rise.
+          </p>
+          <Link to="/login" className="btn btn-gold" style={{ textDecoration: 'none' }}>
+            Sign In to Start Earning
+          </Link>
+          <HowToEarn points={settings} />
+        </div>
       </div>
     );
   }
 
   if (!loyaltyData) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(240,237,232,0.6)' }}>
-        Failed to load loyalty data
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '60px', textAlign: 'center', borderRadius: '20px', background: 'rgba(17,17,23,0.6)', border: '1px solid rgba(201,168,76,0.2)' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--gold)', marginBottom: '12px' }}>
+            Points Not Available Right Now
+          </h3>
+          <p style={{ fontFamily: 'var(--font-ui)', fontSize: '14px', color: 'rgba(240,237,232,0.6)' }}>
+            We couldn't load your loyalty balance. Please try again shortly.
+          </p>
+        </div>
       </div>
     );
   }
@@ -132,26 +156,6 @@ const LoyaltyDashboard = () => {
         }}>
           Earn points with every purchase and unlock exclusive benefits
         </p>
-        {offline && (
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginTop: '14px',
-            padding: '8px 14px',
-            borderRadius: '50px',
-            background: 'rgba(201,168,76,0.08)',
-            border: '1px solid rgba(201,168,76,0.3)',
-            fontFamily: 'var(--font-ui)',
-            fontSize: '11px',
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-            color: 'var(--gold)',
-          }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e0c06a', boxShadow: '0 0 8px rgba(201,168,76,0.8)' }} />
-            Offline Mode — demo data
-          </div>
-        )}
       </motion.div>
 
       {/* Main Stats */}
@@ -348,6 +352,16 @@ const LoyaltyDashboard = () => {
         </motion.div>
       </div>
 
+      {/* How to Earn — clear hint for every user */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        style={{ marginBottom: '40px' }}
+      >
+        <HowToEarn points={settings} />
+      </motion.div>
+
       {/* Benefits */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -443,57 +457,106 @@ const LoyaltyDashboard = () => {
   );
 };
 
-/* ── Offline fallback helpers ── */
-const TIER_BENEFITS = {
-  Bronze: { pointsMultiplier: 1, discountPercentage: 0, freeShipping: true, prioritySupport: false },
-  Silver: { pointsMultiplier: 2, discountPercentage: 2, freeShipping: true, prioritySupport: true },
-  Gold: { pointsMultiplier: 3, discountPercentage: 5, freeShipping: true, prioritySupport: true },
-  Platinum: { pointsMultiplier: 5, discountPercentage: 10, freeShipping: true, prioritySupport: true },
+const HowToEarn = ({ points }) => {
+  const rows = [
+    { icon: '👁', action: 'View any car', detail: 'Open a car page in the collection', pts: points.pointsView },
+    { icon: '🛒', action: 'Add to your garage', detail: 'Add a car to the cart', pts: points.pointsCart },
+    { icon: '❤️', action: 'Save to your favorites', detail: 'Wishlist a dream car', pts: points.pointsWishlist },
+    { icon: '🏁', action: 'Complete an order', detail: `Earn ${points.pointsPerOrder} pt per $ spent`, pts: null },
+  ];
+
+  return (
+    <div style={{
+      padding: '32px',
+      borderRadius: '20px',
+      background: 'linear-gradient(135deg, rgba(17,17,23,0.95) 0%, rgba(25,25,33,0.95) 100%)',
+      border: '1px solid rgba(201,168,76,0.25)',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginBottom: '8px',
+      }}>
+        <span style={{ fontSize: '20px' }}>💰</span>
+        <h3 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: '24px',
+          fontWeight: 700,
+          color: 'var(--gold)',
+          margin: 0,
+        }}>
+          How to Earn Points
+        </h3>
+      </div>
+      <p style={{
+        fontFamily: 'var(--font-ui)',
+        fontSize: '13px',
+        color: 'rgba(240,237,232,0.55)',
+        marginBottom: '24px',
+      }}>
+        Easy ways to boost your balance — every action counts instantly.
+      </p>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+        gap: '14px',
+      }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            padding: '16px 18px',
+            borderRadius: '12px',
+            background: 'rgba(201,168,76,0.06)',
+            border: '1px solid rgba(201,168,76,0.15)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+              <span style={{ fontSize: '22px', flexShrink: 0 }}>{r.icon}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: 'rgba(240,237,232,0.9)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {r.action}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: '11px',
+                  color: 'rgba(240,237,232,0.5)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {r.detail}
+                </div>
+              </div>
+            </div>
+            {r.pts != null && (
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'var(--gold)',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}>
+                +{r.pts} pts
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
-
-const daysAgo = (n) => {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-};
-
-const tierFor = (points) => {
-  if (points >= 100000) return 'Platinum';
-  if (points >= 50000) return 'Gold';
-  if (points >= 20000) return 'Silver';
-  return 'Bronze';
-};
-
-function seedFallbackData() {
-  let name = 'Member';
-  try {
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (user) name = user.name || user.username || user.email || 'Member';
-  } catch (e) { /* ignore */ }
-
-  let h = 0;
-  for (const c of String(name)) h = (h * 31 + c.charCodeAt(0)) % 100000;
-
-  const totalEarned = 8000 + (h % 24000);
-  const totalRedeemed = h % 5000;
-  const points = totalEarned - totalRedeemed;
-  const tier = tierFor(points);
-
-  return {
-    points,
-    tier,
-    totalEarned,
-    totalRedeemed,
-    benefits: TIER_BENEFITS[tier],
-    history: [
-      { type: 'earned', points: Math.round(totalEarned * 0.4), reason: 'Purchase reward — 911 Turbo S', date: daysAgo(14) },
-      { type: 'earned', points: 1500, reason: 'Welcome bonus', date: daysAgo(30) },
-      { type: 'earned', points: 500, reason: 'Profile completion bonus', date: daysAgo(45) },
-      ...(totalRedeemed > 0 ? [{ type: 'redeemed', points: totalRedeemed, reason: 'Redeemed for service credit', date: daysAgo(7) }] : []),
-    ],
-    offline: true,
-  };
-}
 
 const BenefitItem = ({ icon, label, value, active = true }) => (
   <div style={{

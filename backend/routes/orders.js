@@ -1,11 +1,31 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const Order = require("../models/Order");
+const Activity = require("../models/Activity");
+const { awardOrderPoints } = require("../services/loyaltyService");
+
+// Soft auth: populate req.user if a valid token exists, never block guests.
+const softAuth = (req, res, next) => {
+  let token = req.cookies?.auth_token;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded) req.user = decoded;
+    } catch (err) {
+      /* ignore invalid token */
+    }
+  }
+  next();
+};
 
 // 🟢 CREATE ORDER (Checkout)
-router.post("/checkout", async (req, res) => {
+router.post("/checkout", softAuth, async (req, res) => {
   try {
-    const { items, total } = req.body;
+    const { items, total, customer, status } = req.body;
 
     // validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -22,10 +42,33 @@ router.post("/checkout", async (req, res) => {
       });
     }
 
+    const normalizedItems = items.map(item => ({
+      product: item.id || item._id || item.product || undefined,
+      name: item.name,
+      brand: item.brand,
+      price: item.price,
+      quantity: item.quantity || item.qty || 1,
+      image: item.image,
+    }));
+
     const order = await Order.create({
-      items,
-      total
+      user: req.user?.id || undefined,
+      items: normalizedItems,
+      total,
+      status: status || "pending",
+      customer: customer || {},
     });
+
+    if (order.user) {
+      await Activity.create({
+        user: order.user,
+        type: "order",
+        carName: normalizedItems[0]?.name,
+        brand: normalizedItems[0]?.brand,
+        price: total,
+      });
+      await awardOrderPoints(order.user, order, total);
+    }
 
     return res.status(201).json({
       success: true,

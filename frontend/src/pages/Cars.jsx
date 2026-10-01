@@ -103,20 +103,29 @@ export default function Cars() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          {/* Cinematic backdrop */}
+          {/* Cinematic backdrop: one full-bleed cover layer.
+              The previous two-layer build (cover fill under a sharp contain)
+              was meant to satisfy "show the whole car" and "fill a wide hero"
+              at once. It cannot: contain-fitted into a 3:1 hero, a 16:9 frame
+              measures 849px of a 1440px hero, so the sharp photo sat as a
+              centred letterbox with 295px of dead space on each side. Cover
+              solves it the only way that fills — by giving up the top and
+              bottom of the sky instead of the sides of the car, and the
+              object-position bias keeps the crop in sky and tarmac rather
+              than through the bodywork. */}
           <div style={styles.heroBackdrop}>
-            <div style={styles.heroBackdropZoom}>
-              <img
-                src={cars.find(c => c.id === 11)?.heroImage}
-                alt=""
-                aria-hidden="true"
-                loading="eager"
-                style={styles.heroBackdropImg}
-              />
-            </div>
+            <img
+              src={cars.find(c => c.id === 11)?.heroImage}
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+              style={styles.heroPhoto}
+            />
             <div style={styles.heroOverlayLeft} />
-            <div style={styles.heroOverlayBottom} />
+            <div style={styles.heroOverlayCenter} />
             <div style={styles.heroVignette} />
+            <div style={styles.heroOverlayBottom} />
           </div>
 
           <div style={styles.particleContainer}>
@@ -367,6 +376,7 @@ export default function Cars() {
                   car={car}
                   index={index}
                   priority={index < 3}
+                  hideDetails
                 />
               ))}
             </AnimatePresence>
@@ -394,13 +404,18 @@ const styles = {
     minHeight: '100vh',
     background: 'transparent',
     color: colors.white,
-    paddingTop: '100px',
+    // --nav-offset is announce bar + navbar, so the hero starts exactly where
+    // the navbar ends. The hardcoded 100px it replaced left a 28px strip of
+    // page background between the two, which read as a gap above the photo.
+    paddingTop: 'var(--nav-offset)',
     paddingBottom: spacing['7xl'],
     position: 'relative',
   },
   backButton: {
     position: 'fixed',
-    top: '100px',
+    // Hangs just inside the hero, keyed off the same token as the page padding
+    // so it stays put when the announcement bar is toggled.
+    top: 'calc(var(--nav-offset) + 20px)',
     left: spacing.xl,
     zIndex: 100,
     background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
@@ -426,14 +441,22 @@ const styles = {
   },
   hero: {
     textAlign: 'center',
-    padding: '140px 20px 120px',
+    // flex-end, not center: the copy sits low, on the dark dissolve band,
+    // which leaves the bright part of the photograph clear above it. Centring
+    // the copy put it on top of the car.
+    justifyContent: 'flex-end',
+    padding: '0 20px clamp(64px, 9vh, 112px)',
     position: 'relative',
     overflow: 'hidden',
-    minHeight: '460px',
+    // 56.25vw is 16:9, the photo's own ratio, so cover-fit has nothing to cut
+    // at any desktop width. The clamp floors it for narrow screens, where a
+    // literal 16:9 box would be too short to hold the title, and caps it so a
+    // very wide window does not push the gallery below the fold.
+    height: 'clamp(360px, 56.25vw, 760px)',
+    minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   heroBackdrop: {
     position: 'absolute',
@@ -442,32 +465,64 @@ const styles = {
     overflow: 'hidden',
     background: 'rgba(5,5,7,0.6)',
   },
-  heroBackdropZoom: {
+  // The photograph, full-bleed, and near full brightness — the home hero runs
+  // its photo at brightness(1) and lets the gradient bands do the dimming, so
+  // matching that is what clears the image up. Dimming the photo with a filter
+  // AND laying a scrim over it is what made it murky.
+  //   · object-position bottom pins the photo's own bottom edge to the hero's,
+  //     so the crop can only come out of the sky. The previous 62% bias cut
+  //     the lower third — wheels and road — which is what read as a cropped
+  //     image.
+  //   · the box height below is 56.25vw, i.e. 16:9 itself, so from 640px up
+  //     there is no crop at all. Any height that is not the photo's own ratio
+  //     is a crop by definition; matching the ratio is the only way out.
+  heroPhoto: {
     position: 'absolute',
-    inset: '-8%',
-    animation: 'heroZoom 18s ease-in-out infinite alternate',
-  },
-  heroBackdropImg: {
+    inset: 0,
     width: '100%',
     height: '100%',
     objectFit: 'cover',
-    objectPosition: 'center 40%',
-    filter: 'saturate(0.9) brightness(0.55)',
+    objectPosition: 'center bottom',
+    filter: 'saturate(1.05) brightness(0.95)',
+    // 0, not 1: a positive z-index would paint the photo on top of the
+    // legibility overlays below, which is the opposite of what they are for.
+    zIndex: 0,
+  },
+  // Light, and lifted to the top of the frame. The copy has moved down onto the
+  // bottom band, so this only needs to take the edge off the sky — it must not
+  // darken the middle of the photograph.
+  heroOverlayCenter: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 1,
+    background:
+      'radial-gradient(ellipse 85% 70% at 50% 16%, rgba(5,5,7,0.4) 0%, rgba(5,5,7,0.15) 55%, transparent 100%)',
   },
   heroOverlayLeft: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(to right, rgba(5,5,7,0.9) 0%, rgba(5,5,7,0.45) 55%, rgba(5,5,7,0.2) 100%)',
+    zIndex: 1,
+    background: 'linear-gradient(to right, rgba(5,5,7,0.72) 0%, rgba(5,5,7,0.3) 55%, rgba(5,5,7,0.1) 100%)',
   },
+  // Bottom dissolve, matched to the home hero (Home.jsx): a band anchored to
+  // the bottom edge that reaches full page-black and fades out, so the
+  // photograph has no bottom edge at all. Taller and with more stops than
+  // home's 38% — the copy now sits inside this band, so the falloff has to be
+  // gradual enough to read as a fade rather than a dark slab.
   heroOverlayBottom: {
     position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.8) 28%, rgba(5,5,7,0.25) 62%, transparent 100%)',
+    left: 0, right: 0, bottom: 0,
+    height: '58%',
+    background:
+      'linear-gradient(to top, #050507 0%, #050507 18%, rgba(5,5,7,0.72) 40%, rgba(5,5,7,0.42) 60%, rgba(5,5,7,0.16) 78%, transparent 100%)',
+    pointerEvents: 'none',
+    zIndex: 3,
   },
   heroVignette: {
     position: 'absolute',
     inset: 0,
-    background: 'radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(0,0,0,0.5) 100%)',
+    zIndex: 2,
+    background: 'radial-gradient(ellipse 92% 84% at 50% 38%, transparent 58%, rgba(0,0,0,0.42) 100%)',
   },
   heroEyebrow: {
     position: 'relative',
@@ -483,6 +538,7 @@ const styles = {
     letterSpacing: '5px',
     textTransform: 'uppercase',
     color: colors.gold,
+    textShadow: '0 1px 3px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.6)',
   },
   heroEyebrowLine: {
     width: 44,
@@ -524,11 +580,15 @@ const styles = {
   },
   heroSubtitle: {
     fontSize: '18px',
-    color: 'rgba(240, 237, 232, 0.6)',
+    color: 'rgba(240, 237, 232, 0.78)',
     letterSpacing: '2px',
     fontWeight: 300,
     position: 'relative',
     zIndex: 1,
+    /* Same reason as .car-card-body: the copy is over a photograph now, so the
+       shadow carries its contrast rather than the backdrop. The title cannot
+       use this — background-clip:text paints the fill only, not a shadow. */
+    textShadow: '0 1px 3px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.7)',
   },
   controlsSection: {
     maxWidth: '1400px',

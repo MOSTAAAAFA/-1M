@@ -31,7 +31,12 @@ export default function MouseTrail({ color = '#C9A84C', trailLength = 20, size =
     };
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!document.hidden) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      } else {
+        animationFrameId.current = requestAnimationFrame(draw);
+        return;
+      }
 
       const now = Date.now();
       points.current = points.current.filter(p => now - p.timestamp < 1000);
@@ -127,6 +132,10 @@ export function ParticleTrail({ color = '#C9A84C', particleCount = 5 }) {
       if (loopRunning.current) return;
       loopRunning.current = true;
       const step = () => {
+        if (document.hidden) {
+          animationFrameId.current = requestAnimationFrame(step);
+          return;
+        }
         draw(ctx, canvas);
         if (particles.current.length > 0) {
           animationFrameId.current = requestAnimationFrame(step);

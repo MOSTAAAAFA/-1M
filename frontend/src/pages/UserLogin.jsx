@@ -14,6 +14,7 @@ export default function Login() {
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState({});
   const [shakeError, setShakeError] = useState(false);
   const navigate = useNavigate();
@@ -501,7 +502,7 @@ export default function Login() {
               </label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -557,6 +558,32 @@ export default function Login() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+
+              {/* Show/Hide Password */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--gold)',
+                    fontFamily: 'var(--font-ui)',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: '1.5px',
+                    textTransform: 'uppercase',
+                    padding: '4px 2px',
+                    opacity: 0.85,
+                    transition: 'opacity 0.2s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.textDecoration = 'underline'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = 0.85; e.currentTarget.style.textDecoration = 'none'; }}
+                >
+                  {showPassword ? 'Hide Password' : 'Show Password'}
+                </button>
               </div>
 
               {/* Password Strength Indicator */}

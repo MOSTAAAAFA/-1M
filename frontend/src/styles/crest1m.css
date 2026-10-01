@@ -1,0 +1,36 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CREST 1M — ORBIT ROTATION
+   The brand mark's outer orbit (dashed ring + compass dots) turns slowly, the
+   monogram stays upright. Lives in its own file because the crest is imported
+   by eight routes and this is the only thing any of them need from CSS.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes crest1mOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.crest1m--spin .crest1m__orbit {
+  transform-box: view-box;
+  /* Without an explicit origin the rotation pivots on the SVG's top-left
+     corner, which throws the orbit off-centre. view-box + 48 48 puts the
+     pivot on the monogram disc, which is the circle's true centre. */
+  transform-origin: 48px 48px;
+  animation: crest1mOrbit 24s linear infinite;
+  /* Promote to its own layer so the turn does not repaint the monogram disc
+     underneath it every frame. */
+  will-change: transform;
+}
+
+/* A moving mark is exactly the kind of ambient motion this preference exists
+   for. Without this the crest keeps turning for anyone who asked it not to. */
+@media (prefers-reduced-motion: reduce) {
+  .crest1m--spin .crest1m__orbit {
+    animation: none;
+    will-change: auto;
+  }
+}

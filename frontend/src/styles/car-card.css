@@ -3,11 +3,19 @@
    One card for every car on the site: home featured rail, /cars catalogue,
    /favorites. Replaces four parallel implementations.
 
-   Lighting model (all compositor-only, no filter/blur on the card root):
+   The card body is real glass: a translucent pane plus backdrop-filter, so
+   the page behind it shows through instead of a flat fill. Everything else
+   stays compositor-only:
+     .car-card         glass pane         → backdrop blur + saturate
+     .car-card::before top sheen          → the reflection on a glass surface
      .car-card-rim    inner top hairline  → reads as a light bar above the car
      .car-card-sweep  diagonal specular   → light travelling across polished paint
      .car-card-glare  pointer-tracked    → gold pool following the cursor
      .car-card-scrim  bottom gradient    → carries badge contrast, not the car
+
+   Glass is progressive-enhanced: @supports gates the backdrop-filter, and the
+   base alpha is chosen to look right on a non-supporting engine too, so the
+   card never renders as an unreadable dark slab.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .car-card-perspective {
@@ -22,22 +30,79 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--card-radius);
-  background: rgba(17, 17, 23, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  /* Progressive enhancement, in the order that matters:
+       1. this block       → opaque fallback, for engines with no backdrop-filter
+       2. @supports below  → alpha 0, the real see-through pane
+     A pane cannot go transparent unconditionally: without the blur behind it
+     the copy would sit straight on the page and lose contrast entirely. So
+     full transparency is gated on the filter that makes it work. */
+  background: rgba(12, 12, 18, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Glass needs light to refract; a hairline on the top edge sells the
+     thickness. The ::before sheen below does the real work. */
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform-origin: 50% 60%;
   transition:
     border-color var(--duration-slow) var(--ease-cinematic),
     box-shadow var(--duration-slow) var(--ease-cinematic),
     background var(--duration-slow) var(--ease-cinematic);
+  isolation: isolate;
 }
 
+/* Top sheen: a soft vertical reflection, the way light catches the top edge
+   of a glass panel. Fixed overlay, so it must sit above the media (z 3) but
+   below the controls that need clicks (z 6). */
+.car-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 18%,
+    transparent 46%
+  );
+  opacity: 0.9;
+  transition: opacity var(--duration-slow) var(--ease-cinematic);
+}
+
+/* Hover is opaque here only as the no-backdrop-filter fallback; the
+   @supports block overrides it to transparent. What the hover actually sells
+   is the border and the glow, not a fill. */
 .car-card[data-hovered] {
-  background: rgba(22, 22, 30, 0.98);
-  border-color: rgba(201, 168, 76, 0.35);
+  background: rgba(16, 16, 24, 0.88);
+  border-color: rgba(201, 168, 76, 0.4);
   box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.75),
-    0 0 60px rgba(201, 168, 76, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 60px rgba(201, 168, 76, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.car-card[data-hovered]::before {
+  opacity: 1;
+}
+
+/* The blur is the glass — and now it is the whole card. With the filter
+   supported the tint drops to zero and the pane becomes genuinely see-through:
+   the page, the hero, whatever is behind it all reads straight through, and
+   the blur is what keeps the body copy legible over it. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .car-card,
+  .car-card[data-hovered] {
+    background: transparent;
+  }
+  .car-card {
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
+  .car-card[data-hovered] {
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    backdrop-filter: blur(24px) saturate(170%);
+  }
 }
 
 /* ── Media ───────────────────────────────────────────────────────────── */
@@ -222,6 +287,12 @@
   display: flex;
   flex-direction: column;
   padding: 22px 24px 24px;
+  /* The pane behind this copy is now see-through, so contrast can no longer
+     come from a background fill. A tight shadow under the glyphs restores it
+     on any backdrop, and it costs no paint because the text is already in a
+     composited layer. This is the one thing a fully transparent card cannot
+     do without. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 14px rgba(0, 0, 0, 0.55);
 }
 
 .car-card-brand {
@@ -452,6 +523,22 @@
   }
   .car-card-price {
     font-size: 19px;
+  }
+}
+
+/* ── Reduced transparency ────────────────────────────────────────────── */
+/* Glass is the whole treatment here, so when transparency is explicitly
+   unwanted the pane goes opaque and the blur is dropped — the card must not
+   stay translucent over content the user asked not to see through. */
+@media (prefers-reduced-transparency: reduce) {
+  .car-card,
+  .car-card[data-hovered] {
+    background: #12121a;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .car-card::before {
+    display: none;
   }
 }
 

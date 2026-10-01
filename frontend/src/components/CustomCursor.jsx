@@ -14,8 +14,9 @@ export default function CustomCursor() {
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
-    // Check touch device
+    // Skip on touch devices and when the user prefers reduced motion
     if (window.matchMedia('(hover: none)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     // Add class to body to hide default cursor
     document.body.classList.add('custom-cursor');

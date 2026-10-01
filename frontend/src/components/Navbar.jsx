@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useApp } from '../context/AppContext';
@@ -37,6 +37,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
+  // Set when an avatar URL 404s, so the button falls back to initials instead
+  // of rendering an empty gold disc. Reset whenever the signed-in user changes.
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,6 +73,12 @@ export default function Navbar() {
     setMobileOpen(false);
     setProfileOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [user]);
+
+  const avatarSrc = avatarFailed ? null : resolveAvatar(user);
 
   const handleLogout = async () => {
     try {
@@ -274,6 +283,7 @@ export default function Navbar() {
 
             {/* Auth group */}
             <div className="nav-auth" style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginRight: spacing.lg }}>
+            <PalestineBadge solid={solid} />
             {user ? (
               <div style={{ position: 'relative' }}>
                 {/* Gmail-style profile circle */}
@@ -286,6 +296,8 @@ export default function Navbar() {
                     width: 44,
                     height: 44,
                     borderRadius: radius.full,
+                    // Photo sits on top of the gold gradient, which stays as the
+                    // ring/edge treatment and as the fallback if the image 404s.
                     background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
                     border: solid ? '2px solid rgba(5,5,7,0.92)' : '2px solid rgba(244,208,63,0.6)',
                     color: colors.black,
@@ -298,6 +310,8 @@ export default function Navbar() {
                     cursor: 'pointer',
                     boxShadow: `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`,
                     transition: transitions.default,
+                    overflow: 'hidden',
+                    padding: 0,
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.transform = 'scale(1.08)';
@@ -308,7 +322,22 @@ export default function Navbar() {
                     e.currentTarget.style.boxShadow = `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`;
                   }}
                 >
-                  {getInitials(user)}
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt=""
+                      aria-hidden="true"
+                      width={40}
+                      height={40}
+                      onError={() => setAvatarFailed(true)}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  ) : getInitials(user)}
                 </button>
 
                 <AnimatePresence>
@@ -786,10 +815,201 @@ function CartIcon() {
   );
 }
 
+/**
+ * The Palestine flag badge, same 44px gold-ringed circle as the account avatar.
+ * Clicking it raises a one-shot notice. Deliberately a <button> and not the
+ * account menu: it is a statement, not navigation, and it must stay reachable
+ * when nobody is signed in.
+ */
+function PalestineBadge({ solid }) {
+  // Pure toggle: the badge is the only control, so pressing it opens the
+  // notice and pressing it again closes it. No timer — an auto-dismiss that
+  // hides content while the pointer is still on the button is worse than
+  // having no dismissal at all. Escape stays as the keyboard equivalent.
+  const [shown, setShown] = useState(false);
+
+  const toggle = useCallback(() => setShown(o => !o), []);
+
+  const close = useCallback(() => setShown(false), []);
+
+  // The notice is decorative relative to the page, so it closes on outside
+  // pointer-down, but not on the click that opened it.
+  useEffect(() => {
+    if (!shown) return undefined;
+    const onDown = (e) => {
+      if (!e.target.closest('.palestine-badge')) close();
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [shown, close]);
+
+  return (
+    <div className="palestine-badge" style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={toggle}
+        onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
+        aria-label="This website supports Palestine"
+        aria-expanded={shown}
+        title="This website supports Palestine"
+        style={{
+          width: 44,
+          height: 44,
+          padding: 0,
+          borderRadius: radius.full,
+          // Gold gradient sits behind the flag as the ring and as the fallback
+          // if the image fails to load.
+          background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
+          border: solid ? '2px solid rgba(5,5,7,0.92)' : '2px solid rgba(244,208,63,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          cursor: 'pointer',
+          boxShadow: `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`,
+          transition: transitions.default,
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'scale(1.08)';
+          e.currentTarget.style.boxShadow = `0 6px 24px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.5)`;
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`;
+        }}
+      >
+        <img
+          src={`${process.env.PUBLIC_URL || ''}/admin/palestine.png`}
+          alt=""
+          aria-hidden="true"
+          width={40}
+          height={40}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      </button>
+
+          {/* The notice. role="status" so it is announced without stealing
+              focus, and aria-live="polite" so a screen reader reads it once
+              rather than interrupting. Closes on Escape as well as on the
+              timer, because a hover-only dismissal is unreachable by keyboard. */}
+          <AnimatePresence>
+            {shown && (
+              <motion.div
+                role="status"
+                aria-live="polite"
+                initial={{ opacity: 0, y: 12, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 14px)',
+                  right: 0,
+                  zIndex: 1200,
+                  width: 268,
+                  // No padding on the card itself: the flag is a full-bleed
+                  // block in normal flow and the copy has its own padding
+                  // below. Padding here would inset the flag away from the
+                  // edges, which is the thing being fixed.
+                  padding: 0,
+                  borderRadius: radius.lg,
+                  // Glass, so it reads as floating over the nav rather than as
+                  // a panel sitting in it.
+                  background:
+                    'linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 45%, rgba(255,255,255,0) 100%), rgba(10,10,14,0.9)',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  boxShadow:
+                    '0 24px 60px rgba(0,0,0,0.65), 0 0 34px rgba(201,168,76,0.16), inset 0 1px 0 rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(20px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                  color: colors.white,
+                  fontFamily: typography.fontUI,
+                  textAlign: 'left',
+                  pointerEvents: 'none',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Flag, bleeding off the top and both sides. Full width plus a
+                    negative side margin so it meets the rounded corners, and
+                    the card's overflow: hidden clips it back to the radius.
+                    height: auto is load-bearing: the SVG carries its own 2:1
+                    ratio, so the browser derives the height from the width and
+                    all three bands stay whole. A fixed height with object-fit
+                    would crop the flag — the band is the whole point. */}
+                <img
+                  src={`${process.env.PUBLIC_URL || ''}/admin/palestine-flag.svg`}
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    display: 'block',
+                    width: 'calc(100% + 2px)',
+                    marginLeft: -1,
+                    height: 'auto',
+                  }}
+                />
+
+                <div style={{ padding: '18px 20px 16px' }}>
+                  <p style={{
+                    fontFamily: typography.fontDisplay,
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    letterSpacing: '0.4px',
+                    lineHeight: 1.35,
+                    margin: 0,
+                  }}>
+                    We stand with Palestine
+                  </p>
+
+                  <p style={{
+                    fontSize: '12.5px',
+                    fontWeight: 300,
+                    lineHeight: 1.65,
+                    color: 'rgba(240,237,232,0.68)',
+                    margin: '8px 0 0',
+                  }}>
+                    Proud of our support for Palestine and everyone standing for
+                    them.{' '}
+                    <span style={{ color: 'rgba(201,168,76,0.95)', fontWeight: 600 }}>
+                      Solidarity, always.
+                    </span>
+                  </p>
+
+                  {/* Gold rule, matching the rest of the brand's dividers. */}
+                  <div style={{
+                    marginTop: 14,
+                    height: 1,
+                    background:
+                      'linear-gradient(90deg, transparent, rgba(201,168,76,0.55) 30%, rgba(224,192,106,0.9) 50%, rgba(201,168,76,0.55) 70%, transparent)',
+                  }} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+    </div>
+  );
+}
+
 function getInitials(u) {
   const source = String(u?.name || u?.email || 'M').trim();
   const letters = source.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
   return letters || 'M';
+}
+
+// The admin's own photo ships with the bundle rather than living in the
+// database, so it is always resolvable and cannot rot into a dead CDN URL.
+// PUBLIC_URL keeps the path correct on a deploy sub-path.
+const ADMIN_PROFILE_PHOTO = `${process.env.PUBLIC_URL || ''}/admin/profile.jpg`;
+
+/**
+ * Avatar for the account button: an uploaded photo wins, then the bundled
+ * admin photo for admin accounts, and null falls back to the initials badge.
+ */
+function resolveAvatar(u) {
+  if (!u) return null;
+  const uploaded = typeof u.avatar === 'string' ? u.avatar.trim() : '';
+  if (uploaded) return uploaded;
+  const isAdmin = u.isAdmin === true || u.role === 'admin';
+  return isAdmin ? ADMIN_PROFILE_PHOTO : null;
 }
 
 const dropdownItemStyle = {

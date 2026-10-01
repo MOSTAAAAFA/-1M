@@ -13,7 +13,27 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  const toggleStyle = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: 'var(--gold)',
+    fontFamily: 'var(--font-ui)',
+    fontSize: 10,
+    fontWeight: 600,
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase',
+    padding: '4px 2px',
+    opacity: 0.85,
+    transition: 'opacity 0.2s ease',
+  };
+
+  const handleToggleHoverIn = (e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.textDecoration = 'underline'; };
+  const handleToggleHoverOut = (e) => { e.currentTarget.style.opacity = 0.85; e.currentTarget.style.textDecoration = 'none'; };
 
   const handleChange = (e) => {
     setFormData({
@@ -315,8 +335,14 @@ export default function Register() {
               }}>
                 Password
               </label>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <button type="button" onClick={() => setShowPassword(s => !s)} style={toggleStyle}
+                  onMouseEnter={handleToggleHoverIn} onMouseLeave={handleToggleHoverOut}>
+                  {showPassword ? 'Hide Password' : 'Show Password'}
+                </button>
+              </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -359,8 +385,14 @@ export default function Register() {
               }}>
                 Confirm Password
               </label>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <button type="button" onClick={() => setShowConfirmPassword(s => !s)} style={toggleStyle}
+                  onMouseEnter={handleToggleHoverIn} onMouseLeave={handleToggleHoverOut}>
+                  {showConfirmPassword ? 'Hide Password' : 'Show Password'}
+                </button>
+              </div>
               <input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}

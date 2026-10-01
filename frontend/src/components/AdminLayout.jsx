@@ -6,11 +6,13 @@ import Brand1M from './Brand1M';
 export default function AdminLayout({ children }) {  const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const adminEmail = localStorage.getItem('adminEmail') || 'Admin';
+  const adminUser = (() => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; } })();
+  const adminName = adminUser?.name || 'Admin';
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminEmail');
+    localStorage.removeItem('user');
     navigate('/admin/login');
   };
 
@@ -224,7 +226,7 @@ export default function AdminLayout({ children }) {  const navigate = useNavigat
               color: 'rgba(255,255,255,0.4)',
               margin: '4px 0 0 0',
             }}>
-              Welcome back, {adminEmail.split('@')[0]}
+              Welcome back, {adminName.toUpperCase()}
             </p>
           </div>
 

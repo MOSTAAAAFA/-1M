@@ -81,7 +81,7 @@ export function FilmGrain() {
         className="film-grain"
         style={{
           position: 'fixed',
-          inset: '-100%',
+          inset: '-5%',
           zIndex: 99997,
           pointerEvents: 'none',
           opacity: 0.06,
@@ -94,15 +94,15 @@ export function FilmGrain() {
       <style>{`
         @keyframes grainShift {
           0% { transform: translate(0, 0); }
-          10% { transform: translate(-3%, -6%); }
-          20% { transform: translate(-10%, 3%); }
-          30% { transform: translate(6%, -8%); }
-          40% { transform: translate(-4%, 9%); }
-          50% { transform: translate(-9%, 2%); }
-          60% { transform: translate(8%, 0); }
-          70% { transform: translate(-1%, 7%); }
-          80% { transform: translate(4%, -4%); }
-          90% { transform: translate(-7%, -2%); }
+          10% { transform: translate(-1%, -2%); }
+          20% { transform: translate(-3%, 1%); }
+          30% { transform: translate(2%, -2%); }
+          40% { transform: translate(-1%, 2%); }
+          50% { transform: translate(-2%, 1%); }
+          60% { transform: translate(2%, 0); }
+          70% { transform: translate(-1%, 2%); }
+          80% { transform: translate(1%, -1%); }
+          90% { transform: translate(-2%, -1%); }
           100% { transform: translate(0, 0); }
         }
       `}</style>

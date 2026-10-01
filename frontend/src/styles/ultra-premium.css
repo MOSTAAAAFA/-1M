@@ -7,8 +7,7 @@
  * ═══════════════════════════════════════════════════════════════════
  */
 
-/* ── Bodoni Moda for ultra-luxury display headlines ── */
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400;1,6..96,700&family=Space+Mono:wght@400;700&display=swap');
+/* ── Bodoni Moda for ultra-luxury display headlines (loaded via index.html) ── */
 
 :root {
   /* Ultra Premium — Bespoke Champagne Gold & Onyx palette */
@@ -28,8 +27,10 @@
   --shadow-ultra:      0 2px 4px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.5), 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
   --shadow-gold-ultra: 0 0 40px rgba(212,175,55,0.3), 0 0 100px rgba(212,175,55,0.12), 0 0 200px rgba(212,175,55,0.06);
 
-  /* Ultra glass */
-  --glass-ultra:       rgba(255,255,255,0.028);
+  /* Ultra glass — zero-alpha pane. The backdrop blur is the entire effect, so
+     the surface behind reads fully through; anything painted here would only
+     subtract from that. --glass-blur is what keeps copy legible on top. */
+  --glass-ultra:       transparent;
   --glass-border:      rgba(255,255,255,0.08);
   --glass-blur:        24px;
 
@@ -45,6 +46,8 @@
   background: var(--glass-ultra);
   backdrop-filter: blur(var(--glass-blur)) saturate(160%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  /* See-through pane needs the copy to carry its own contrast. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 14px rgba(0, 0, 0, 0.55);
   border: 1px solid var(--glass-border);
   box-shadow:
     var(--shadow-ultra),
@@ -382,8 +385,10 @@
   transition: opacity 0.4s ease !important;
 }
 
-.hm-card:hover .hm-card-line {
-  opacity: 1 !important;
+@media (hover: hover) and (pointer: fine) {
+  .hm-card:hover .hm-card-line {
+    opacity: 1 !important;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════

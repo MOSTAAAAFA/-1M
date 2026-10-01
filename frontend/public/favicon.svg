@@ -1,10 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#E0C06A"/>
-      <stop offset="100%" style="stop-color:#C9A84C"/>
+    <linearGradient id="d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C9A84C"/>
+      <stop offset="0.5" stop-color="#E0C06A"/>
+      <stop offset="1" stop-color="#F4D03F"/>
+    </linearGradient>
+    <linearGradient id="r" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8E6D2F"/>
+      <stop offset="0.45" stop-color="#C9A84C"/>
+      <stop offset="1" stop-color="#E0C06A"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="12" fill="#050507"/>
-  <text x="32" y="44" font-family="Georgia, serif" font-size="32" font-weight="700" fill="url(#g)" text-anchor="middle">1M</text>
+  <rect width="64" height="64" rx="14" fill="#0B0B10"/>
+  <circle cx="32" cy="32" r="29.5" fill="none" stroke="url(#r)" stroke-width="2"/>
+  <circle cx="32" cy="32" r="25.5" fill="none" stroke="#C9A84C" stroke-width="1" stroke-dasharray="1.5 2.5" opacity="0.7"/>
+  <circle cx="32" cy="32" r="21" fill="url(#d)"/>
+  <circle cx="32" cy="32" r="16.5" fill="none" stroke="#2A1D0A" stroke-width="1" opacity="0.55"/>
+  <text x="32" y="36.5" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#171009" text-anchor="middle">1M</text>
 </svg>

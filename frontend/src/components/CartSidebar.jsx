@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, radius, typography, shadows, transitions, zIndex, components } from '../styles/designTokens';
 
@@ -26,33 +27,49 @@ export default function CartSidebar() {
   return (
     <>
       {/* Backdrop */}
-      <div onClick={() => setCartOpen(false)} style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(6px)',
-        zIndex: zIndex.modal,
-        opacity: cartOpen ? 1 : 0,
-        pointerEvents: cartOpen ? 'all' : 'none',
-        transition: `opacity 0.4s ${transitions.easeOut}`,
-      }}/>
+      <AnimatePresence>
+        {cartOpen && (
+          <motion.div
+            onClick={() => setCartOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.75)',
+              backdropFilter: 'blur(6px)',
+              zIndex: zIndex.modal,
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Drawer */}
-      <aside style={{
-        position: 'fixed',
-        top: 0, right: 0, bottom: 0,
-        width: 460,
-        maxWidth: '100vw',
-        zIndex: zIndex.modal,
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'rgba(10,10,14,0.97)',
-        backdropFilter: 'blur(40px)',
-        WebkitBackdropFilter: 'blur(40px)',
-        borderLeft: `1px solid ${colors.border}`,
-        transform: cartOpen ? 'translateX(0)' : 'translateX(100%)',
-        transition: `transform ${transitions.duration.slow} ${transitions.easeOut}`,
-        boxShadow: shadows.lg,
-      }}>
+      <motion.aside
+        initial={{ x: '100%' }}
+        animate={{ x: cartOpen ? 0 : '100%' }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          mass: 0.8
+        }}
+        style={{
+          position: 'fixed',
+          top: 0, right: 0, bottom: 0,
+          width: 460,
+          maxWidth: '100vw',
+          zIndex: zIndex.modal,
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'rgba(10,10,14,0.97)',
+          backdropFilter: 'blur(40px)',
+          WebkitBackdropFilter: 'blur(40px)',
+          borderLeft: `1px solid ${colors.border}`,
+          boxShadow: shadows.lg,
+        }}
+      >
 
         {/* Header */}
         <div style={{
@@ -74,7 +91,7 @@ export default function CartSidebar() {
             width: 40, height: 40, borderRadius: radius.full,
             background: colors.white10,
             border: `1px solid ${colors.border2}`,
-            color: colors.white40,
+            color: colors.white60,
             fontSize: typography.fontSize.lg, cursor: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: transitions.default,
@@ -154,7 +171,7 @@ export default function CartSidebar() {
             </button>
           </div>
         )}
-      </aside>
+      </motion.aside>
     </>
   );
 }

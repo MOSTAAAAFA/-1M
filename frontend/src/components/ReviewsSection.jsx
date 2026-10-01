@@ -2,23 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 const key = (id) => `1m_reviews_${id}`;
 
-const SEED_POOL = [
-  { name: 'Omar K.', rating: 5, comment: 'Immaculate condition and an effortless purchase. The 1M team handled everything with true white-glove service.', date: '2026-03-12' },
-  { name: 'Sara M.', rating: 5, comment: 'Delivered to my door within 48 hours. This car is everything the photos promised and more.', date: '2026-04-02' },
-  { name: 'Liam W.', rating: 4, comment: 'Outstanding spec and exactly as described. Took a point off only for the delivery window.', date: '2026-05-21' },
-  { name: 'Youssef A.', rating: 5, comment: 'A masterpiece. The test drive experience sold me instantly — highly recommend.', date: '2026-06-15' },
-  { name: 'Nour T.', rating: 4, comment: 'Beautiful machine, transparent pricing. The concierge follow-up was a class act.', date: '2026-07-08' },
-];
-
-function seedReviews(carId, carName) {
-  const count = 3 + (carId % 3);
-  const start = carId % SEED_POOL.length;
-  return Array.from({ length: count }, (_, i) => {
-    const s = SEED_POOL[(start + i) % SEED_POOL.length];
-    return { ...s, carName };
-  });
-}
-
 function load(carId) {
   try {
     const raw = localStorage.getItem(key(carId));
@@ -41,7 +24,7 @@ export default function ReviewsSection({ carId, carName }) {
 
   useEffect(() => {
     const existing = load(carId);
-    setReviews(existing && existing.length ? existing : seedReviews(carId, carName));
+    setReviews(existing && existing.length ? existing : []);
   }, [carId, carName]);
 
   useEffect(() => {
@@ -118,41 +101,70 @@ export default function ReviewsSection({ carId, carName }) {
 
       {/* List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40 }}>
-        {reviews.map((r, i) => (
-          <div key={i} style={{
-            padding: '20px 22px',
-            background: 'rgba(255,255,255,0.03)',
+        {reviews.length === 0 ? (
+          <div style={{
+            padding: '36px',
+            textAlign: 'center',
+            background: 'rgba(255,255,255,0.02)',
             borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: '1px dashed rgba(255,255,255,0.1)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  background: 'rgba(201,168,76,0.15)',
-                  border: '1px solid rgba(201,168,76,0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: '#c9a84c',
-                }}>{r.name.charAt(0)}</div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f0ede8' }}>{r.name}</div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: 'rgba(240,237,232,0.3)', letterSpacing: '1px' }}>
-                    {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 20,
+              color: 'rgba(240,237,232,0.6)',
+              margin: '0 0 6px 0',
+            }}>
+              No reviews yet
+            </p>
+            <p style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              color: 'rgba(240,237,232,0.55)',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              margin: 0,
+            }}>
+              Be the first owner to share an experience
+            </p>
+          </div>
+        ) : (
+          reviews.map((r, i) => (
+            <div key={i} style={{
+              padding: '20px 22px',
+              background: 'rgba(255,255,255,0.03)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    background: 'rgba(201,168,76,0.15)',
+                    border: '1px solid rgba(201,168,76,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: '#c9a84c',
+                  }}>{r.name.charAt(0)}</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#f0ede8' }}>{r.name}</div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: 'rgba(240,237,232,0.3)', letterSpacing: '1px' }}>
+                      {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
                   </div>
                 </div>
+                <Stars value={r.rating} size={14} />
               </div>
-              <Stars value={r.rating} size={14} />
+              <p style={{ fontSize: 14, color: 'rgba(240,237,232,0.75)', lineHeight: 1.6, margin: 0 }}>{r.comment}</p>
             </div>
-            <p style={{ fontSize: 14, color: 'rgba(240,237,232,0.75)', lineHeight: 1.6, margin: 0 }}>{r.comment}</p>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Write a review */}

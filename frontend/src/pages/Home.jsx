@@ -681,8 +681,14 @@ function StatsBar() {
             // and stacks them instead.
             style={{
               padding: '40px 28px',
+              // Glass, matched to the canonical car card: a zero-alpha pane so
+              // the section behind reads straight through, with the blur doing
+              // the work. The text-shadow below is what keeps the white copy
+              // legible now that no background is carrying its contrast.
               background: 'transparent',
-              backdropFilter: 'blur(4px)',
+              backdropFilter: 'blur(18px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(18px) saturate(150%)',
+              textShadow: '0 1px 3px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.55)',
               borderRadius: '16px',
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateY(0)' : 'translateY(20px)',
@@ -711,65 +717,12 @@ function StatsBar() {
                 }
               `}</style>
             )}
-            {/* 🔥 Border مضيء يلف حوالين الكارد */}
-            <svg
-              style={{
-                position: 'absolute',
-                inset: -1,
-                width: 'calc(100% + 2px)',
-                height: 'calc(100% + 2px)',
-                pointerEvents: 'none',
-              }}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                {/* Gradient يتحرك حوالين الحواف */}
-                <linearGradient id={`borderGradient${i}`} gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="rgba(201,168,76,0)" />
-                  <stop offset="25%" stopColor="rgba(201,168,76,0)" />
-                  <stop offset="50%" stopColor="rgba(201,168,76,1)" />
-                  <stop offset="75%" stopColor="rgba(201,168,76,0)" />
-                  <stop offset="100%" stopColor="rgba(201,168,76,0)" />
-                  <animate
-                    attributeName="x1"
-                    values="0%;100%;0%"
-                    dur={`${4 + i * 0.5}s`}
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="y1"
-                    values="0%;100%;0%"
-                    dur={`${4 + i * 0.5}s`}
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="x2"
-                    values="100%;0%;100%"
-                    dur={`${4 + i * 0.5}s`}
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="y2"
-                    values="100%;0%;100%"
-                    dur={`${4 + i * 0.5}s`}
-                    repeatCount="indefinite"
-                  />
-                </linearGradient>
-              </defs>
-              <rect
-                x="1"
-                y="1"
-                width="calc(100% - 2px)"
-                height="calc(100% - 2px)"
-                rx="16"
-                fill="none"
-                stroke={`url(#borderGradient${i})`}
-                strokeWidth="2"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.8))',
-                }}
-              />
-            </svg>
+            {/* Moving gold edge. A conic gradient rotating behind a ring mask
+                makes the light travel around the perimeter in one direction,
+                which is what the diagonal gradient trick could not do. All four
+                cards share one keyframe name and duration, so they stay in
+                lockstep instead of drifting apart. */}
+            <div className="stats-ring" aria-hidden="true" />
 
             {/* Static border ناعم */}
             <div
@@ -839,15 +792,52 @@ function StatsBar() {
         ))}
       </div>
 
-      {/* Keyframe for border travel animation */}
+      {/* Keyframes for the shared border-travel animation */}
       <style>{`
-        @keyframes borderTravel {
-          0% {
-            stroke-dashoffset: 0;
-          }
-          100% {
-            stroke-dashoffset: -400;
-          }
+        /* Registered so the angle can be interpolated; without this the
+           conic gradient would jump between keyframes instead of sweeping. */
+        @property --stats-angle {
+          syntax: '<angle>';
+          inherits: false;
+          initial-value: 0deg;
+        }
+
+        @keyframes statsRingSweep {
+          from { --stats-angle: 0deg; }
+          to   { --stats-angle: 360deg; }
+        }
+
+        .stats-ring {
+          --stats-angle: 0deg;
+          position: absolute;
+          inset: 0;
+          border-radius: 16px;
+          padding: 1.5px;
+          /* A short bright arc on a dark base: the arc is the travelling
+             light, the dark remainder keeps the edge visible everywhere. */
+          background: conic-gradient(
+            from var(--stats-angle),
+            rgba(201, 168, 76, 0.18) 0deg,
+            rgba(201, 168, 76, 0.18) 300deg,
+            rgba(201, 168, 76, 0.85) 342deg,
+            #FFF3C4 358deg,
+            rgba(201, 168, 76, 0.85) 360deg
+          );
+          /* Ring mask: content-box keeps the centre empty, the xor punches out
+             the padding so only the 1.5px edge is painted. */
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+          filter: drop-shadow(0 0 6px rgba(201, 168, 76, 0.55));
+          pointer-events: none;
+          animation: statsRingSweep 6s linear infinite;
+        }
+
+        /* No travelling light for reduced-motion users: the resting gold edge
+           is the whole treatment, and nothing flashes. */
+        @media (prefers-reduced-motion: reduce) {
+          .stats-ring { animation: none; }
         }
 
         @media (max-width: 1024px) {
@@ -1379,8 +1369,9 @@ function MiniCard({ car, index, visible }) {
         style={{
           borderRadius: radius.md,
           overflow: 'hidden',
-          border: `1px solid ${colors.border2}`,
-          background: 'rgba(17,17,23,0.85)',
+          // Glass comes from .car-card in CSS (translucent pane + backdrop blur
+          // + top sheen). An inline background here would override it and put
+          // the opaque fill back.
           opacity: visible ? 1 : 0,
           animation: visible ? `fadeUp 0.6s ${index * 0.08}s ${transitions.easeOut} both` : 'none',
           cursor: 'none',

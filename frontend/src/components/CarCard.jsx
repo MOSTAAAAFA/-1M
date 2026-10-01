@@ -15,6 +15,10 @@
 //   stopPropagation. This keeps the markup valid — nesting <button> inside
 //   <a> is invalid HTML and breaks keyboard/screen-reader behaviour.
 //
+// hideDetails: drops the "View Details" link. The stretched link still makes
+//   the whole card open the car, so the only thing this changes is whether a
+//   redundant second control is drawn. /cars passes it; home and /favorites
+//   keep it.
 // Motion budget:
 //   - Tilt/spotlight use Framer motion values + springs (compositor only).
 //   - Pointer tracking writes CSS custom properties straight to the DOM node
@@ -47,7 +51,7 @@ const SpecPill = ({ label, value, active }) => (
   </div>
 );
 
-function CarCard({ car, index = 0, priority = false }) {
+function CarCard({ car, index = 0, priority = false, hideDetails = false }) {
   const cardRef = useRef(null);
   const [hovered, setHovered] = useState(false);
   const reduced = useReducedMotion();
@@ -179,13 +183,20 @@ function CarCard({ car, index = 0, priority = false }) {
                 place people actually reach for when deciding, and a control
                 that is visibly a control is worth more than an invisible
                 hit area. Sits above the stretched link via z-index. */}
-            <Link
-              to={`/car/${car.id}`}
-              className="car-card-details"
-              aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
-            >
-              View Details
-            </Link>
+            {/* "View Details" is hidden on the /cars collection grid. The whole
+                card is already a clickable surface through the stretched link,
+                so the control is redundant there, and at catalogue column widths
+                it crowded the primary "Add to Garage" pill and pushed its label
+                out of view. */}
+            {!hideDetails && (
+              <Link
+                to={`/car/${car.id}`}
+                className="car-card-details"
+                aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
+              >
+                View Details
+              </Link>
+            )}
             <button
               className="car-card-cta"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(car); }}

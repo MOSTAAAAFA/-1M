@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Loyalty = require('../models/Loyalty');
-const { protect } = require('../middleware/authMiddleware');
+const protect = require('../middleware/authMiddleware');
 
 // @route   GET /api/v1/loyalty
 // @desc    Get user's loyalty points
 // @access  Private
 router.get('/', protect, async (req, res) => {
   try {
-    let loyalty = await Loyalty.findOne({ user: req.user._id });
+    let loyalty = await Loyalty.findOne({ user: req.user.id });
 
     if (!loyalty) {
-      loyalty = await Loyalty.create({ user: req.user._id });
+      loyalty = await Loyalty.create({ user: req.user.id });
     }
 
     // Check for expired points
@@ -44,7 +44,7 @@ router.get('/', protect, async (req, res) => {
 // @access  Private
 router.get('/history', protect, async (req, res) => {
   try {
-    const loyalty = await Loyalty.findOne({ user: req.user._id }).populate('history.orderId');
+    const loyalty = await Loyalty.findOne({ user: req.user.id }).populate('history.orderId');
 
     if (!loyalty) {
       return res.status(404).json({
@@ -79,7 +79,7 @@ router.post('/redeem', protect, async (req, res) => {
       });
     }
 
-    const loyalty = await Loyalty.findOne({ user: req.user._id });
+    const loyalty = await Loyalty.findOne({ user: req.user.id });
 
     if (!loyalty) {
       return res.status(404).json({

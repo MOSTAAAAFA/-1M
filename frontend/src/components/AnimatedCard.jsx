@@ -20,20 +20,20 @@ export default function AnimatedCard({ car, index = 0 }) {
   const [spotlight, setSpotlight] = useState({ x: 50, y: 50 });
   const { addToCart, toggleFavorite, isFavorite } = useApp();
 
-  // ── 3D Tilt via Framer Motion spring physics ──
+  // ── Lighter 3D Tilt for better performance ──
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [9, -9]), {
-    stiffness: 280, damping: 28
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), {
+    stiffness: 150, damping: 20
   });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-9, 9]), {
-    stiffness: 280, damping: 28
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), {
+    stiffness: 150, damping: 20
   });
-  const scale = useSpring(isHovered ? 1.035 : 1, { stiffness: 300, damping: 25 });
+  const scale = useSpring(isHovered ? 1.02 : 1, { stiffness: 200, damping: 20 });
 
   const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !isHovered) return;
     const rect = cardRef.current.getBoundingClientRect();
     const cx = (e.clientX - rect.left) / rect.width  - 0.5;
     const cy = (e.clientY - rect.top)  / rect.height - 0.5;
@@ -44,7 +44,7 @@ export default function AnimatedCard({ car, index = 0 }) {
     const sx = ((e.clientX - rect.left) / rect.width)  * 100;
     const sy = ((e.clientY - rect.top)  / rect.height) * 100;
     setSpotlight({ x: sx, y: sy });
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, isHovered]);
 
   const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => {
@@ -55,15 +55,7 @@ export default function AnimatedCard({ car, index = 0 }) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 48, scale: 0.94 }}
-      whileInView={{
-        opacity: 1, y: 0, scale: 1,
-        transition: { duration: 0.6, delay: index * 0.09, ease: [0.22, 1, 0.36, 1] }
-      }}
-      viewport={{ once: true, amount: 0.15 }}
-      style={{ perspective: 1000 }}
-    >
+    <div style={{ perspective: 1000, height: '100%' }}>
       {/* ── 3D Tilt wrapper ── */}
       <motion.div
         ref={cardRef}
@@ -75,6 +67,9 @@ export default function AnimatedCard({ car, index = 0 }) {
           rotateY,
           scale,
           transformStyle: 'preserve-3d',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           borderRadius: 20,
           overflow: 'hidden',
           background: isHovered
@@ -88,7 +83,6 @@ export default function AnimatedCard({ car, index = 0 }) {
             : '0 8px 32px rgba(0,0,0,0.5)',
           cursor: 'none',
           position: 'relative',
-          willChange: 'transform',
           transition: 'border-color 0.35s, box-shadow 0.35s, background 0.35s',
         }}
       >
@@ -123,9 +117,9 @@ export default function AnimatedCard({ car, index = 0 }) {
             src={car.image}
             alt={car.name}
             onError={(e) => { e.currentTarget.src = `https://placehold.co/800x600/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
-            animate={{ scale: isHovered ? 1.08 : 1 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', willChange: 'transform' }}
+            animate={{ scale: isHovered ? 1.05 : 1 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
 
           {/* Deep gradient overlay */}
@@ -209,12 +203,24 @@ export default function AnimatedCard({ car, index = 0 }) {
               transition: 'all 0.3s',
             }}
           >
-            {isFavorite(car.id) ? '♥' : '♡'}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill={isFavorite(car.id) ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
           </motion.button>
         </div>
 
         {/* ── Body ── */}
-        <div style={{ padding: '24px 26px 26px', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '24px 26px 26px', position: 'relative', zIndex: 1, flex: 1 }}>
           <p style={{
             fontFamily: 'var(--font-ui)', fontSize: 9,
             letterSpacing: '3px', textTransform: 'uppercase',
@@ -304,7 +310,7 @@ export default function AnimatedCard({ car, index = 0 }) {
                 to={`/car/${car.id}`}
                 className="btn btn-ghost"
                 data-hover
-                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px' }}
+                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px', borderRadius: 999 }}
               >
                 Details
               </Link>
@@ -314,7 +320,7 @@ export default function AnimatedCard({ car, index = 0 }) {
                 whileTap={{ scale: 0.97 }}
                 className="btn btn-gold"
                 data-hover
-                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px', zIndex: 10 }}
+                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px', zIndex: 10, borderRadius: 999 }}
               >
                 + Garage
               </motion.button>
@@ -334,6 +340,6 @@ export default function AnimatedCard({ car, index = 0 }) {
           transition: 'background 0.4s',
         }}/>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

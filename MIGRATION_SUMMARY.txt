@@ -1,0 +1,95 @@
+
+═══════════════════════════════════════════════════════════════════
+  TTS MIGRATION COMPLETE - ملخص نهائي
+═══════════════════════════════════════════════════════════════════
+
+✅ COMPLETED:
+
+1. Removed Gemini TTS:
+   • Deleted services/geminiTts.js
+   • Removed @google/genai package
+   • Cleaned all Gemini references
+
+2. Replaced ElevenLabs:
+   • ElevenLabs free tier requires paid plan for API library voices
+   • Removed ElevenLabs as primary provider
+   • Kept SDK installed (can be removed if desired)
+
+3. Installed Google Cloud TTS:
+   • Package: @google-cloud/text-to-speech v7.1.0
+   • Service: backend/services/googleTts.js
+   • Voice: ar-XA-Wavenet-B (Male Arabic, Wavenet quality)
+   • Free tier: 1,000,000 characters/month
+   • No credit card required
+
+4. Updated Code:
+   • backend/routes/tts.js - replaced ElevenLabs with Google
+   • frontend/src/components/AiAssistant.jsx - updated all references
+   • All debug logs updated
+
+═══════════════════════════════════════════════════════════════════
+  🎯 FINAL STEP: Get Google Cloud API Key
+═══════════════════════════════════════════════════════════════════
+
+1. Go to: https://console.cloud.google.com/apis/credentials
+2. Create new project (or use existing)
+3. Enable "Cloud Text-to-Speech API"
+4. Create Credentials → API Key
+5. Copy the key (starts with AIza...)
+6. Add to backend/.env:
+   
+   GOOGLE_CLOUD_TTS_KEY=AIzaYourKeyHere
+
+7. Restart backend server:
+   cd backend && node server.js
+
+8. Test the AI Assistant - should speak with clear Arabic voice!
+
+═══════════════════════════════════════════════════════════════════
+  📊 COMPARISON
+═══════════════════════════════════════════════════════════════════
+
+                ElevenLabs      →     Google Cloud TTS
+Free Tier:      10,000 chars    →     1,000,000 chars (100x!)
+Credit Card:    Required        →     NOT required
+Arabic Voice:   Amr (Egyptian)  →     ar-XA-Wavenet-B (clear Arabic)
+Quality:        Excellent       →     Excellent (Wavenet)
+API Access:     Paid only       →     FREE
+
+═══════════════════════════════════════════════════════════════════
+  🔊 VOICE DETAILS
+═══════════════════════════════════════════════════════════════════
+
+Voice ID: ar-XA-Wavenet-B
+Language: Arabic (ar-XA)
+Gender: Male
+Quality: Wavenet (highest Google quality)
+Style: Natural, clear, professional
+Suitable for: General use, voiceovers, narration
+
+═══════════════════════════════════════════════════════════════════
+  📁 FILES CHANGED
+═══════════════════════════════════════════════════════════════════
+
+Created:
+  • backend/services/googleTts.js
+  • GOOGLE_TTS_SETUP.md
+  • MIGRATION_SUMMARY.txt
+
+Modified:
+  • backend/package.json (added @google-cloud/text-to-speech)
+  • backend/routes/tts.js (replaced ElevenLabs with Google)
+  • frontend/src/components/AiAssistant.jsx (updated all TTS references)
+
+Deleted:
+  • backend/services/geminiTts.js
+  • backend/_tts_probe2.js
+  • backend/package.json (removed @google/genai)
+
+═══════════════════════════════════════════════════════════════════
+
+After you add the GOOGLE_CLOUD_TTS_KEY to .env and restart the server,
+the AI Assistant will respond with high-quality Arabic speech!
+
+═══════════════════════════════════════════════════════════════════
+

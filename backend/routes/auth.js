@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const { authLimiter } = require("../middleware/security");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get("/test", (req, res) => {
 });
 
 // Register (NOW SAVING TO DB)
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
 
@@ -113,7 +114,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Login (NOW CHECKING DB)
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
 

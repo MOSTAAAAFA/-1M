@@ -3,10 +3,10 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 
-// Rate limiting
+// Rate limiting (global API guard)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 300, // limit each IP to 300 requests per windowMs (the frontend is chatty)
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -15,7 +15,7 @@ const limiter = rateLimit({
 // Strict rate limiting for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 10,
   message: 'Too many login attempts, please try again later.',
   skipSuccessfulRequests: true,
 });

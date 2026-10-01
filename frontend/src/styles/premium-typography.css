@@ -18,8 +18,9 @@
   /* Variable sans for body - highly legible */
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Monospace for technical details */
-  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  /* Monospace for technical details / telemetry data */
+  --font-mono: 'Space Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  --font-data: 'Space Mono', 'SF Mono', 'Consolas', monospace;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -30,11 +31,10 @@
 .hero-title {
   font-family: var(--font-display);
   font-size: clamp(64px, 12vw, 180px);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: var(--white);
-  font-variation-settings: 'wght' 300;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -176,20 +176,8 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .text-gold-gradient {
-  background: linear-gradient(
-    135deg,
-    #C9A84C 0%,
-    #E0C06A 30%,
-    #F4D03F 50%,
-    #E0C06A 70%,
-    #C9A84C 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: goldFlow 4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 12px rgba(201, 168, 76, 0.3));
+  color: var(--gold);
+  filter: none;
 }
 
 @keyframes goldFlow {
@@ -246,14 +234,14 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .number-premium {
-  font-family: var(--font-mono);
+  font-family: var(--font-data);
   font-size: clamp(48px, 6vw, 80px);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--gold);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 40px rgba(201, 168, 76, 0.4);
+  text-shadow: none;
 }
 
 .stat-label {
