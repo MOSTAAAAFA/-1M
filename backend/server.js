@@ -14,9 +14,15 @@ const orderRoutes = require("./routes/orders");
 const productRoutes = require("./routes/products");
 const reviewRoutes = require("./routes/reviews");
 const wishlistRoutes = require("./routes/wishlist");
+const loyaltyRoutes = require("./routes/loyalty");
+const activityRoutes = require("./routes/activities");
 const adminRoutes = require("./routes/admin");
+const settingsRoutes = require("./routes/settings");
+const ttsRoutes = require("./routes/tts");
+const voiceRoutes = require("./routes/voice");
 
 const { errorHandler, notFound } = require("./middleware/errorHandler");
+const { chatWithTools } = require("./services/chatService");
 const { limiter, helmet, mongoSanitize, hpp } = require("./middleware/security");
 const logger = require("./utils/logger");
 
@@ -111,7 +117,12 @@ app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
+app.use("/api/v1/loyalty", loyaltyRoutes);
+app.use("/api/v1/activities", activityRoutes);
+app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1", ttsRoutes);
+app.use("/api/v1", voiceRoutes);
 
 // Keep backward compatibility
 app.use("/api/auth", authRoutes);
@@ -122,52 +133,15 @@ app.use("/api/products", productRoutes);
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages, system } = req.body;
-
-    const groqMessages = [
-      { role: "system", content: system || "You are a helpful assistant." },
-      ...messages.map(m => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: m.content
-      }))
-    ];
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-oss-120b",
-        messages: groqMessages,
-        max_tokens: 1000
-      })
+    const result = await chatWithTools({
+      messages: messages || [],
+      system: system || "You are a helpful assistant.",
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Groq API error:", response.status, JSON.stringify(data));
-      return res.status(500).json({
-        error: { message: data.error?.message || `Groq request failed with status ${response.status}` }
-      });
-    }
-
-    const text = data.choices?.[0]?.message?.content;
-
-    if (!text) {
-      console.error("Groq returned no content. Full response:", JSON.stringify(data));
-      return res.status(500).json({
-        error: { message: "Groq returned no response" }
-      });
-    }
-
-    res.json({ content: [{ text }] });
-
+    res.json({ content: [{ text: result.text }], actions: result.actions || [] });
   } catch (err) {
-    console.error("Chat error:", err.message);
+    console.error("Chat error:", err.status, err.message);
     res.status(500).json({
-      error: { message: err.message }
+      error: { message: err.message || "Chat request failed" }
     });
   }
 });
