@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const sdk = require('microsoft-cognitiveservices-speech-sdk');
+const textToSpeech = require('@google-cloud/text-to-speech');
 
 // In-memory cache: text hash → {audio: Buffer, voice: string, timestamp: number}
 const cache = new Map();
@@ -19,48 +19,49 @@ function getCacheKey(text, voice) {
 }
 
 /**
- * Generate speech using Azure Cognitive Services Speech SDK (Egyptian Arabic Neural)
- * Free tier: 500k characters/month
+ * Generate speech using Google Cloud Text-to-Speech (Arabic Wavenet Neural)
+ * Free tier: 4 million characters/month (Standard voices)
+ * No credit card required for free tier
  */
-async function generateSpeechAzure(text, voice = 'male') {
-  const subscriptionKey = process.env.AZURE_SPEECH_KEY;
-  const region = process.env.AZURE_SPEECH_REGION || 'eastus';
-
-  if (!subscriptionKey) {
-    throw new Error('AZURE_SPEECH_KEY not configured');
+async function generateSpeechGoogle(text, voice = 'male') {
+  // Check if Google credentials are configured
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.GOOGLE_CLOUD_PROJECT) {
+    throw new Error('GOOGLE_APPLICATION_CREDENTIALS not configured');
   }
 
-  const voiceName = voice === 'female' ? 'ar-EG-SalmaNeural' : 'ar-EG-ShakirNeural';
+  const client = new textToSpeech.TextToSpeechClient();
 
-  return new Promise((resolve, reject) => {
-    const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, region);
-    speechConfig.speechSynthesisVoiceName = voiceName;
-    speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
+  // Google has ar-XA-Wavenet voices (Modern Standard Arabic with good neural quality)
+  // Not Egyptian-specific, but high quality neural voices
+  const voiceName = voice === 'female' ? 'ar-XA-Wavenet-A' : 'ar-XA-Wavenet-B';
 
-    const synthesizer = new sdk.SpeechSynthesizer(speechConfig, null);
+  const request = {
+    input: { text },
+    voice: {
+      languageCode: 'ar-XA',
+      name: voiceName,
+      ssmlGender: voice === 'female' ? 'FEMALE' : 'MALE'
+    },
+    audioConfig: {
+      audioEncoding: 'MP3',
+      speakingRate: 0.9,
+      pitch: 0
+    }
+  };
 
-    synthesizer.speakTextAsync(
-      text,
-      result => {
-        synthesizer.close();
-        if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          console.log('[TTS] Azure Speech synthesis completed:', result.audioData.byteLength, 'bytes');
-          resolve({
-            audio: Buffer.from(result.audioData),
-            voice: voiceName,
-            service: 'azure-speech'
-          });
-        } else {
-          reject(new Error(`Azure Speech synthesis failed: ${result.errorDetails}`));
-        }
-      },
-      error => {
-        synthesizer.close();
-        console.error('[TTS] Azure Speech error:', error);
-        reject(new Error('azure_speech_failed'));
-      }
-    );
-  });
+  try {
+    const [response] = await client.synthesizeSpeech(request);
+    console.log('[TTS] Google Cloud TTS synthesis completed:', response.audioContent.length, 'bytes');
+
+    return {
+      audio: Buffer.from(response.audioContent),
+      voice: voiceName,
+      service: 'google-tts'
+    };
+  } catch (error) {
+    console.error('[TTS] Google Cloud TTS error:', error.message);
+    throw new Error('google_tts_failed');
+  }
 }
 
 /**
@@ -83,20 +84,20 @@ async function generateSpeech(text, voice = 'male') {
   }
 
   try {
-    // Primary: Azure Speech Service (Egyptian Arabic Neural)
-    console.log('[TTS] Calling Azure Speech Service...');
-    const result = await generateSpeechAzure(text, voice);
+    // Primary: Google Cloud Text-to-Speech (Arabic Wavenet Neural)
+    console.log('[TTS] Calling Google Cloud TTS...');
+    const result = await generateSpeechGoogle(text, voice);
     addToCache(cacheKey, { audio: result.audio, voice: result.voice, service: result.service });
     return { ...result, cached: false };
-  } catch (azureError) {
-    console.error('[TTS] Azure Speech failed:', azureError.message);
+  } catch (googleError) {
+    console.error('[TTS] Google Cloud TTS failed:', googleError.message);
 
-    // Fallback: return JSON for client-side handling
+    // Fallback: return JSON for client-side handling (browser TTS)
     return {
       fallback: true,
       text,
       voice,
-      message: 'معذرة، الصوت مش متاح دلوقتي. جرب تاني بعد شوية'
+      message: 'معذرة، الصوت مش متاح دلوقتي. هيستخدم صوت المتصفح'
     };
   }
 }
