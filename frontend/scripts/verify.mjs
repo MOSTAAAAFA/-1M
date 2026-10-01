@@ -415,35 +415,45 @@ try {
   ok('mobile menu closes on Escape');
   await mCtx.close();
 
-  // ---- bento: hierarchy and no overflow at each breakpoint ---------------
+  // ---- stats strip: four equal tiles, in order, no overflow ---------------
+  // These are four parallel promises, not a ranked list, so they must render
+  // as four equal tiles in source order at every width.
   for (const w of [1440, 1024, 640, 390]) {
     const bCtx = await browser.newContext({ viewport: { width: w, height: 900 } });
     const bPage = await bCtx.newPage();
     await bPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
     await bPage.evaluate(() => sessionStorage.setItem('1m_splash_seen', '1'));
     await bPage.waitForTimeout(600);
-    const bento = await bPage.evaluate(() => {
+    const strip = await bPage.evaluate(() => {
       const g = document.querySelector('.stats-grid');
       if (!g) return null;
-      const tiles = [...g.children].map((c) => c.getBoundingClientRect());
+      const tiles = [...g.children].map((c) => {
+        const b = c.getBoundingClientRect();
+        return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width) };
+      });
       return {
         count: tiles.length,
-        leadW: Math.round(tiles[0].width),
-        wideW: Math.round(tiles[tiles.length - 1].width),
-        halfW: Math.round(tiles[1].width),
+        widths: tiles.map((t) => t.w),
+        // Left-to-right, then top-to-bottom: the source order as painted.
+        order: [...tiles].sort((a, b) => (a.y - b.y) || (a.x - b.x)).map((t) => `${t.x},${t.y}`),
+        paintOrder: tiles.map((t) => `${t.x},${t.y}`),
         overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
       };
     });
-    if (!bento) {
-      bad(`bento @${w}`, 'stats grid not found');
-    } else if (bento.overflow) {
-      bad(`bento @${w}`, 'horizontal overflow');
-    } else if (w === 1440 && !(bento.leadW > bento.halfW * 1.5 && bento.wideW > bento.leadW)) {
-      // The point of the bento: the lead tile is visibly larger than the
-      // halves, and the closing tile is wider than the lead.
-      bad(`bento @${w}`, `lead=${bento.leadW} half=${bento.halfW} wide=${bento.wideW}`);
+    if (!strip) {
+      bad(`stats strip @${w}`, 'grid not found');
+    } else if (strip.overflow) {
+      bad(`stats strip @${w}`, 'horizontal overflow');
+    } else if (strip.count !== 4) {
+      bad(`stats strip @${w}`, `expected 4 tiles, got ${strip.count}`);
+    } else if (new Set(strip.widths).size !== 1) {
+      // Equal tiles are the requirement; a 1px rounding wobble is not.
+      bad(`stats strip @${w}`, `tiles not equal: ${strip.widths.join('/')}`);
+    } else if (strip.order.join('|') !== strip.paintOrder.join('|')) {
+      // Reordering tiles on screen would break the promised sequence.
+      bad(`stats strip @${w}`, 'tiles reordered from source order');
     } else {
-      ok(`bento @${w}`, `lead=${bento.leadW} half=${bento.halfW} wide=${bento.wideW}`);
+      ok(`stats strip @${w}`, `4 equal tiles, order kept, w=${strip.widths[0]}`);
     }
     await bCtx.close();
   }
