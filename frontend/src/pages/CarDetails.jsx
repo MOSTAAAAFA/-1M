@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { cars } from '../data/cars';
 import { useApp } from '../context/AppContext';
@@ -8,7 +8,11 @@ import TestDriveBooking from '../components/TestDriveBooking';
 import { StockAlert, PriceAlert } from '../components/FlashSaleCountdown';
 import FinanceCalculator from '../components/FinanceCalculator';
 import ReviewsSection from '../components/ReviewsSection';
-import { motion, AnimatePresence } from 'framer-motion';
+import Crest1M from '../components/Crest1M';
+import OptimizedImage from '../components/OptimizedImage';
+import { trackActivity } from '../utils/activity';
+import { useSiteSettings } from '../context/SiteSettingsContext';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -17,13 +21,28 @@ export default function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleFavorite, favorites } = useApp();
+  const { settings } = useSiteSettings();
   const [loaded, setLoaded] = useState(false);
   const [addedPulse, setAddedPulse] = useState(false);
   const [activeTab, setActiveTab] = useState('specs');
   const [isMuted, setIsMuted] = useState(true);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const videoRef = React.useRef(null);
+  const videoRef = useRef(null);
+  const heroRef = useRef(null);
+
+  // Parallax scroll effects
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start']
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '40%']);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+
+  const smoothHeroY = useSpring(heroY, { stiffness: 100, damping: 30 });
+  const smoothHeroScale = useSpring(heroScale, { stiffness: 100, damping: 30 });
 
   const car = cars.find(c => c.id === Number(id));
   const relatedCars = cars.filter(c => c.id !== car?.id && c.brand === car?.brand).slice(0, 3);
@@ -36,8 +55,9 @@ export default function CarDetails() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     const t = setTimeout(() => setLoaded(true), 80);
+    if (car) trackActivity('view', car);
     return () => clearTimeout(t);
-  }, [id]);
+  }, [id, car]);
 
   if (!car) {
     return (
@@ -73,23 +93,33 @@ export default function CarDetails() {
   };
 
   return (
-    <div style={{ background: 'var(--black)', minHeight: '100vh', paddingTop: '72px' }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{ background: 'var(--black)', minHeight: '100vh', paddingTop: '72px' }}
+    >
 
 {/* Hero */}
-<section style={{
+<section ref={heroRef} style={{
   position: 'relative',
   height: 'clamp(500px, 70vh, 800px)',
   overflow: 'hidden',
 }}>
     {car.heroVideo ? (
     <>
-    <video
+    <motion.video
       ref={videoRef}
       autoPlay
       muted={isMuted}
       loop
       playsInline
-      preload="auto"
+      // These are 100MB+ files. preload="auto" made the browser buffer the
+      // whole thing before the user could skip, and the poster frame meant
+      // they saw black for seconds first.
+      preload="metadata"
+      poster={car.heroImage || car.image}
       style={{
         position: 'absolute',
         inset: 0,
@@ -98,16 +128,20 @@ export default function CarDetails() {
         objectFit: 'cover',
         objectPosition: 'center',
         filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
-        transform: 'scale(1.01)',
+        y: smoothHeroY,
+        scale: smoothHeroScale,
+        opacity: heroOpacity,
       }}
     >
       <source src={car.heroVideo} type="video/mp4" />
-    </video>
+    </motion.video>
 
     {/* Sound Toggle Button */}
-    <button
+    <motion.button
       onClick={() => setIsMuted(!isMuted)}
       aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+      whileHover={{ scale: 1.1, background: 'rgba(201,168,76,0.2)' }}
+      whileTap={{ scale: 0.95 }}
       style={{
         position: 'absolute',
         bottom: '30px',
@@ -124,16 +158,7 @@ export default function CarDetails() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        transition: 'all 0.3s',
         zIndex: 10,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(201,168,76,0.2)';
-        e.currentTarget.style.transform = 'scale(1.1)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
-        e.currentTarget.style.transform = 'scale(1)';
       }}
     >
       {isMuted ? (
@@ -149,14 +174,17 @@ export default function CarDetails() {
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
         </svg>
       )}
-    </button>
+    </motion.button>
     </>
   ) : (
     <>
-    <img
+    <motion.img
       src={car.heroImage || car.image}
       alt={car.name}
       onError={(e) => { e.currentTarget.src = `https://placehold.co/1920x1080/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
+      initial={{ opacity: 0, scale: 1.04 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: 'absolute',
         inset: 0,
@@ -164,15 +192,17 @@ export default function CarDetails() {
         height: '100%',
         objectFit: 'cover',
         objectPosition: 'center 40%',
-        opacity: loaded ? 1 : 0,
-        transform: loaded ? 'scale(1)' : 'scale(1.04)',
-        transition: 'opacity 1s, transform 1.2s cubic-bezier(0.22,1,0.36,1)',
+        y: smoothHeroY,
+        scale: smoothHeroScale,
+        opacity: heroOpacity,
       }}
     />
     {/* Gallery launcher */}
-    <button
+    <motion.button
       onClick={() => setGalleryOpen(true)}
       aria-label={`Open gallery for ${car.name}`}
+      whileHover={{ scale: 1.06, background: 'rgba(201,168,76,0.2)' }}
+      whileTap={{ scale: 0.98 }}
       style={{
         position: 'absolute',
         bottom: '30px',
@@ -193,15 +223,6 @@ export default function CarDetails() {
         letterSpacing: '2px',
         textTransform: 'uppercase',
         cursor: 'pointer',
-        transition: 'all 0.3s',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(201,168,76,0.2)';
-        e.currentTarget.style.transform = 'scale(1.06)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
-        e.currentTarget.style.transform = 'scale(1)';
       }}
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -211,7 +232,7 @@ export default function CarDetails() {
         <line x1="11" y1="8" x2="11" y2="14"/>
       </svg>
       View Gallery
-    </button>
+    </motion.button>
     </>
   )}
         <div style={{
@@ -286,6 +307,7 @@ export default function CarDetails() {
               alignItems: 'center',
               gap: '10px',
             }}>
+              <Crest1M size={26} />
               <span style={{ width: '24px', height: '1px', background: '#c9a84c', display: 'inline-block' }} />
               {car.brand} · {car.year} · {car.category}
             </p>
@@ -325,15 +347,13 @@ export default function CarDetails() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img
+                  <OptimizedImage
                     src={car.heroImage || car.image}
                     alt={car.name}
-                    onError={(e) => { e.currentTarget.src = `https://placehold.co/800x600/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                    fallback={`https://placehold.co/800x600/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`}
                   />
                 </div>
               </div>
@@ -781,7 +801,7 @@ export default function CarDetails() {
                   cursor: 'pointer',
                 }}
               >✕</button>
-              <TestDriveBooking carName={car.name} carId={car.id} />
+              {settings.testDriveEnabled !== false && <TestDriveBooking carName={car.name} carId={car.id} />}
             </motion.div>
           </motion.div>
         )}
@@ -793,7 +813,7 @@ export default function CarDetails() {
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -879,13 +899,15 @@ function RelatedCard({ car }) {
         }}
       >
         <div style={{ height: '130px', overflow: 'hidden' }}>
-          <img
+          {/* Lazy by default: this sits at the very bottom of a long page, so
+              eager-loading it competes with content the user is still reading. */}
+          <OptimizedImage
             src={car.image}
             alt={car.name}
-            onError={(e) => { e.currentTarget.src = `https://placehold.co/400x300/111117/C9A84C?text=${encodeURIComponent(car.brand)}`; }}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            width="100%"
+            height="100%"
+            objectFit="cover"
+            fallback={`https://placehold.co/400x300/111117/C9A84C?text=${encodeURIComponent(car.brand)}`}
           />
         </div>
         <div style={{ padding: '14px' }}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import AdminLayout from '../components/AdminLayout';
 import ProtectedAdminRoute from '../components/ProtectedAdminRoute';
 import AnimatedCounter from '../components/AnimatedCounter';
@@ -388,6 +388,54 @@ export default function AdminDashboard() {
                   icon="star"
                   color="#f59e0b"
                 />
+                <TodayMetric
+                  label="Cart Adds Today"
+                  value={stats.engagement?.todayCartAdds || 0}
+                  icon="cart"
+                  color="#25D366"
+                />
+                <TodayMetric
+                  label="Loyalty Members"
+                  value={stats.loyalty?.members || 0}
+                  icon="gem"
+                  color="#C9A84C"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Live Engagement */}
+          {stats?.engagement && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+              style={{
+                background: 'rgba(17,17,23,0.8)',
+                border: '1px solid rgba(201,168,76,0.2)',
+                borderRadius: 20,
+                padding: 28,
+                backdropFilter: 'blur(20px)',
+                marginBottom: 32,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: '#fff', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '2px', margin: 0 }}>
+                  Live Customer Activity
+                </h3>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-ui)' }}>
+                  real data · auto-refreshes every 30s
+                </span>
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: 16,
+              }}>
+                <EngageStat label="Total Cart Adds" value={stats.engagement.totalCartAdds || 0} color="#25D366" icon="cart" />
+                <EngageStat label="Total Car Views" value={stats.engagement.totalViews || 0} color="#3b82f6" icon="car" />
+                <EngageStat label="Wishlist Saves" value={stats.engagement.totalWishlists || 0} color="#f59e0b" icon="star" />
+                <EngageStat label="Lifetime Loyalty Pts" value={stats.loyalty?.totalEarned || 0} color="#C9A84C" icon="gem" />
               </div>
             </motion.div>
           )}
@@ -591,7 +639,7 @@ export default function AdminDashboard() {
                       key={product._id || idx}
                       name={product.name || 'Unknown Product'}
                       revenue={product.revenue || 0}
-                      unitsSold={product.count || 0}
+                      unitsSold={product.totalSold || product.count || 0}
                       delay={idx * 0.05}
                     />
                   ))}
@@ -722,6 +770,38 @@ function TodayMetric({ label, value, icon, color, isCounter = true }) {
         ) : (
           value
         )}
+      </div>
+    </div>
+  );
+}
+
+function EngageStat({ label, value, color, icon }) {
+  return (
+    <div style={{
+      padding: '18px',
+      borderRadius: 14,
+      background: `${color}12`,
+      border: `1px solid ${color}30`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <Icon name={icon} size={16} color={color} />
+        <span style={{
+          fontSize: 12,
+          color: 'rgba(255,255,255,0.7)',
+          fontFamily: 'var(--font-ui)',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+        }}>
+          {label}
+        </span>
+      </div>
+      <div style={{
+        fontSize: 28,
+        fontWeight: 700,
+        color: '#fff',
+        fontFamily: 'var(--font-display)',
+      }}>
+        <AnimatedCounter to={typeof value === 'number' ? value : 0} duration={1200} separator="," />
       </div>
     </div>
   );
@@ -1102,6 +1182,20 @@ function Icon({ name, size = 24, color = 'currentColor' }) {
         <path d="M3 17h18" />
         <circle cx="7.5" cy="17.5" r="2.5" />
         <circle cx="16.5" cy="17.5" r="2.5" />
+      </svg>
+    ),
+    cart: (
+      <svg {...common}>
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+    ),
+    gem: (
+      <svg {...common}>
+        <path d="M6 3h12l4 6-10 13L2 9Z" />
+        <path d="M11 3 8 9l4 13 4-13-3-6" />
+        <path d="M2 9h20" />
       </svg>
     ),
     star: (

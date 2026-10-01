@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useApp } from '../context/AppContext';
@@ -7,6 +7,7 @@ import Crest1M from './Crest1M';
 import SearchBar from './SearchBar';
 import API_BASE from '../utils/api';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import useFocusTrap from '../hooks/useFocusTrap';
 import { colors, spacing, radius, typography, shadows, transitions } from '../styles/designTokens';
 
 const NAV_LINKS = [
@@ -15,6 +16,21 @@ const NAV_LINKS = [
   { label: 'Favorites', to: '/favorites' },
   { label: 'Configurator', to: '/configurator' },
 ];
+
+// Secondary actions in the mobile overlay. Quieter than the primary nav
+// links, so the hierarchy still reads top to bottom.
+const overlayActionStyle = {
+  fontFamily: 'inherit',
+  fontSize: '15px',
+  fontWeight: 500,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.62)',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: 0,
+};
 
 export default function Navbar() {
   const { cartCount, compareList, favorites, setCartOpen } = useApp();
@@ -26,6 +42,14 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { scrollY } = useScroll();
   const { settings } = useSiteSettings();
+
+  // Both overlays are full-screen or page-covering, so each needs its own
+  // focus trap. The refs are what the hook confines Tab to.
+  const mobileMenuRef = useRef(null);
+  const profileMenuRef = useRef(null);
+
+  useFocusTrap(mobileMenuRef, mobileOpen, () => setMobileOpen(false));
+  useFocusTrap(profileMenuRef, profileOpen, () => setProfileOpen(false), { lockScroll: false });
 
   // Parallax effect for navbar based on scroll
   const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
@@ -298,6 +322,10 @@ export default function Navbar() {
                         style={{ position: 'fixed', inset: 0, zIndex: 940 }}
                       />
                       <motion.div
+                        ref={profileMenuRef}
+                        role="menu"
+                        aria-label="Account"
+                        tabIndex={-1}
                         initial={{ opacity: 0, y: -8, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.96 }}
@@ -577,7 +605,15 @@ export default function Navbar() {
 
       {/* ── Mobile menu overlay ── */}
       {mobileOpen && (
-        <div style={{
+        <div
+          ref={mobileMenuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          // The trap moves focus to the first control; this makes sure a
+          // screen reader lands on the dialog itself first.
+          tabIndex={-1}
+          style={{
           position: 'fixed',
           inset: 0,
           zIndex: 850,
@@ -622,6 +658,23 @@ export default function Navbar() {
             opacity: 0,
             animation: `fadeUp 0.5s ${NAV_LINKS.length * 0.1}s ${transitions.easeOut} forwards`,
           }}>Home</Link>
+
+          {/* These two are hidden from the bar on small screens, so the menu
+              has to carry them or they become unreachable on a phone. */}
+          <button
+            type="button"
+            onClick={() => { setMobileOpen(false); setCartOpen(true); }}
+            style={overlayActionStyle}
+          >
+            Garage{cartCount > 0 ? ` (${cartCount})` : ''}
+          </button>
+          <Link
+            to={user ? '/dashboard' : '/admin/login'}
+            onClick={() => setMobileOpen(false)}
+            style={{ ...overlayActionStyle, textDecoration: 'none' }}
+          >
+            {user ? 'My Account' : 'Admin'}
+          </Link>
         </div>
       )}
 
@@ -652,16 +705,14 @@ export default function Navbar() {
         }
         @media (max-width: 768px) {
           .nav-icons, .nav-auth { display: none !important; }
+          /* The Garage and Admin controls are ~240px wide together, which
+             pushed the burger past the right edge and made the menu
+             unreachable on phones. Both now live in the overlay instead. */
+          .nav-cart, .nav-admin { display: none !important; }
         }
         @media (max-width: 480px) {
           nav { padding: 0 16px !important; }
           nav span { font-size: 18px !important; }
-          .nav-cart span:last-child {
-            display: none;
-          }
-          .nav-admin span:last-child {
-            display: none;
-          }
         }
       `}</style>
     </>

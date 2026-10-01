@@ -642,9 +642,13 @@ function StatsBar() {
       borderTop: '1px solid rgba(255,255,255,0.04)',
       borderBottom: '1px solid rgba(255,255,255,0.04)',
     }}>
+      {/* Bento, not four equal tiles. A uniform row of four reads as a spec
+          table; giving the lead promise more room makes the hierarchy say
+          "this is the headline, these support it". Order is preserved in the
+          DOM, so the reading order still matches the visual one. */}
       <div className="container stats-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(12, 1fr)',
         gap: 20,
         // Tight role: the stats strip is a divider between hero and content, so
         // it sits closer to both than a full section would.
@@ -676,7 +680,11 @@ function StatsBar() {
           <div
             key={label}
             className="premium-feature-card"
+            // Lead tile spans half the row; the rest pair up beside it. The
+            // last tile then runs full width to close the composition.
+            data-bento={i === 0 ? 'lead' : i === 3 ? 'wide' : 'half'}
             style={{
+              gridColumn: i === 0 ? 'span 6' : i === 3 ? 'span 12' : 'span 3',
               padding: '40px 28px',
               background: 'transparent',
               backdropFilter: 'blur(4px)',
@@ -690,6 +698,24 @@ function StatsBar() {
               border: '1px solid rgba(255,255,255,0.1)',
             }}
           >
+            {/* Wide tiles get horizontal type, not a stretched 12-column box:
+                the copy stays a readable measure instead of one long line. */}
+            {i === 3 && (
+              <style>{`
+                @media (min-width: 641px) {
+                  .stats-grid [data-bento='wide'] {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+                    align-items: center;
+                    gap: 40px;
+                    text-align: left;
+                  }
+                  .stats-grid [data-bento='wide'] > div:last-of-type {
+                    justify-content: center;
+                  }
+                }
+              `}</style>
+            )}
             {/* 🔥 Border مضيء يلف حوالين الكارد */}
             <svg
               style={{
@@ -829,17 +855,30 @@ function StatsBar() {
           }
         }
 
+        /* Bento spans are declared inline (they depend on tile index), so the
+           breakpoints have to restate them per tile rather than just changing
+           the column count. */
         @media (max-width: 1024px) {
           .stats-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 16px !important;
           }
+          .stats-grid > * { grid-column: span 1 !important; }
+          /* Lead and closing tiles take the full row; the two middle ones
+             pair up. Otherwise the last tile sits alone at half width. */
+          .stats-grid > *:first-child,
+          .stats-grid > *:last-child { grid-column: span 2 !important; }
         }
         @media (max-width: 640px) {
           .stats-grid {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
           }
+          /* Must out-specify the :first-child / :last-child rules above, which
+             still apply at this width. */
+          .stats-grid > *,
+          .stats-grid > *:first-child,
+          .stats-grid > *:last-child { grid-column: span 1 !important; }
         }
       `}</style>
     </div>

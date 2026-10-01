@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useInView } from 'framer-motion';
+import { useReducedMotion } from '../context/ReducedMotionContext.jsx';
 
 export default function AnimatedCounter({
   from = 0,
@@ -12,55 +13,80 @@ export default function AnimatedCounter({
   className,
   style = {},
   onComplete,
+  children,
 }) {
   const [count, setCount] = useState(from);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
   const hasStarted = useRef(false);
+  const rafRef = useRef(0);
+  const reducedMotion = useReducedMotion();
+
+  // Format is pure, so memoise it: it runs on every animation frame and
+  // re-deriving a regex split 60x/second is pure waste.
+  const formatNumber = useCallback(
+    (num) => {
+      const fixed = num.toFixed(decimals);
+      const parts = fixed.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+      return parts.join('.');
+    },
+    [decimals, separator]
+  );
 
   useEffect(() => {
     if (!isInView || hasStarted.current) return;
     hasStarted.current = true;
 
-    const startTime = Date.now();
-    const startValue = from;
-    const endValue = to;
-    const totalChange = endValue - startValue;
+    // Reduced motion: land on the final value immediately. Counting up from
+    // zero is exactly the kind of gratuitous movement the preference exists
+    // to suppress, and for large figures it also means the number is wrong
+    // for the whole 2s.
+    if (reducedMotion) {
+      setCount(to);
+      onComplete?.();
+      return;
+    }
 
-    const animate = () => {
-      const now = Date.now();
-      const progress = Math.min((now - startTime) / duration, 1);
+    let cancelled = false;
+    const startTime = performance.now();
+    const totalChange = to - from;
 
-      // Easing function (ease-out)
+    const animate = (now) => {
+      // Guard against a setState after unmount, and against a slow first
+      // frame producing a negative progress.
+      if (cancelled) return;
+      const elapsed = now - startTime;
+      const progress = Math.min(Math.max(elapsed / duration, 0), 1);
+
+      // easeOutCubic
       const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentValue = startValue + (totalChange * easeOut);
-
-      setCount(currentValue);
+      setCount(from + totalChange * easeOut);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        rafRef.current = requestAnimationFrame(animate);
       } else {
-        setCount(endValue);
+        // Snap to the exact target; the eased value can land a hair under.
+        setCount(to);
         onComplete?.();
       }
     };
 
-    requestAnimationFrame(animate);
-  }, [isInView, from, to, duration, onComplete]);
+    rafRef.current = requestAnimationFrame(animate);
 
-  const formatNumber = (num) => {
-    const fixed = num.toFixed(decimals);
-    const parts = fixed.split('.');
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+  }, [isInView, from, to, duration, reducedMotion, onComplete]);
 
-    // Add thousand separators
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-
-    return parts.join('.');
-  };
+  // A render-prop child lets callers format the number themselves.
+  const display = children ? children(count) : `${prefix}${formatNumber(count)}${suffix}`;
 
   return (
     <span ref={ref} className={className} style={style}>
-      {prefix}{formatNumber(count)}{suffix}
+      {display}
     </span>
   );
 }
@@ -77,10 +103,10 @@ export function CurrencyCounter({ amount, currency = 'USD', ...props }) {
     <AnimatedCounter
       to={amount}
       {...props}
+      // The formatter replaces AnimatedCounter's own number formatting
+      // entirely, so prefix/suffix must stay empty or the symbol prints twice.
       suffix=""
       prefix=""
-      className={props.className}
-      style={props.style}
     >
       {(value) => formatter.format(value)}
     </AnimatedCounter>

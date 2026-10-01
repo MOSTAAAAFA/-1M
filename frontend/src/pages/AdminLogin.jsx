@@ -15,6 +15,7 @@ export default function AdminLogin() {
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [shakeError, setShakeError] = useState(false);
   const navigate = useNavigate();
 
@@ -409,7 +410,8 @@ export default function AdminLogin() {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} role="form" aria-label="Admin login form">
+          {/* A <form> already exposes the form role; the label is what names it. */}
+          <form onSubmit={handleSubmit} aria-label="Admin login form">
             {/* Email */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
@@ -430,7 +432,6 @@ export default function AdminLogin() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   placeholder="admin@1mmotors.com"
                   aria-invalid={errors.email ? 'true' : 'false'}
                   aria-describedby={errors.email ? 'email-error' : undefined}
@@ -517,11 +518,10 @@ export default function AdminLogin() {
               </label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   placeholder="••••••••••"
                   aria-invalid={errors.password ? 'true' : 'false'}
                   aria-describedby={errors.password ? 'password-error' : undefined}
@@ -579,6 +579,30 @@ export default function AdminLogin() {
                     </svg>
                   )}
                 </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--gold)',
+                    fontFamily: 'var(--font-ui)',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: '1.5px',
+                    textTransform: 'uppercase',
+                    padding: '4px 2px',
+                    opacity: 0.85,
+                    transition: 'opacity 0.2s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.textDecoration = 'underline'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = 0.85; e.currentTarget.style.textDecoration = 'none'; }}
+                >
+                  {showPassword ? 'Hide Password' : 'Show Password'}
+                </button>
               </div>
               {errors.password && (
                 <p id="password-error" role="alert" style={{

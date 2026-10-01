@@ -3,6 +3,24 @@ import AdminLayout from '../components/AdminLayout';
 import ProtectedAdminRoute from '../components/ProtectedAdminRoute';
 import API_BASE from '../utils/api';
 
+// Shared by every skeleton bar in this file.
+const skeletonBar = {
+  background:
+    'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 100%)',
+  backgroundSize: '200% 100%',
+  borderRadius: 4,
+};
+
+// Announced to screen readers but not painted.
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clipPath: 'inset(50%)',
+  whiteSpace: 'nowrap',
+};
+
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,12 +34,9 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE}/admin/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        method: 'GET',
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -39,12 +54,9 @@ export default function AdminUsers() {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -72,19 +84,39 @@ export default function AdminUsers() {
     return (
       <ProtectedAdminRoute>
         <AdminLayout>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                width: 60,
-                height: 60,
-                border: '4px solid rgba(201,168,76,0.2)',
-                borderTop: '4px solid var(--gold)',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto 20px',
-              }}/>
-              <p style={{ color: 'var(--gold)', fontSize: 14 }}>LOADING USERS...</p>
-            </div>
+          {/* Row-shaped skeletons rather than a spinner: the table geometry is
+              already known, so the page does not reflow when data lands. */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            style={{ display: 'flex', flexDirection: 'column', gap: 14, minHeight: '60vh' }}
+          >
+            <span style={visuallyHidden}>Loading users…</span>
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                aria-hidden="true"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '48px 1fr 140px 110px 90px',
+                  alignItems: 'center',
+                  gap: 20,
+                  padding: '18px 22px',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 12,
+                }}
+              >
+                <div style={{ ...skeletonBar, width: 44, height: 44, borderRadius: 999 }} />
+                <div>
+                  <div style={{ ...skeletonBar, width: '40%', height: 13 }} />
+                  <div style={{ ...skeletonBar, width: '62%', height: 11, marginTop: 9 }} />
+                </div>
+                <div style={{ ...skeletonBar, width: '85%', height: 11 }} />
+                <div style={{ ...skeletonBar, width: '70%', height: 11 }} />
+                <div style={{ ...skeletonBar, width: '55%', height: 26, borderRadius: 6 }} />
+              </div>
+            ))}
           </div>
         </AdminLayout>
       </ProtectedAdminRoute>
@@ -133,7 +165,7 @@ export default function AdminUsers() {
           }}>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 8, textTransform: 'uppercase' }}>Admins</p>
             <p style={{ fontSize: 28, fontWeight: 700, color: '#3b82f6', margin: 0 }}>
-              {users.filter(u => u.role === 'admin').length}
+              {users.filter(u => u.isAdmin).length}
             </p>
           </div>
         </div>
@@ -212,11 +244,11 @@ export default function AdminUsers() {
                         fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',
-                        background: user.role === 'admin' ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.05)',
-                        color: user.role === 'admin' ? '#3b82f6' : 'rgba(255,255,255,0.6)',
-                        border: `1px solid ${user.role === 'admin' ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                        background: user.isAdmin ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.05)',
+                        color: user.isAdmin ? '#3b82f6' : 'rgba(255,255,255,0.6)',
+                        border: `1px solid ${user.isAdmin ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.1)'}`,
                       }}>
-                        {user.role || 'user'}
+                        {user.isAdmin ? 'admin' : (user.role || 'user')}
                       </span>
                     </td>
                     <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
@@ -225,15 +257,15 @@ export default function AdminUsers() {
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <button
                         onClick={() => deleteUser(user._id)}
-                        disabled={user.role === 'admin'}
+                        disabled={user.isAdmin}
                         style={{
                           padding: '8px 16px',
-                          background: user.role === 'admin' ? 'rgba(255,255,255,0.05)' : 'rgba(239,68,68,0.1)',
-                          border: `1px solid ${user.role === 'admin' ? 'rgba(255,255,255,0.1)' : 'rgba(239,68,68,0.3)'}`,
+                          background: user.isAdmin ? 'rgba(255,255,255,0.05)' : 'rgba(239,68,68,0.1)',
+                          border: `1px solid ${user.isAdmin ? 'rgba(255,255,255,0.1)' : 'rgba(239,68,68,0.3)'}`,
                           borderRadius: '6px',
-                          color: user.role === 'admin' ? 'rgba(255,255,255,0.3)' : '#ef4444',
+                          color: user.isAdmin ? 'rgba(255,255,255,0.3)' : '#ef4444',
                           fontSize: 12,
-                          cursor: user.role === 'admin' ? 'not-allowed' : 'pointer',
+                          cursor: user.isAdmin ? 'not-allowed' : 'pointer',
                         }}
                       >
                         Delete

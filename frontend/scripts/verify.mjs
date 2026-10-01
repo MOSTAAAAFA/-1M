@@ -395,8 +395,58 @@ try {
   await m.waitForTimeout(3200);
   const noHScroll = await m.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
   noHScroll ? ok('mobile: no horizontal scroll') : bad('mobile: no horizontal scroll');
-  await m.screenshot({ path: join(SHOTS, 'mobile-home.png'), fullPage: false });
+
+  // The menu is the only way to navigate on a phone, so it has to be inside
+  // the viewport and operable. This caught a burger pushed to x=452 on a 390px
+  // screen by the Garage/Admin pills.
+  const burger = m.locator('button[aria-label="Open navigation menu"]');
+  const bInView = await burger.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return r.left >= 0 && r.right <= window.innerWidth && r.width > 0;
+  });
+  bInView ? ok('mobile burger is on screen') : bad('mobile burger is on screen');
+  await burger.click();
+  const mDialog = m.locator('[role="dialog"][aria-label="Site menu"]');
+  await mDialog.waitFor({ state: 'visible', timeout: 5000 });
+  ok('mobile menu opens');
+  await m.screenshot({ path: join(SHOTS, 'mobile-menu.png'), fullPage: false });
+  await m.keyboard.press('Escape');
+  await mDialog.waitFor({ state: 'detached', timeout: 5000 });
+  ok('mobile menu closes on Escape');
   await mCtx.close();
+
+  // ---- bento: hierarchy and no overflow at each breakpoint ---------------
+  for (const w of [1440, 1024, 640, 390]) {
+    const bCtx = await browser.newContext({ viewport: { width: w, height: 900 } });
+    const bPage = await bCtx.newPage();
+    await bPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
+    await bPage.evaluate(() => sessionStorage.setItem('1m_splash_seen', '1'));
+    await bPage.waitForTimeout(600);
+    const bento = await bPage.evaluate(() => {
+      const g = document.querySelector('.stats-grid');
+      if (!g) return null;
+      const tiles = [...g.children].map((c) => c.getBoundingClientRect());
+      return {
+        count: tiles.length,
+        leadW: Math.round(tiles[0].width),
+        wideW: Math.round(tiles[tiles.length - 1].width),
+        halfW: Math.round(tiles[1].width),
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
+    });
+    if (!bento) {
+      bad(`bento @${w}`, 'stats grid not found');
+    } else if (bento.overflow) {
+      bad(`bento @${w}`, 'horizontal overflow');
+    } else if (w === 1440 && !(bento.leadW > bento.halfW * 1.5 && bento.wideW > bento.leadW)) {
+      // The point of the bento: the lead tile is visibly larger than the
+      // halves, and the closing tile is wider than the lead.
+      bad(`bento @${w}`, `lead=${bento.leadW} half=${bento.halfW} wide=${bento.wideW}`);
+    } else {
+      ok(`bento @${w}`, `lead=${bento.leadW} half=${bento.halfW} wide=${bento.wideW}`);
+    }
+    await bCtx.close();
+  }
 
   // ---- screenshots ----------------------------------------------------
   await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
