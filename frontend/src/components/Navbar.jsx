@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import Brand1M from './Brand1M';
+import Crest1M from './Crest1M';
 import SearchBar from './SearchBar';
+import API_BASE from '../utils/api';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 import { colors, spacing, radius, typography, shadows, transitions } from '../styles/designTokens';
 
 const NAV_LINKS = [
@@ -16,7 +20,16 @@ export default function Navbar() {
   const { cartCount, compareList, favorites, setCartOpen } = useApp();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { scrollY } = useScroll();
+  const { settings } = useSiteSettings();
+
+  // Parallax effect for navbar based on scroll
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
+  const logoOpacity = useTransform(scrollY, [0, 50], [1, 0.95]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -24,35 +37,61 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    try {
+      setUser(JSON.parse(localStorage.getItem('user') || 'null'));
+    } catch {
+      setUser(null);
+    }
+    setMobileOpen(false);
+    setProfileOpen(false);
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      /* ignore */
+    }
+    localStorage.removeItem('user');
+    setUser(null);
+    setProfileOpen(false);
+    navigate('/');
+  };
 
   const isHome = location.pathname === '/';
-  // On non-home pages (e.g. car details) the navbar keeps a solid glass
-  // background at all times so text stays readable and looks professional.
   const solid = scrolled || !isHome;
 
   return (
     <>
-      <nav
+      <motion.nav
         role="navigation"
         aria-label="Main navigation"
-        style={{
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+        className="site-nav"
+      data-solid={solid ? 'true' : 'false'}
+      style={{
+        // Layout + the solid/transparent border edge only. The glass material
+        // lives in cinematic.css (.site-nav[data-solid='true']) so it shares
+        // one token with the footer and can degrade in @supports instead of
+        // needing a JS branch here.
         position: 'fixed',
-        top: 0, left: 0, right: 0,
+        top: 'var(--announce-offset, 0px)',
+        left: 0, right: 0,
         zIndex: 900,
-        height: scrolled ? 'calc(var(--nav-h) - 10px)' : 'var(--nav-h)',
+        height: 'var(--nav-h)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 48px',
-        transition: `all 0.6s ${transitions.easeOut}`,
-        background: solid ? 'rgba(5,5,7,0.88)' : 'transparent',
-        backdropFilter: solid ? 'blur(20px) saturate(1.2)' : 'none',
-        WebkitBackdropFilter: solid ? 'blur(20px) saturate(1.2)' : 'none',
+        transition: 'background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s ease',
         borderBottom: solid ? '1px solid rgba(201,168,76,0.22)' : '1px solid transparent',
         boxShadow: solid
           ? '0 10px 40px rgba(0,0,0,0.5), 0 1px 0 rgba(201,168,76,0.18), inset 0 -1px 0 rgba(201,168,76,0.08)'
           : 'none',
-      }}>
+      }}
+      >
         <div style={{
           width: '100%',
           maxWidth: 'none',
@@ -63,20 +102,31 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: spacing.md }}>
-            <LogoMark scrolled={scrolled} />
-            <span style={{
-              fontFamily: typography.fontDisplay,
-              fontSize: typography.fontSize['2xl'],
-              fontWeight: typography.fontWeight.bold,
-              letterSpacing: '1.5px',
-              color: colors.white,
-              display: 'flex',
-              alignItems: 'center',
-              gap: spacing.sm,
-              textShadow: !solid ? '0 2px 8px rgba(0,0,0,0.5)' : 'none',
-              transition: `all 0.6s ${transitions.easeOut}`,
-            }}>
-              <Brand1M style={{
+            <motion.div
+              style={{ scale: logoScale, opacity: logoOpacity }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <LogoMark scrolled={scrolled} />
+            </motion.div>
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              style={{
+                fontFamily: typography.fontDisplay,
+                fontSize: typography.fontSize['2xl'],
+                fontWeight: typography.fontWeight.bold,
+                letterSpacing: '1.5px',
+                color: colors.white,
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                textShadow: !solid ? '0 2px 8px rgba(0,0,0,0.5)' : 'none',
+                transition: `all 0.6s ${transitions.easeOut}`,
+              }}
+            >
+              <Brand1M name={settings.siteName} style={{
                 fontSize: typography.fontSize['2xl'],
                 fontWeight: typography.fontWeight.bold,
                 background: `linear-gradient(135deg, ${colors.gold}, ${colors.goldLight})`,
@@ -90,48 +140,74 @@ export default function Navbar() {
                 fontWeight: typography.fontWeight.bold,
                 color: colors.white,
                 transition: `color 0.6s ${transitions.easeOut}`,
-              }}>MOTORS</span>
-            </span>
+              }}>{settings.siteSuffix || 'MOTORS'}</span>
+            </motion.span>
           </Link>
 
           {/* ── Desktop links ── */}
-          <div className="nav-links" style={{ display: 'flex', gap: spacing['4xl'], alignItems: 'center' }}>
-            {NAV_LINKS.map(({ label, to }) => {
+          <motion.div
+            className="nav-links"
+            style={{ display: 'flex', gap: spacing['4xl'], alignItems: 'center' }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6, staggerChildren: 0.1 }}
+          >
+            {NAV_LINKS.map(({ label, to }, index) => {
               const active = location.pathname === to;
               return (
-                <Link key={to} to={to} style={{
-                  fontFamily: typography.fontUI,
-                  fontSize: typography.fontSize.sm,
-                  fontWeight: typography.fontWeight.semibold,
-                  letterSpacing: '3px',
-                  textTransform: 'uppercase',
-                  color: active ? colors.gold : colors.white70,
-                  textDecoration: 'none',
-                  position: 'relative',
-                  paddingBottom: 3,
-                  transition: `color ${transitions.duration.normal} ${transitions.easeOut}`,
-                  textShadow: !solid && !active ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
-                }}>
-                  {label}
-                  {active && (
-                    <span style={{
-                      position: 'absolute',
-                      bottom: -2, left: 0, right: 0,
-                      height: 2,
-                      background: `linear-gradient(90deg, ${colors.gold}, ${colors.goldLight})`,
-                      borderRadius: '2px 2px 0 0',
-                      boxShadow: `0 0 8px ${colors.goldGlow}`,
-                    }}/>
-                  )}
-                </Link>
+                <motion.div
+                  key={to}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <Link to={to} style={{
+                    fontFamily: typography.fontUI,
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.semibold,
+                    letterSpacing: '3px',
+                    textTransform: 'uppercase',
+                    color: active ? colors.gold : colors.white70,
+                    textDecoration: 'none',
+                    position: 'relative',
+                    paddingBottom: 3,
+                    transition: `color ${transitions.duration.normal} ${transitions.easeOut}`,
+                    textShadow: !solid && !active ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
+                  }}>
+                    {label}
+                    {active && (
+                      <motion.span
+                        layoutId="activeNav"
+                        style={{
+                          position: 'absolute',
+                          bottom: -2, left: 0, right: 0,
+                          height: 2,
+                          background: `linear-gradient(90deg, ${colors.gold}, ${colors.goldLight})`,
+                          borderRadius: '2px 2px 0 0',
+                          boxShadow: `0 0 8px ${colors.goldGlow}`,
+                        }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+                      />
+                    )}
+                  </Link>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* ── Search ── */}
-          <div className="nav-search" style={{ display: 'flex', alignItems: 'center' }}>
+          <motion.div
+            className="nav-search"
+            style={{ display: 'flex', alignItems: 'center' }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
             <SearchBar />
-          </div>
+          </motion.div>
 
           {/* ── Actions ── */}
           <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
@@ -174,6 +250,125 @@ export default function Navbar() {
 
             {/* Auth group */}
             <div className="nav-auth" style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginRight: spacing.lg }}>
+            {user ? (
+              <div style={{ position: 'relative' }}>
+                {/* Gmail-style profile circle */}
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(o => !o)}
+                  aria-label={`Account menu for ${user.name || user.email || 'member'}`}
+                  aria-expanded={profileOpen}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: radius.full,
+                    background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
+                    border: solid ? '2px solid rgba(5,5,7,0.92)' : '2px solid rgba(244,208,63,0.6)',
+                    color: colors.black,
+                    fontFamily: typography.fontDisplay,
+                    fontSize: 16,
+                    fontWeight: typography.fontWeight.black,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`,
+                    transition: transitions.default,
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.08)';
+                    e.currentTarget.style.boxShadow = `0 6px 24px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.5)`;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = `0 4px 16px ${colors.goldGlow}, inset 0 1px 0 rgba(255,255,255,0.4)`;
+                  }}
+                >
+                  {getInitials(user)}
+                </button>
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setProfileOpen(false)}
+                        style={{ position: 'fixed', inset: 0, zIndex: 940 }}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                        transition={{ duration: 0.18, ease: [0.19, 1, 0.22, 1] }}
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 12px)',
+                          right: 0,
+                          width: 264,
+                          background: 'rgba(14,14,20,0.98)',
+                          border: `1px solid ${colors.goldDim}`,
+                          borderRadius: 16,
+                          boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 24px rgba(201,168,76,0.12)',
+                          backdropFilter: 'blur(20px)',
+                          overflow: 'hidden',
+                          zIndex: 950,
+                        }}
+                      >
+                        <div style={{
+                          padding: '18px 20px',
+                          borderBottom: '1px solid rgba(255,255,255,0.07)',
+                        }}>
+                          <div style={{
+                            fontFamily: typography.fontDisplay,
+                            fontSize: 15,
+                            fontWeight: typography.fontWeight.bold,
+                            color: colors.white,
+                            marginBottom: 4,
+                          }}>
+                            {user.name || 'Member'}
+                          </div>
+                          <div style={{
+                            fontFamily: typography.fontUI,
+                            fontSize: 12,
+                            color: 'rgba(255,255,255,0.5)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {user.email}
+                          </div>
+                        </div>
+                        <Link to="/dashboard" onClick={() => setProfileOpen(false)} style={dropdownItemStyle}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.12)'; e.currentTarget.style.color = colors.gold; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}>
+                          <ProfileIcon type="dashboard" />
+                          My Dashboard
+                        </Link>
+                        <Link to="/orders" onClick={() => setProfileOpen(false)} style={dropdownItemStyle}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.12)'; e.currentTarget.style.color = colors.gold; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}>
+                          <ProfileIcon type="orders" />
+                          My Orders
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          style={{ ...dropdownItemStyle, width: '100%', background: 'transparent', border: 'none', textAlign: 'left', color: '#ef4444', cursor: 'pointer' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.12)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <ProfileIcon type="logout" />
+                          Log Out
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+            <>
             {/* Login Button */}
             <Link
               to="/login"
@@ -184,7 +379,7 @@ export default function Navbar() {
                 padding: `${spacing.sm} ${spacing.xl}`,
                 background: colors.white10,
                 border: `1px solid ${colors.border2}`,
-                borderRadius: radius.sm,
+                borderRadius: radius.full,
                 color: colors.white,
                 fontFamily: typography.fontUI,
                 fontSize: 11,
@@ -218,7 +413,7 @@ export default function Navbar() {
                 padding: `${spacing.sm} ${spacing.xl}`,
                 background: `linear-gradient(135deg, ${colors.goldDim}, ${colors.goldDim})`,
                 border: `1px solid ${colors.goldDim}`,
-                borderRadius: radius.sm,
+                borderRadius: radius.full,
                 color: colors.gold,
                 fontFamily: typography.fontUI,
                 fontSize: 11,
@@ -244,6 +439,8 @@ export default function Navbar() {
             >
               SIGN UP
             </Link>
+            </>
+            )}
             </div>
 
             {/* Cart */}
@@ -259,7 +456,7 @@ export default function Navbar() {
                 padding: `${spacing.md} ${spacing['2xl']}`,
                 background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
                 border: 'none',
-                borderRadius: radius.sm,
+                borderRadius: radius.full,
                 color: colors.black,
                 fontFamily: typography.fontUI,
                 fontSize: typography.fontSize.sm,
@@ -310,7 +507,7 @@ export default function Navbar() {
                 padding: `${spacing.md} ${spacing.xl}`,
                 background: colors.white10,
                 border: `1px solid ${colors.border2}`,
-                borderRadius: radius.sm,
+                borderRadius: radius.full,
                 color: colors.white70,
                 fontFamily: typography.fontUI,
                 fontSize: typography.fontSize.sm,
@@ -376,7 +573,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ── Mobile menu overlay ── */}
       {mobileOpen && (
@@ -500,289 +697,22 @@ function Badge({ children }) {
 }
 
 function LogoMark({ scrolled }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        position: 'relative',
-        width: 48,
-        height: 48,
-      }}
-    >
-      {/* Electric sparks ring 1 - rotating fast */}
-      <svg
-        style={{
-          position: 'absolute',
-          inset: -12,
-          width: 'calc(100% + 24px)',
-          height: 'calc(100% + 24px)',
-          pointerEvents: 'none',
-          animation: 'electricRotate1 4s linear infinite',
-        }}
-        viewBox="0 0 100 100"
-      >
-        <defs>
-          <filter id="electricGlow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-          <circle
-            key={i}
-            cx={50 + 40 * Math.cos(angle * Math.PI / 180)}
-            cy={50 + 40 * Math.sin(angle * Math.PI / 180)}
-            r="1.5"
-            fill="#F4D03F"
-            filter="url(#electricGlow)"
-            style={{
-              animation: `sparkPulse 0.${3 + i}s ease-in-out infinite`,
-              animationDelay: `${i * 0.1}s`,
-            }}
-          />
-        ))}
-      </svg>
-
-      {/* Electric sparks ring 2 - rotating opposite */}
-      <svg
-        style={{
-          position: 'absolute',
-          inset: -8,
-          width: 'calc(100% + 16px)',
-          height: 'calc(100% + 16px)',
-          pointerEvents: 'none',
-          animation: 'electricRotate2 3s linear infinite reverse',
-        }}
-        viewBox="0 0 100 100"
-      >
-        {[22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map((angle, i) => (
-          <circle
-            key={i}
-            cx={50 + 35 * Math.cos(angle * Math.PI / 180)}
-            cy={50 + 35 * Math.sin(angle * Math.PI / 180)}
-            r="1.2"
-            fill="#E0C06A"
-            filter="url(#electricGlow)"
-            style={{
-              animation: `sparkPulse 0.${4 + i}s ease-in-out infinite`,
-              animationDelay: `${i * 0.15}s`,
-            }}
-          />
-        ))}
-      </svg>
-
-      {/* Lightning glow trail - moving around */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: -10,
-          borderRadius: '50%',
-          background: 'conic-gradient(from 0deg, transparent 0deg, rgba(244,208,63,0.8) 20deg, rgba(244,208,63,0.4) 40deg, transparent 60deg)',
-          animation: 'lightningRotate 1.5s linear infinite',
-          pointerEvents: 'none',
-          filter: 'blur(8px)',
-        }}
-      />
-
-      {/* Lightning glow trail 2 - moving opposite */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: -10,
-          borderRadius: '50%',
-          background: 'conic-gradient(from 180deg, transparent 0deg, rgba(201,168,76,0.7) 25deg, rgba(201,168,76,0.3) 50deg, transparent 75deg)',
-          animation: 'lightningRotate 2s linear infinite reverse',
-          pointerEvents: 'none',
-          filter: 'blur(6px)',
-        }}
-      />
-
-      {/* Outer glow ring - pulsing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: -6,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.5) 0%, rgba(201,168,76,0.15) 50%, transparent 70%)',
-          animation: 'logoGlowPulse 3s ease-in-out infinite',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Electric arc flashes */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: -4,
-          borderRadius: '50%',
-          border: '2px solid transparent',
-          borderTopColor: 'rgba(244,208,63,0.6)',
-          borderRightColor: 'rgba(244,208,63,0.3)',
-          animation: 'electricArc 0.8s linear infinite',
-          pointerEvents: 'none',
-          filter: 'blur(1px)',
-        }}
-      />
-
-      {/* Main logo circle */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
-          fontSize: 14,
-          fontWeight: 900,
-          color: 'var(--black)',
-          letterSpacing: '-0.5px',
-          transition: 'all 0.5s var(--ease-out)',
-          boxShadow: isHovered
-            ? '0 8px 32px rgba(201,168,76,0.8), 0 0 60px rgba(244,208,63,0.7), 0 0 100px rgba(201,168,76,0.5), inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2)'
-            : '0 4px 20px rgba(201,168,76,0.6), 0 0 40px rgba(244,208,63,0.4), 0 0 70px rgba(201,168,76,0.3), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.15)',
-          transform: isHovered ? 'scale(1.12) rotate(8deg)' : 'scale(1) rotate(0deg)',
-          border: '2px solid rgba(255,255,255,0.3)',
-          animation: 'logoGlow 2.5s ease-in-out infinite',
-        }}
-      >
-        <Brand1M />
-
-        {/* Inner shine effect */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            left: '20%',
-            width: '50%',
-            height: '50%',
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.6) 0%, transparent 60%)',
-            borderRadius: '50%',
-            pointerEvents: 'none',
-            animation: 'logoShine 3s ease-in-out infinite',
-          }}
-        />
-
-        {/* Electric flash overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 30% 30%, rgba(244,208,63,0.3) 0%, transparent 50%)',
-            animation: 'electricFlash 3s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}
-        />
-      </div>
-
-      <style>{`
-        @keyframes logoGlow {
-          0%, 100% {
-            box-shadow:
-              0 4px 20px rgba(201,168,76,0.6),
-              0 0 40px rgba(244,208,63,0.4),
-              0 0 70px rgba(201,168,76,0.3),
-              inset 0 2px 3px rgba(255,255,255,0.3),
-              inset 0 -1px 2px rgba(0,0,0,0.15);
-          }
-          50% {
-            box-shadow:
-              0 4px 28px rgba(201,168,76,0.8),
-              0 0 60px rgba(244,208,63,0.6),
-              0 0 110px rgba(201,168,76,0.5),
-              inset 0 2px 4px rgba(255,255,255,0.35),
-              inset 0 -1px 3px rgba(0,0,0,0.2);
-          }
-        }
-
-        @keyframes logoGlowPulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.6;
-          }
-          50% {
-            transform: scale(1.2);
-            opacity: 1;
-          }
-        }
-
-        @keyframes logoShine {
-          0%, 100% {
-            opacity: 0.3;
-            transform: translate(-10%, -10%) scale(1);
-          }
-          50% {
-            opacity: 0.7;
-            transform: translate(5%, 5%) scale(1.15);
-          }
-        }
-
-        @keyframes electricRotate1 {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes electricRotate2 {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(-360deg); }
-        }
-
-        @keyframes sparkPulse {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.8);
-          }
-        }
-
-        @keyframes lightningRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes electricArc {
-          0% {
-            transform: rotate(0deg);
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 0.8;
-          }
-          100% {
-            transform: rotate(360deg);
-            opacity: 0.4;
-          }
-        }
-
-        @keyframes electricFlash {
-          0%, 90%, 100% {
-            opacity: 0;
-          }
-          92%, 94%, 96% {
-            opacity: 0.5;
-          }
-          93%, 95% {
-            opacity: 0.2;
-          }
-        }
-      `}</style>
+    <div style={{ position: 'relative', width: 40, height: 40 }}>
+      {/* Soft ambient glow — brighter over the transparent hero */}
+      <div style={{
+        position: 'absolute',
+        inset: -7,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(201,168,76,0.45) 0%, rgba(201,168,76,0.12) 55%, transparent 72%)',
+        opacity: scrolled ? 0.6 : 1,
+        transition: 'opacity 0.6s ease',
+        pointerEvents: 'none',
+      }} />
+      <Crest1M size={40} />
     </div>
   );
 }
-
 function HeartIcon() {
   return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -801,6 +731,40 @@ function CartIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
       <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+    </svg>
+  );
+}
+
+function getInitials(u) {
+  const source = String(u?.name || u?.email || 'M').trim();
+  const letters = source.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  return letters || 'M';
+}
+
+const dropdownItemStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  padding: '13px 20px',
+  fontFamily: typography.fontUI,
+  fontSize: 13,
+  fontWeight: typography.fontWeight.semibold,
+  letterSpacing: '0.5px',
+  color: 'rgba(255,255,255,0.85)',
+  textDecoration: 'none',
+  transition: transitions.default,
+  borderBottom: '1px solid rgba(255,255,255,0.05)',
+};
+
+function ProfileIcon({ type }) {
+  const paths = {
+    dashboard: <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    orders: <><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></>,
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>,
+  };
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {paths[type]}
     </svg>
   );
 }
