@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const textToSpeech = require('@google-cloud/text-to-speech');
 
 // In-memory cache: text hash → {audio: Buffer, voice: string, timestamp: number}
 const cache = new Map();
@@ -19,39 +18,20 @@ function getCacheKey(text, voice) {
 }
 
 /**
- * Generate speech using Google Cloud Text-to-Speech (Arabic Wavenet Neural)
- * Supports both API Key and Service Account authentication
+ * Generate speech using Google Cloud Text-to-Speech REST API with API Key
+ * This works with API keys directly (no service account needed)
  */
 async function generateSpeechGoogle(text, voice = 'male') {
-  // Initialize client with API key or service account
-  let client;
+  const apiKey = process.env.GOOGLE_CLOUD_API_KEY;
 
-  if (process.env.GOOGLE_CLOUD_API_KEY) {
-    // Option 1: API Key (simpler)
-    const { GoogleAuth } = require('google-auth-library');
-    const auth = new GoogleAuth({
-      credentials: {
-        client_email: 'api-key@google.com',
-        private_key: 'unused'
-      },
-      scopes: ['https://www.googleapis.com/auth/cloud-platform']
-    });
-
-    client = new textToSpeech.TextToSpeechClient({
-      auth,
-      apiKey: process.env.GOOGLE_CLOUD_API_KEY
-    });
-  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    // Option 2: Service Account JSON
-    client = new textToSpeech.TextToSpeechClient();
-  } else {
-    throw new Error('Google Cloud credentials not configured. Set GOOGLE_CLOUD_API_KEY or GOOGLE_APPLICATION_CREDENTIALS');
+  if (!apiKey) {
+    throw new Error('GOOGLE_CLOUD_API_KEY not configured in .env');
   }
 
   // Google has ar-XA-Wavenet voices (Modern Standard Arabic with good neural quality)
   const voiceName = voice === 'female' ? 'ar-XA-Wavenet-A' : 'ar-XA-Wavenet-B';
 
-  const request = {
+  const requestBody = {
     input: { text },
     voice: {
       languageCode: 'ar-XA',
@@ -66,11 +46,33 @@ async function generateSpeechGoogle(text, voice = 'male') {
   };
 
   try {
-    const [response] = await client.synthesizeSpeech(request);
-    console.log('[TTS] Google Cloud TTS synthesis completed:', response.audioContent.length, 'bytes');
+    const response = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('[TTS] Google Cloud TTS API error:', error);
+      throw new Error(`Google TTS failed: ${error.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.audioContent) {
+      throw new Error('No audioContent in Google TTS response');
+    }
+
+    // audioContent is base64-encoded
+    const audioBuffer = Buffer.from(data.audioContent, 'base64');
+    console.log('[TTS] Google Cloud TTS synthesis completed:', audioBuffer.length, 'bytes');
 
     return {
-      audio: Buffer.from(response.audioContent),
+      audio: audioBuffer,
       voice: voiceName,
       service: 'google-tts'
     };
