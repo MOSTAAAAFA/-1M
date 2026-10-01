@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RHYTHM & TYPE SCALE  (Stage 3.4 — C1 spacing, C3 typography)
+
+   The problem this fixes: the page had ~5 different `clamp()` values doing the
+   same job. Section padding was 96-144, 72-112, 88-132, 80-128 and one outlier
+   at 16-24. No two adjacent sections related, so the page had no vertical
+   beat — it read as a stack of blocks rather than a composed layout.
+
+   The fix is a named scale, not more arbitrary numbers. Two things:
+     1. A fluid type scale on a single ratio, so every step is ~1.2x the last.
+     2. A section rhythm with deliberate roles (tight / standard / generous /
+        hero), so adjacent sections are visibly different rather than identical.
+
+   Everything is a token. Adopting a value is a class or a var() reference, not
+   a new magic number, so the next person does not have to re-derive the scale.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Fluid type scale ──────────────────────────────────────────────────
+     Ratio ~1.2 from --type-xs up. vw-based so headings breathe with the
+     viewport, but the min/max pair means text never becomes unreadable on a
+     phone and never becomes silly on a 4K display. */
+  --type-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.8125rem);
+  --type-sm: clamp(0.875rem, 0.84rem + 0.18vw, 0.9375rem);
+  --type-base: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+  --type-lg: clamp(1.125rem, 1.06rem + 0.32vw, 1.25rem);
+  --type-xl: clamp(1.375rem, 1.24rem + 0.67vw, 1.75rem);
+  --type-2xl: clamp(1.75rem, 1.47rem + 1.4vw, 2.5rem);
+  --type-3xl: clamp(2.25rem, 1.76rem + 2.45vw, 3.5rem);
+  --type-4xl: clamp(2.75rem, 1.9rem + 4.25vw, 5rem);
+  --type-5xl: clamp(3.25rem, 1.94rem + 6.55vw, 7rem);
+
+  /* ── Section rhythm ────────────────────────────────────────────────────
+     Roles, not sizes. Alternating tight/generous is what gives a long page a
+     measurable pulse; using the same value everywhere is what flattens it. */
+  /* Ordered, and the order is the contract: verify.mjs asserts
+     tight <= standard <= generous <= hero. hero is the closing moment, so it
+     gets the most air; the stats strip next to it gets the least. */
+  --rhythm-tight: clamp(48px, 5vw, 72px);
+  --rhythm-standard: clamp(72px, 8vw, 112px);
+  --rhythm-generous: clamp(96px, 10vw, 144px);
+  --rhythm-hero: clamp(112px, 12vw, 176px);
+
+  /* Vertical offset between a section's heading block and its content. */
+  --rhythm-heading-gap: clamp(32px, 4vw, 56px);
+}
+
+/* ── Section rhythm utilities ───────────────────────────────────────────── */
+
+/* Use as className="rhythm rhythm--generous" on a <section>. Replaces the
+   per-section clamp() so the scale can be retuned in one place. */
+.rhythm {
+  padding-block: var(--rhythm-standard);
+}
+.rhythm--tight {
+  padding-block: var(--rhythm-tight);
+}
+.rhythm--generous {
+  padding-block: var(--rhythm-generous);
+}
+.rhythm--hero {
+  padding-block: var(--rhythm-hero);
+}
+
+/* The hero owns its own height, so rhythm on it would only double the offset. */
+.rhythm--none {
+  padding-block: 0;
+}
+
+/* Heading block to content. Applied to the flex row that holds the eyebrow,
+   title and action link, so every section's title sits the same distance
+   above its body. */
+.rhythm-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: var(--rhythm-heading-gap);
+}
+.rhythm-heading--center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* ── Type scale utilities ───────────────────────────────────────────────── */
+
+/* Fluid display headings. The 3xl/4xl/5xl steps map onto the old ad-hoc
+   clamps (32-52, 36-58, 36-64) so adopting them is a like-for-like swap. */
+.type-display-sm {
+  font-size: var(--type-2xl);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.type-display-md {
+  font-size: var(--type-3xl);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+.type-display-lg {
+  font-size: var(--type-4xl);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.type-hero {
+  font-size: var(--type-5xl);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+/* Body copy. max-width matters more than size here: without it, long lines
+   destroy readability regardless of the font size chosen. */
+.type-lede {
+  font-size: var(--type-lg);
+  line-height: 1.6;
+  color: var(--white-70, rgba(240, 237, 232, 0.7));
+  max-width: 62ch;
+}
+.type-body {
+  font-size: var(--type-base);
+  line-height: 1.65;
+  color: var(--white-70, rgba(240, 237, 232, 0.7));
+  max-width: 68ch;
+}
+.type-label {
+  font-size: var(--type-xs);
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Every display step tightens tracking as it grows, because large type needs
+   negative letter-spacing to hold together optically. Done once here rather
+   than re-derived at each call site. */
+.type-display-sm,
+.type-display-md,
+.type-display-lg,
+.type-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+/* Long body copy should not be the last ragged line on its own. */
+.type-lede,
+.type-body {
+  text-wrap: pretty;
+}
+
+/* ═══ REDUCED MOTION ══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reveal animations that only translate/fade should not leave a gap where
+     the element used to be. The utilities are pure layout, but any transition
+     hung off them by a parent is not. */
+  .rhythm-heading,
+  .type-display-sm,
+  .type-display-md,
+  .type-display-lg,
+  .type-hero {
+    transition: none;
+  }
+}

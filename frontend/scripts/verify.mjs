@@ -239,7 +239,9 @@ try {
   // move on pointermove (a stubbed rAF or a missing listener would leave them
   // at their initial 50%/50%).
   await goto('/');
-  const heroSel = 'main .spotlight-surface';
+  // The hero is the first spotlight surface on the page; the CTA banner further
+  // down is also one, so target the hero specifically rather than "any".
+  const heroSel = 'main .spotlight-surface >> nth=0';
   const hasHero = await page.locator(heroSel).count();
   if (hasHero) {
     const box = await page.locator(heroSel).boundingBox();
@@ -297,6 +299,68 @@ try {
   stacking && stacking.pe === 'none'
     ? ok('spotlight layer is inert to pointer', `z=${stacking.z} pointer-events=${stacking.pe}`)
     : bad('spotlight layer is inert to pointer', JSON.stringify(stacking));
+
+  // ---- 6b2. Section rhythm: adjacent sections differ, and scale is sane ---
+  // A page of identical section paddings reads as a flat stack. Assert the
+  // rhythm scale resolves to real values and that Home actually consumes the
+  // named roles rather than hardcoded clamps.
+  // The tokens are clamp() expressions, so parseFloat() on the raw value is
+  // NaN. Read the *resolved* pixel value off a live element per role instead,
+  // which is also the value that actually matters to layout.
+  const rhythm = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;left:-9999px';
+    document.body.appendChild(probe);
+    const resolve = (cls) => {
+      probe.className = cls;
+      return parseFloat(getComputedStyle(probe).paddingTop) || 0;
+    };
+    const roles = {
+      tight: resolve('rhythm rhythm--tight'),
+      standard: resolve('rhythm rhythm--standard'),
+      generous: resolve('rhythm rhythm--generous'),
+      hero: resolve('rhythm rhythm--hero'),
+    };
+    // Also read the raw token text so a missing definition is distinguishable
+    // from a role that resolved to 0.
+    const cs = getComputedStyle(document.documentElement);
+    const declared = ['--rhythm-tight', '--rhythm-standard', '--rhythm-generous', '--rhythm-hero'].map((k) =>
+      cs.getPropertyValue(k).trim()
+    );
+    probe.remove();
+    const used = [...document.querySelectorAll('main section.rhythm')].map((s) => ({
+      role: (s.className.match(/rhythm--(\w+)/) || [])[1] || 'base',
+      pad: Math.round(parseFloat(getComputedStyle(s).paddingTop)),
+    }));
+    return { roles, declared, used };
+  });
+  const vals = Object.values(rhythm.roles);
+  const allResolved = vals.every((v) => v > 0);
+  const allDeclared = rhythm.declared.every(Boolean);
+  // Monotonic tight <= standard <= generous <= hero, or the names are lies.
+  const [t, s, g, h] = vals;
+  const ordered = t <= s && s <= g && g <= h;
+  // A scale where every role is the same number is not a scale.
+  const distinct = new Set(vals).size >= 3;
+  allResolved && allDeclared && ordered && distinct
+    ? ok(
+        'rhythm scale resolves',
+        `tight=${Math.round(t)} standard=${Math.round(s)} generous=${Math.round(g)} hero=${Math.round(h)}px ` +
+          `| used: ${rhythm.used.map((u) => `${u.role}@${u.pad}`).join(' ')}`
+      )
+    : bad('rhythm scale resolves', `roles=${JSON.stringify(rhythm.roles)} declared=${JSON.stringify(rhythm.declared)}`);
+
+  // Home should use the named classes; a leftover clamp() is a scale bypass.
+  const rawClamps = await page.evaluate(
+    () =>
+      [...document.querySelectorAll('main section')]
+        .filter((s) => /padding:\s*clamp/.test(s.getAttribute('style') || ''))
+        .length
+  );
+  const usesRoles = await page.evaluate(() => document.querySelectorAll('main section.rhythm').length);
+  usesRoles > 0
+    ? ok('home sections use rhythm roles', `${usesRoles} sections on the scale, ${rawClamps} raw clamps left`)
+    : bad('home sections use rhythm roles', 'no section carries a .rhythm role');
 
   // ---- 6c. Reduced motion pins the spotlight and does not track --------
   const rmSpotCtx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });

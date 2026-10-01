@@ -646,7 +646,9 @@ function StatsBar() {
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: 20,
-        padding: '60px 0',
+        // Tight role: the stats strip is a divider between hero and content, so
+        // it sits closer to both than a full section would.
+        paddingBlock: 'var(--rhythm-tight)',
         position: 'relative',
       }}>
         {[
@@ -913,15 +915,15 @@ function FeaturedSection() {
   const [ref] = useIntersectionObserver();
 
   return (
-    <section style={{ padding: 'clamp(96px, 10vw, 144px) 0' }} ref={ref}>
+    <section className="rhythm rhythm--generous" ref={ref}>
       <div className="container">
-        <div style={{ marginBottom: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
+        <div className="rhythm-heading" style={{ flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
               <span style={{ width: 28, height: 1, background: '#C9A84C' }}/>
               <p className="eyebrow" style={{ margin: 0 }}>Editor's Selection</p>
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4vw, 58px)', fontWeight: 400, color: 'var(--white)', lineHeight: 1.1 }}>
+            <h2 className="type-display-md" style={{ fontWeight: 400, color: 'var(--white)' }}>
               <TextRevealByWord delay={0} stagger={0.1}>
                 Most Coveted
               </TextRevealByWord>
@@ -1129,9 +1131,9 @@ function BrandsSection() {
   }, [visible, brands.length]);
 
   return (
-    <section ref={ref} style={{ padding: 'clamp(72px, 8vw, 112px) 0', borderTop: '1px solid rgba(255,255,255,0.04)', position: 'relative', overflow: 'hidden' }}>
+    <section ref={ref} className="rhythm rhythm--tight" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', position: 'relative', overflow: 'hidden' }}>
       <div className="container" style={{ textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 48 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 'var(--rhythm-heading-gap)' }}>
           <span style={{ width: 44, height: 1, background: 'linear-gradient(to right, transparent, #C9A84C)', boxShadow: '0 0 8px rgba(201,168,76,0.5)' }}/>
           <p className="eyebrow" style={{ margin: 0 }}>Our Partners</p>
           <span style={{ width: 44, height: 1, background: 'linear-gradient(to left, transparent, #C9A84C)', boxShadow: '0 0 8px rgba(201,168,76,0.5)' }}/>
@@ -1315,15 +1317,15 @@ function CollectionPreview() {
   const [ref, visible] = useIntersectionObserver();
 
   return (
-    <section style={{ padding: 'clamp(88px, 9vw, 132px) 0', background: 'transparent' }} ref={ref}>
+    <section className="rhythm rhythm--standard" style={{ background: 'transparent' }} ref={ref}>
       <div className="container">
-        <div style={{ marginBottom: 56, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 24 }}>
+        <div className="rhythm-heading" style={{ flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
               <span style={{ width: 44, height: 1, background: 'linear-gradient(to right, transparent, #C9A84C)', boxShadow: '0 0 8px rgba(201,168,76,0.5)' }}/>
               <p className="eyebrow" style={{ margin: 0 }}>Full Collection</p>
             </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 3.5vw, 52px)', fontWeight: 300, color: 'var(--white)', lineHeight: 1.1 }}>
+            <h2 className="type-display-sm" style={{ fontWeight: 300, color: 'var(--white)' }}>
               12 Exceptional<br/>
               <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#C9A84C,#E0C06A 55%,#F4D03F)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Machines</em>
             </h2>
@@ -1444,13 +1446,15 @@ function PrivateAllocationCountdown() {
   ];
 
   return (
-    <section style={{ padding: 'clamp(16px, 2vw, 24px) 0 clamp(40px, 5vw, 72px)' }}>
+    /* Tight: this is a call to action, not a content section. It should sit
+       close to what precedes it and breathe out into the footer. */
+    <section style={{ paddingBlock: 'var(--rhythm-tight) var(--rhythm-standard)' }}>
       <div className="container">
         <div style={{
           position: 'relative',
           overflow: 'hidden',
           textAlign: 'center',
-          padding: 'clamp(40px, 5vw, 64px)',
+          padding: 'var(--rhythm-heading-gap)',
           borderRadius: 'var(--radius-xl)',
           border: '1px solid rgba(201,168,76,0.22)',
           background: 'linear-gradient(135deg, rgba(17,17,23,0.85) 0%, rgba(20,18,12,0.85) 100%)',
@@ -1548,13 +1552,13 @@ function PrivateAllocationCountdown() {
 function CTABanner() {
   const [ref, visible] = useIntersectionObserver();
   return (
-    <section ref={ref} style={{ padding: 'clamp(80px, 9vw, 128px) 0' }}>
+    <section ref={ref} className="rhythm rhythm--hero">
       <div className="container">
-        <div style={{
+        <div className="spotlight-surface" style={{
           background: 'rgba(17,17,23,0.8)',
           border: '1px solid rgba(201,168,76,0.15)',
           borderRadius: 'var(--radius-xl)',
-          padding: 'clamp(48px, 6vw, 80px)',
+          padding: 'var(--rhythm-generous)',
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
@@ -1563,12 +1567,13 @@ function CTABanner() {
           transition: 'all 0.8s var(--ease-out)',
         }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 70%)', pointerEvents: 'none' }}/>
+          <div className="spotlight-layer" aria-hidden="true" />
           <p className="eyebrow" style={{ marginBottom: 20 }}>Experience the Difference</p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 300, color: 'var(--white)', marginBottom: 20, lineHeight: 1.1 }}>
+          <h2 className="type-display-md" style={{ fontWeight: 300, color: 'var(--white)', marginBottom: 20 }}>
             Ready to Find Your<br/>
             <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#C9A84C,#E0C06A 55%,#F4D03F)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Perfect Machine?</em>
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--white-40)', marginBottom: 40, maxWidth: 480, margin: '0 auto 40px' }}>
+          <p className="type-body" style={{ color: 'var(--white-40)', margin: '0 auto 40px', maxWidth: 480 }}>
             Let our AI concierge guide you, or explore the full collection at your own pace.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
