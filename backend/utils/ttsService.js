@@ -20,19 +20,35 @@ function getCacheKey(text, voice) {
 
 /**
  * Generate speech using Google Cloud Text-to-Speech (Arabic Wavenet Neural)
- * Free tier: 4 million characters/month (Standard voices)
- * No credit card required for free tier
+ * Supports both API Key and Service Account authentication
  */
 async function generateSpeechGoogle(text, voice = 'male') {
-  // Check if Google credentials are configured
-  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.GOOGLE_CLOUD_PROJECT) {
-    throw new Error('GOOGLE_APPLICATION_CREDENTIALS not configured');
+  // Initialize client with API key or service account
+  let client;
+
+  if (process.env.GOOGLE_CLOUD_API_KEY) {
+    // Option 1: API Key (simpler)
+    const { GoogleAuth } = require('google-auth-library');
+    const auth = new GoogleAuth({
+      credentials: {
+        client_email: 'api-key@google.com',
+        private_key: 'unused'
+      },
+      scopes: ['https://www.googleapis.com/auth/cloud-platform']
+    });
+
+    client = new textToSpeech.TextToSpeechClient({
+      auth,
+      apiKey: process.env.GOOGLE_CLOUD_API_KEY
+    });
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // Option 2: Service Account JSON
+    client = new textToSpeech.TextToSpeechClient();
+  } else {
+    throw new Error('Google Cloud credentials not configured. Set GOOGLE_CLOUD_API_KEY or GOOGLE_APPLICATION_CREDENTIALS');
   }
 
-  const client = new textToSpeech.TextToSpeechClient();
-
   // Google has ar-XA-Wavenet voices (Modern Standard Arabic with good neural quality)
-  // Not Egyptian-specific, but high quality neural voices
   const voiceName = voice === 'female' ? 'ar-XA-Wavenet-A' : 'ar-XA-Wavenet-B';
 
   const request = {
