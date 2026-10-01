@@ -114,7 +114,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   style={{
                     padding: '14px 18px',
-                    borderRadius: '12px',
+                    borderRadius: '20px',
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(201,168,76,0.2)',
                     color: 'var(--white)',
@@ -133,7 +133,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   style={{
                     padding: '14px 18px',
-                    borderRadius: '12px',
+                    borderRadius: '20px',
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(201,168,76,0.2)',
                     color: 'var(--white)',
@@ -153,7 +153,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 style={{
                   padding: '14px 18px',
-                  borderRadius: '12px',
+                    borderRadius: '20px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(201,168,76,0.2)',
                   color: 'var(--white)',
@@ -184,7 +184,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                     style={{
                       width: '100%',
                       padding: '14px 18px',
-                      borderRadius: '12px',
+                      borderRadius: '20px',
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(201,168,76,0.2)',
                       color: 'var(--white)',
@@ -212,7 +212,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                     style={{
                       width: '100%',
                       padding: '14px 18px',
-                      borderRadius: '12px',
+                      borderRadius: '20px',
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(201,168,76,0.2)',
                       color: 'var(--white)',
@@ -239,7 +239,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                 rows="3"
                 style={{
                   padding: '14px 18px',
-                  borderRadius: '12px',
+                    borderRadius: '20px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(201,168,76,0.2)',
                   color: 'var(--white)',
@@ -258,7 +258,7 @@ const TestDriveBooking = ({ carName, carId }) => {
                 whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                 style={{
                   padding: '18px',
-                  borderRadius: '12px',
+                    borderRadius: '20px',
                   background: isSubmitting
                     ? 'rgba(201,168,76,0.5)'
                     : 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 100%)',

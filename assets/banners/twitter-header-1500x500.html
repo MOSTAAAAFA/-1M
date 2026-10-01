@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1500">
+  <title>1M Motors — Twitter/X Header</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1500px;
+      height: 500px;
+      overflow: hidden;
+      background: #050507;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    .header {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 60%),
+        linear-gradient(135deg, #050507 0%, #0a0a0e 50%, #050507 100%);
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.5);
+      margin: 0 auto 20px;
+    }
+
+    .headline {
+      font-size: 48px;
+      font-weight: 300;
+      line-height: 1.15;
+      color: #F0EDE8;
+      margin-bottom: 12px;
+    }
+
+    .headline .gold {
+      background: linear-gradient(135deg, #F4D03F, #E0C06A, #C9A84C);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+
+    .tagline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.9);
+    }
+
+    .gold-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #C9A84C, #E0C06A, #C9A84C, transparent);
+    }
+
+    .particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #C9A84C;
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .particle:nth-child(1) { top: 20%; left: 10%; }
+    .particle:nth-child(2) { top: 70%; left: 20%; }
+    .particle:nth-child(3) { top: 30%; left: 80%; }
+    .particle:nth-child(4) { top: 60%; left: 90%; }
+    .particle:nth-child(5) { top: 15%; left: 50%; }
+    .particle:nth-child(6) { top: 85%; left: 45%; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <div class="content">
+      <div class="logo-circle">1M</div>
+      <h1 class="headline">Where Engineering<br>Becomes <span class="gold">Emotion</span></h1>
+      <p class="tagline">Precision · Luxury · Excellence</p>
+    </div>
+
+    <div class="gold-line"></div>
+  </div>
+</body>
+</html>

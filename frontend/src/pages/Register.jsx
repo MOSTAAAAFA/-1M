@@ -45,6 +45,7 @@ export default function Register() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Enable cookies
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -54,9 +55,8 @@ export default function Register() {
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
+      if (response.ok && data.user) {
+        // Store user info (non-sensitive data only)
         localStorage.setItem('user', JSON.stringify(data.user));
 
         // Redirect to home
@@ -239,7 +239,7 @@ export default function Register() {
                   padding: '14px 16px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   color: 'var(--white)',
                   fontSize: 14,
                   fontFamily: 'var(--font-ui)',
@@ -283,7 +283,7 @@ export default function Register() {
                   padding: '14px 16px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   color: 'var(--white)',
                   fontSize: 14,
                   fontFamily: 'var(--font-ui)',
@@ -327,7 +327,7 @@ export default function Register() {
                   padding: '14px 16px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   color: 'var(--white)',
                   fontSize: 14,
                   fontFamily: 'var(--font-ui)',
@@ -371,7 +371,7 @@ export default function Register() {
                   padding: '14px 16px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   color: 'var(--white)',
                   fontSize: 14,
                   fontFamily: 'var(--font-ui)',

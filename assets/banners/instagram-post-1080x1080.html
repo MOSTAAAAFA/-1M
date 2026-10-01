@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>1M Motors — Instagram Post</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1080px;
+      height: 1080px;
+      overflow: hidden;
+      background: #050507;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    .post {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px;
+      overflow: hidden;
+    }
+
+    .post::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(201,168,76,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(201,168,76,0.05) 0%, transparent 40%),
+        linear-gradient(180deg, #050507 0%, #0a0a0e 50%, #050507 100%);
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo-circle {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 8px 40px rgba(201,168,76,0.6);
+      margin: 0 auto 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .eyebrow {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #C9A84C;
+      margin-bottom: 24px;
+    }
+
+    .headline {
+      font-size: 56px;
+      font-weight: 300;
+      line-height: 1.15;
+      color: #F0EDE8;
+      margin-bottom: 24px;
+    }
+
+    .headline .gold {
+      background: linear-gradient(135deg, #F4D03F, #E0C06A, #C9A84C);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #C9A84C, transparent);
+      margin: 0 auto 24px;
+    }
+
+    .tagline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(240,237,232,0.62);
+    }
+
+    .gold-line-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #C9A84C, #E0C06A, #C9A84C, transparent);
+      z-index: 10;
+    }
+
+    .gold-line-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #C9A84C, #E0C06A, #C9A84C, transparent);
+      z-index: 10;
+    }
+
+    .corner-accent {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      z-index: 10;
+    }
+
+    .corner-accent.top-left {
+      top: 40px;
+      left: 40px;
+      border-top: 1px solid rgba(201,168,76,0.4);
+      border-left: 1px solid rgba(201,168,76,0.4);
+    }
+
+    .corner-accent.top-right {
+      top: 40px;
+      right: 40px;
+      border-top: 1px solid rgba(201,168,76,0.4);
+      border-right: 1px solid rgba(201,168,76,0.4);
+    }
+
+    .corner-accent.bottom-left {
+      bottom: 40px;
+      left: 40px;
+      border-bottom: 1px solid rgba(201,168,76,0.4);
+      border-left: 1px solid rgba(201,168,76,0.4);
+    }
+
+    .corner-accent.bottom-right {
+      bottom: 40px;
+      right: 40px;
+      border-bottom: 1px solid rgba(201,168,76,0.4);
+      border-right: 1px solid rgba(201,168,76,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="post">
+    <div class="gold-line-top"></div>
+    <div class="gold-line-bottom"></div>
+
+    <div class="corner-accent top-left"></div>
+    <div class="corner-accent top-right"></div>
+    <div class="corner-accent bottom-left"></div>
+    <div class="corner-accent bottom-right"></div>
+
+    <div class="content">
+      <div class="logo-circle">1M</div>
+      <div class="eyebrow">1M Motors</div>
+      <h1 class="headline">Where Engineering<br>Becomes <span class="gold">Emotion</span></h1>
+      <div class="divider"></div>
+      <p class="tagline">Precision · Luxury · Excellence</p>
+    </div>
+  </div>
+</body>
+</html>

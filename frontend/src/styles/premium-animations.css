@@ -1,27 +1,36 @@
 /**
  * Premium Animation System
  * Elite-level easing curves and choreographed motion
+ * Now using Three-Layer Design Token Architecture
  */
 
 /* ═══════════════════════════════════════════════════════════════════
    CUSTOM EASING CURVES - No linear or ease-in-out allowed
+   Now referencing design token easing values
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
   /* Confident deceleration - primary easing */
-  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-premium: var(--ease-cinematic);
 
   /* Sharp entry, smooth exit - for reveals */
-  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-reveal: var(--ease-default);
 
   /* Weighted bounce - for interactive elements */
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: var(--ease-bounce);
 
   /* Magnetic pull - for cursor interactions */
-  --ease-magnetic: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-magnetic: var(--ease-in-out);
 
   /* Cinematic slow-mo */
-  --ease-cinematic: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-cinematic: var(--ease-cinematic);
+
+  /* Duration tokens */
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-default: var(--duration-default);
+  --duration-slow: var(--duration-slow);
+  --duration-slower: var(--duration-slower);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

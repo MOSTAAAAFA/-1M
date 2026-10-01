@@ -313,7 +313,7 @@ function OrderSummary({ cart, cartTotal, tax, grandTotal }) {
               width: 64, height: 44, borderRadius: 8, overflow: 'hidden',
               flexShrink: 0, border: '1px solid rgba(255,255,255,0.06)',
             }}>
-              <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={item.image} alt={item.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/128x88/111117/C9A84C?text=${encodeURIComponent(item.brand || item.name)}`; }} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 9, letterSpacing: '2px', color: 'var(--gold)', fontFamily: 'var(--font-ui)' }}>{item.brand}</p>
@@ -851,7 +851,7 @@ function Field({ label, value, onChange, placeholder, type = 'text', span, tag, 
     width: '100%', padding: '14px 16px',
     background: focused ? 'rgba(201,168,76,0.05)' : 'rgba(255,255,255,0.04)',
     border: `1px solid ${focused ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`,
-    borderRadius: 10, color: 'rgba(255,255,255,0.85)',
+    borderRadius: 20, color: 'rgba(255,255,255,0.85)',
     fontFamily: 'var(--font-ui)', fontSize: 14,
     transition: 'all 0.2s', outline: 'none', boxSizing: 'border-box',
     boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.08)' : 'none',

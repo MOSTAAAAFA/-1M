@@ -78,6 +78,7 @@ function CarCard({ car, isSelected, onToggle, disabled }) {
         <img
           src={car.image}
           alt={car.name}
+          onError={(e) => { e.currentTarget.src = `https://placehold.co/600x400/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
           style={{
             width: '100%',
             height: '100%',
@@ -303,7 +304,7 @@ export default function Compare() {
                   background: 'rgba(17,17,23,0.75)',
                   backdropFilter: 'blur(24px)',
                   border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   color: '#F0EDE8',
                   fontSize: '15px',
                   outline: 'none',

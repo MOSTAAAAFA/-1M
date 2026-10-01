@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=820">
+  <title>1M Motors — Facebook Cover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 820px;
+      height: 312px;
+      overflow: hidden;
+      background: #050507;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    .cover {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 60px;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #050507 0%, #0a0a0e 100%);
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      width: 100%;
+    }
+
+    .logo-circle {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 40px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.5);
+      flex-shrink: 0;
+    }
+
+    .text-block {
+      flex: 1;
+    }
+
+    .eyebrow {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #C9A84C;
+      margin-bottom: 8px;
+    }
+
+    .headline {
+      font-size: 36px;
+      font-weight: 300;
+      line-height: 1.15;
+      color: #F0EDE8;
+      margin-bottom: 8px;
+    }
+
+    .headline .gold {
+      background: linear-gradient(135deg, #F4D03F, #E0C06A, #C9A84C);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+
+    .tagline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      color: rgba(240,237,232,0.62);
+      letter-spacing: 1px;
+    }
+
+    .gold-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #C9A84C, #E0C06A, #C9A84C, transparent);
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="content">
+      <div class="logo-circle">1M</div>
+      <div class="text-block">
+        <div class="eyebrow">Luxury Performance</div>
+        <h1 class="headline">Where Engineering<br>Becomes <span class="gold">Emotion</span></h1>
+        <p class="tagline">Precision · Luxury · Excellence</p>
+      </div>
+    </div>
+    <div class="gold-line"></div>
+  </div>
+</body>
+</html>

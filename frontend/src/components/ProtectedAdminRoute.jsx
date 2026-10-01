@@ -8,36 +8,55 @@ export default function ProtectedAdminRoute({ children }) {
 
   useEffect(() => {
     const verifyAuth = async () => {
-      const token = localStorage.getItem('adminToken');
-
-      if (!token) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
+      // Quick check: if user explicitly marked as not admin, reject immediately
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user.isAdmin === false) {
+            setIsAuthenticated(false);
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          // Invalid JSON, proceed to token verification
+        }
       }
 
       try {
-        // Verify token with backend
+        // Verify token with backend (token is in httpOnly cookie)
         const response = await fetch(`${API_BASE}/admin/verify`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // Include httpOnly cookie
         });
 
         if (response.ok) {
-          setIsAuthenticated(true);
+          const data = await response.json();
+          // Verify admin role from response
+          if (data.user && data.user.role === 'admin') {
+            localStorage.setItem('isAdmin', 'true');
+            setIsAuthenticated(true);
+          } else {
+            // Not an admin
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('user');
+            setIsAuthenticated(false);
+          }
         } else {
           // Token invalid, clear storage
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('adminEmail');
+          localStorage.removeItem('user');
+          localStorage.removeItem('isAdmin');
           setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth verification failed:', error);
-        // On network error, allow access if token exists (offline tolerance)
-        setIsAuthenticated(true);
+        // On network error, deny access for security - backend verification is required
+        localStorage.removeItem('user');
+        localStorage.removeItem('isAdmin');
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }

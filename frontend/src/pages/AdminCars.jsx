@@ -230,7 +230,7 @@ export default function AdminCars() {
               padding: '12px 16px',
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
+              borderRadius: '20px',
               color: '#fff',
               fontSize: 14,
             }}
@@ -242,7 +242,7 @@ export default function AdminCars() {
               padding: '12px 16px',
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
+              borderRadius: '20px',
               color: '#fff',
               fontSize: 14,
               cursor: 'pointer',
@@ -288,11 +288,11 @@ export default function AdminCars() {
                           width: 60,
                           height: 60,
                           background: 'rgba(201,168,76,0.1)',
-                          borderRadius: '8px',
+                          borderRadius: '20px',
                           overflow: 'hidden',
                         }}>
                           {car.images?.[0] ? (
-                            <img src={car.images[0]} alt={car.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={car.images[0]} alt={car.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/400x300/111117/C9A84C?text=${encodeURIComponent(car.name)}`; }} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
                               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -443,7 +443,7 @@ export default function AdminCars() {
                       padding: '12px 16px',
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
+                      borderRadius: '20px',
                       color: '#fff',
                       fontSize: 14,
                     }}
@@ -459,7 +459,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -474,7 +474,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -491,7 +491,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -506,7 +506,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -520,7 +520,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -534,7 +534,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -550,7 +550,7 @@ export default function AdminCars() {
                         padding: '12px 16px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
+                        borderRadius: '20px',
                         color: '#fff',
                         fontSize: 14,
                       }}
@@ -569,7 +569,7 @@ export default function AdminCars() {
                       padding: '12px 16px',
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
+                      borderRadius: '20px',
                       color: '#fff',
                       fontSize: 14,
                       resize: 'vertical',
@@ -585,7 +585,7 @@ export default function AdminCars() {
                       padding: '12px 24px',
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
+                      borderRadius: '20px',
                       color: '#fff',
                       fontSize: 14,
                       cursor: 'pointer',
@@ -599,7 +599,7 @@ export default function AdminCars() {
                       padding: '12px 24px',
                       background: 'linear-gradient(135deg, #C9A84C, #E0C06A)',
                       border: 'none',
-                      borderRadius: '8px',
+                      borderRadius: '20px',
                       color: '#000',
                       fontSize: 14,
                       fontWeight: 700,

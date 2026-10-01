@@ -190,7 +190,7 @@ export default function Configurator() {
                   onClick={() => setSelectedCar(car)}
                   style={cardStyle(selectedCar.id === car.id)}
                 >
-                  <img src={car.image} alt={car.name} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '6px' }} />
+                  <img src={car.image} alt={car.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/400x120/111117/C9A84C?text=${encodeURIComponent(car.brand)}`; }} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '20px' }} />
                   <div style={{
                     fontSize: '0.75rem',
                     fontWeight: 600,

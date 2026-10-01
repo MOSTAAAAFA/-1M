@@ -1,6 +1,7 @@
 /**
  * Elite Typography System
  * Variable fonts, extreme scale contrast, kinetic type animations
+ * Now using Three-Layer Design Token Architecture
  */
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -23,6 +24,7 @@
 
 /* ═══════════════════════════════════════════════════════════════════
    EXTREME SCALE CONTRAST - Premium Signal
+   Now using design token scale
    ═══════════════════════════════════════════════════════════════════ */
 
 .hero-title {
@@ -46,7 +48,7 @@
 
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(48px, 8vw, 120px);
+  font-size: var(--text-8xl);
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -54,7 +56,7 @@
 
 .display-lg {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6vw, 80px);
+  font-size: var(--text-7xl);
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: -0.015em;
@@ -62,7 +64,7 @@
 
 .display-md {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 56px);
+  font-size: var(--text-6xl);
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -70,11 +72,12 @@
 
 /* ═══════════════════════════════════════════════════════════════════
    BODY COPY - Editorial Grid Justified
+   Using token-based spacing
    ═══════════════════════════════════════════════════════════════════ */
 
 .body-premium {
   font-family: var(--font-body);
-  font-size: clamp(16px, 1.2vw, 18px);
+  font-size: var(--text-base);
   font-weight: 400;
   line-height: 1.8;
   letter-spacing: 0.01em;
@@ -84,7 +87,7 @@
 }
 
 .body-large {
-  font-size: clamp(18px, 1.4vw, 22px);
+  font-size: var(--text-lg);
   line-height: 1.7;
   font-weight: 350;
   font-variation-settings: 'wght' 350;
@@ -93,7 +96,7 @@
 }
 
 .body-small {
-  font-size: clamp(14px, 1vw, 15px);
+  font-size: var(--text-sm);
   line-height: 1.6;
   font-weight: 400;
   color: var(--text-secondary);

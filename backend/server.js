@@ -2,7 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
+
+// 🔒 Validate JWT_SECRET before starting server
+const { validateOrExit } = require("./utils/validateJwtSecret");
+validateOrExit();
 
 const authRoutes = require("./routes/auth");
 const orderRoutes = require("./routes/orders");
@@ -34,6 +39,7 @@ app.use(helmet({
 // 🟢 Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cookieParser());
 
 // CORS configuration - restrict in production
 const allowedOrigins = process.env.NODE_ENV === 'production'

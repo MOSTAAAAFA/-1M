@@ -248,7 +248,7 @@ export const StockAlert = ({ onNotify, productName }) => {
             style={{
               flex: 1,
               padding: '12px 16px',
-              borderRadius: '8px',
+              borderRadius: '20px',
               border: '1px solid rgba(201,168,76,0.2)',
               background: 'rgba(255,255,255,0.05)',
               color: 'var(--white)',
@@ -263,7 +263,7 @@ export const StockAlert = ({ onNotify, productName }) => {
             whileTap={{ scale: 0.95 }}
             style={{
               padding: '12px 24px',
-              borderRadius: '8px',
+              borderRadius: '20px',
               border: 'none',
               background: 'linear-gradient(135deg, #C9A84C 0%, #E0C06A 100%)',
               color: '#000',
@@ -352,7 +352,7 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
               style={{
                 flex: 1,
                 padding: '10px 14px',
-                borderRadius: '8px',
+                borderRadius: '20px',
                 border: '1px solid rgba(201,168,76,0.2)',
                 background: 'rgba(255,255,255,0.05)',
                 color: 'var(--white)',
@@ -367,7 +367,7 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
               whileTap={{ scale: 0.95 }}
               style={{
                 padding: '10px 20px',
-                borderRadius: '8px',
+                borderRadius: '20px',
                 border: 'none',
                 background: 'var(--gold)',
                 color: '#000',

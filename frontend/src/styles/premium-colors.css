@@ -1,56 +1,60 @@
 /**
  * Premium Color System & Materials
  * Off-black/off-white bases, metallic accents, grain textures
+ * Now using Three-Layer Design Token Architecture
  */
 
 :root {
   /* ═══ BASE COLORS - Off-black/Off-white (never pure #000/#fff) ═══ */
-  --black-true:         #0a0a0c;
-  --black-soft:         #111115;
-  --black-surface:      #18181f;
-  --black-surface-2:    #1f1f28;
-  --black-surface-3:    #27272f;
+  /* Now referencing primitive tokens from design-tokens.css */
+  --black-true:         var(--color-black-500);
+  --black-soft:         var(--color-black-300);
+  --black-surface:      var(--color-black-200);
+  --black-surface-2:    var(--color-black-100);
+  --black-surface-3:    var(--color-black-50);
 
-  --white-true:         #f7f6f3;
-  --white-soft:         #F0EDE8;
-  --white-muted:        rgba(240, 237, 232, 0.85);
-  --white-dim:          rgba(240, 237, 232, 0.6);
-  --white-subtle:       rgba(240, 237, 232, 0.4);
-  --white-whisper:      rgba(240, 237, 232, 0.2);
+  --white-true:         var(--color-white-100);
+  --white-soft:         var(--color-white-200);
+  --white-muted:        var(--color-white-300);
+  --white-dim:          var(--color-white-500);
+  --white-subtle:       var(--color-white-700);
+  --white-whisper:      var(--color-white-900);
   --white-ghost:        rgba(240, 237, 232, 0.08);
 
   /* ═══ GOLD ACCENT - Precise, used sparingly ═══ */
-  --gold-primary:       #C9A84C;
-  --gold-light:         #E0C06A;
-  --gold-bright:        #F4D03F;
-  --gold-dark:          #a38934;
+  /* Now using 10-shade gold scale from primitive tokens */
+  --gold-primary:       var(--color-gold-500);
+  --gold-light:         var(--color-gold-300);
+  --gold-bright:        var(--color-gold-200);
+  --gold-dark:          var(--color-gold-700);
   --gold-glow:          rgba(201, 168, 76, 0.25);
   --gold-subtle:        rgba(201, 168, 76, 0.15);
   --gold-whisper:       rgba(201, 168, 76, 0.08);
 
   /* ═══ METALLIC GRADIENTS - Premium materials ═══ */
+  /* Using new gold scale for richer gradients */
   --gold-gradient: linear-gradient(
     135deg,
-    #C9A84C 0%,
-    #E0C06A 25%,
-    #F4D03F 50%,
-    #E0C06A 75%,
-    #C9A84C 100%
+    var(--color-gold-500) 0%,
+    var(--color-gold-300) 25%,
+    var(--color-gold-200) 50%,
+    var(--color-gold-300) 75%,
+    var(--color-gold-500) 100%
   );
 
   --gold-gradient-radial: radial-gradient(
     circle at 30% 30%,
-    #F4D03F 0%,
-    #E0C06A 40%,
-    #C9A84C 100%
+    var(--color-gold-200) 0%,
+    var(--color-gold-300) 40%,
+    var(--color-gold-500) 100%
   );
 
   --silver-gradient: linear-gradient(
     135deg,
     #e8e8e8 0%,
-    #f7f6f3 30%,
+    var(--color-white-100) 30%,
     #ffffff 50%,
-    #f7f6f3 70%,
+    var(--color-white-100) 70%,
     #d8d8d8 100%
   );
 
@@ -68,14 +72,15 @@
   --border-gold-bright: rgba(201, 168, 76, 0.6);
 
   /* ═══ SHADOWS - Elevated surfaces with glow ═══ */
-  --shadow-sm:          0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-md:          0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-lg:          0 16px 48px rgba(0, 0, 0, 0.6);
+  /* Now using shadow tokens from design system */
+  --shadow-sm:          var(--shadow-sm);
+  --shadow-md:          var(--shadow-md);
+  --shadow-lg:          var(--shadow-lg);
   --shadow-xl:          0 24px 64px rgba(0, 0, 0, 0.7);
 
-  --shadow-gold-sm:     0 4px 16px rgba(201, 168, 76, 0.2);
-  --shadow-gold-md:     0 8px 32px rgba(201, 168, 76, 0.3);
-  --shadow-gold-lg:     0 16px 48px rgba(201, 168, 76, 0.4);
+  --shadow-gold-sm:     var(--shadow-gold-sm);
+  --shadow-gold-md:     var(--shadow-gold-md);
+  --shadow-gold-lg:     var(--shadow-gold-lg);
   --shadow-gold-glow:   0 0 40px rgba(201, 168, 76, 0.5);
 
   /* ═══ SEMANTIC COLORS ═══ */

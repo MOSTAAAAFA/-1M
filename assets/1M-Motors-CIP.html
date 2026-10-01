@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1M Motors — Corporate Identity Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E0C06A;
+  --gold-dark: #B5923C;
+  --black: #050507;
+  --black-secondary: #0a0a0e;
+  --ivory: #F0EDE8;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) var(--black);
+}
+
+body {
+  background: var(--black);
+  color: var(--ivory);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Navigation Dots ────────────────────────────────────── */
+.nav-dots {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 1000;
+}
+.nav-dots a {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  display: block;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.nav-dots a:hover,
+.nav-dots a.active {
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  transform: scale(1.3);
+}
+.nav-dots a::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.nav-dots a:hover::after { opacity: 1; }
+
+/* ── Section Base ───────────────────────────────────────── */
+.section {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 60px;
+  overflow: hidden;
+}
+.section-inner {
+  max-width: 1200px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.section-inner.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Decorative Lines ───────────────────────────────────── */
+.gold-line {
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.gold-line-long {
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.gold-line-vertical {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(180deg, var(--gold), transparent);
+}
+
+/* ── Section Numbers ────────────────────────────────────── */
+.section-number {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.section-subtitle {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.5);
+  margin-bottom: 40px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   1. COVER
+   ════════════════════════════════════════════════════════════ */
+#cover {
+  background: radial-gradient(ellipse at 30% 40%, rgba(201,168,76,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.03) 0%, transparent 50%),
+              var(--black);
+  text-align: center;
+  flex-direction: column;
+}
+.cover-brand {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 140px);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cover-tagline {
+  font-family: var(--font-ui);
+  font-size: clamp(11px, 1.5vw, 14px);
+  font-weight: 300;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.55);
+  margin-bottom: 60px;
+}
+.cover-divider {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 32px;
+}
+.cover-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--ivory);
+  opacity: 0.7;
+}
+.cover-year {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  margin-top: 40px;
+  opacity: 0.6;
+}
+/* corner accents */
+.corner-accent {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.25;
+}
+.corner-accent.tl { top: 40px; left: 40px; border-width: 1px 0 0 1px; }
+.corner-accent.tr { top: 40px; right: 40px; border-width: 1px 1px 0 0; }
+.corner-accent.bl { bottom: 40px; left: 40px; border-width: 0 0 1px 1px; }
+.corner-accent.br { bottom: 40px; right: 40px; border-width: 0 1px 1px 0; }
+
+/* ════════════════════════════════════════════════════════════
+   2. BRAND OVERVIEW
+   ════════════════════════════════════════════════════════════ */
+#overview { background: var(--black); }
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-top: 20px;
+}
+.overview-block h3 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.overview-block p {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ivory);
+  opacity: 0.85;
+}
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 50px;
+  grid-column: 1 / -1;
+}
+.value-item {
+  text-align: center;
+  padding: 32px 16px;
+  border: 1px solid rgba(201,168,76,0.12);
+  transition: border-color 0.3s;
+}
+.value-item:hover { border-color: rgba(201,168,76,0.4); }
+.value-icon {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+.value-item h4 {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.value-item p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.5;
+}
+
+/* ════════════════════════════════════════════════════════════
+   3. LOGO SYSTEM
+   ════════════════════════════════════════════════════════════ */
+#logos { background: var(--black-secondary); }
+.logo-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 20px;
+}
+.logo-card {
+  background: var(--black);
+  border: 1px solid rgba(201,168,76,0.1);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+.logo-card.dark { background: var(--black); }
+.logo-card.light { background: #F0EDE8; }
+.logo-card-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.4);
+  margin-bottom: 24px;
+}
+.logo-card.light .logo-card-label { color: rgba(5,5,7,0.4); }
+
+/* Primary Logo */
+.logo-primary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.logo-primary .logo-1m {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1;
+}
+.logo-card.light .logo-primary .logo-1m { color: #B5923C; }
+.logo-primary .logo-motors {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  border-left: 1px solid var(--gold);
+  padding-left: 16px;
+}
+.logo-card.light .logo-primary .logo-motors { color: var(--black); }
+
+/* Monogram */
+.logo-monogram {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.logo-card.light .logo-monogram { border-color: #B5923C; }
+.logo-monogram-text {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.logo-card.light .logo-monogram-text { color: #B5923C; }
+.logo-monogram-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(201,168,76,0.3);
+}
+.logo-card.light .logo-monogram-ring { border-color: rgba(181,146,60,0.3); }
+
+/* Logo Rules */
+.logo-rules {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+.logo-rule {
+  padding: 24px;
+  border: 1px solid rgba(201,168,76,0.1);
+}
+.logo-rule h4 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.logo-rule p {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.6;
+}
+
+/* Incorrect Usage */
+.incorrect-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+.incorrect-item {
+  background: var(--black);
+  border: 1px solid rgba(201,168,76,0.1);
+  padding: 32px 20px;
+  text-align: center;
+  position: relative;
+}
+.incorrect-item::after {
+  content: '✕';
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  color: #C0392B;
+  font-size: 12px;
+}
+.incorrect-item .mock-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.incorrect-item.stretched .mock-logo { transform: scaleX(1.5); }
+.incorrect-item.recolored .mock-logo { color: #27AE60; }
+.incorrect-item.low-contrast .mock-logo { color: #444; }
+.incorrect-item.rotated .mock-logo { transform: rotate(15deg); }
+.incorrect-item span {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. COLOR PALETTE
+   ════════════════════════════════════════════════════════════ */
+#colors { background: var(--black); }
+.color-section-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+.color-spectrum {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.color-swatch {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 4px;
+  border-radius: 4px;
+  position: relative;
+}
+.color-swatch .swatch-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  text-align: center;
+}
+.color-swatch .swatch-hex {
+  font-family: var(--font-ui);
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  text-align: center;
+  margin-top: 2px;
+}
+.color-usage {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+  grid-column: 1 / -1;
+}
+.color-usage-item {
+  padding: 20px;
+  border: 1px solid rgba(201,168,76,0.1);
+}
+.color-usage-item h5 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.color-usage-item p {
+  font-size: 12px;
+  line-height: 1.6;
+  opacity: 0.5;
+}
+.accessibility-box {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid rgba(201,168,76,0.1);
+  grid-column: 1 / -1;
+}
+.accessibility-box h5 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.a11y-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.a11y-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+.a11y-preview {
+  width: 80px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 3px;
+}
+.a11y-ratio {
+  font-weight: 600;
+  color: var(--gold);
+}
+.a11y-pass { color: #27AE60; }
+.a11y-fail { color: #C0392B; }
+
+/* ════════════════════════════════════════════════════════════
+   5. TYPOGRAPHY
+   ════════════════════════════════════════════════════════════ */
+#typography { background: var(--black-secondary); }
+.type-showcase {
+  margin-top: 20px;
+}
+.type-family {
+  padding: 40px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+}
+.type-family:last-child { border-bottom: none; }
+.type-family-header {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+.type-family-name {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.type-family-role {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+.type-specimen {
+  margin-bottom: 16px;
+}
+.type-specimen-display {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--ivory);
+}
+.type-specimen-ui {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--ivory);
+}
+.type-specimen-body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--ivory);
+  opacity: 0.7;
+  max-width: 600px;
+}
+.type-scale {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.type-scale-row {
+  display: grid;
+  grid-template-columns: 80px 120px 60px 1fr;
+  align-items: baseline;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.05);
+}
+.type-scale-row .ts-size {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--gold);
+  opacity: 0.7;
+}
+.type-scale-row .ts-name {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.type-scale-row .ts-weight {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  opacity: 0.35;
+}
+.type-scale-row .ts-sample {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ════════════════════════════════════════════════════════════
+   6. BUSINESS CARD
+   ════════════════════════════════════════════════════════════ */
+#business-card { background: var(--black); }
+.card-showcase {
+  display: flex;
+  gap: 60px;
+  margin-top: 40px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.card-mockup {
+  width: 420px;
+  height: 240px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.1);
+}
+.card-front {
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px;
+}
+.card-front .card-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-front .card-logo-area .logo-1m {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.card-front .card-logo-area .logo-motors {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  border-left: 1px solid var(--gold);
+  padding-left: 10px;
+}
+.card-front .card-gold-accent {
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+}
+.card-front .card-person .card-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ivory);
+}
+.card-front .card-person .card-title {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 4px;
+}
+.card-front .card-edge-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+}
+
+.card-back {
+  background: var(--black-secondary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 36px;
+}
+.card-back .card-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card-back .card-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-back .card-contact-icon {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.card-back .card-contact-text {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ivory);
+  opacity: 0.75;
+}
+.card-back .card-monogram-bg {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 300;
+  color: rgba(201,168,76,0.06);
+  line-height: 1;
+}
+.card-back .card-edge-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+}
+
+.card-dimensions {
+  text-align: center;
+  margin-top: 24px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.35;
+}
+
+/* ════════════════════════════════════════════════════════════
+   7. LETTERHEAD
+   ════════════════════════════════════════════════════════════ */
+#letterhead { background: var(--black-secondary); }
+.letterhead-mockup {
+  width: 480px;
+  max-width: 100%;
+  aspect-ratio: 210/297;
+  background: #FDFCFA;
+  border-radius: 4px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.lh-top-accent {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  margin-bottom: 30px;
+}
+.lh-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+.lh-header .logo-1m {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold-dark);
+}
+.lh-header .logo-motors {
+  font-family: var(--font-ui);
+  font-size: 8px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #555;
+  border-left: 1px solid var(--gold);
+  padding-left: 8px;
+}
+.lh-body {
+  flex: 1;
+  padding: 0 10px;
+}
+.lh-line {
+  height: 1px;
+  background: #e8e6e1;
+  margin-bottom: 18px;
+}
+.lh-line.short { width: 60%; }
+.lh-line.medium { width: 80%; }
+.lh-line.long { width: 95%; }
+.lh-text-block {
+  margin-top: 30px;
+}
+.lh-text-line {
+  height: 4px;
+  background: #eee;
+  border-radius: 2px;
+  margin-bottom: 10px;
+}
+.lh-text-line:nth-child(1) { width: 40%; }
+.lh-text-line:nth-child(2) { width: 100%; }
+.lh-text-line:nth-child(3) { width: 100%; }
+.lh-text-line:nth-child(4) { width: 75%; }
+.lh-footer {
+  border-top: 1px solid #e0ded9;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.lh-footer-text {
+  font-family: var(--font-ui);
+  font-size: 7px;
+  letter-spacing: 0.05em;
+  color: #999;
+  line-height: 1.8;
+}
+.lh-footer-logo {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--gold);
+  opacity: 0.5;
+}
+
+/* ════════════════════════════════════════════════════════════
+   8. EMAIL SIGNATURE
+   ════════════════════════════════════════════════════════════ */
+#email-sig { background: var(--black); }
+.sig-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  margin-top: 40px;
+  align-items: center;
+}
+.sig-version-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.sig-block {
+  max-width: 520px;
+  width: 100%;
+  padding: 30px;
+  border-radius: 6px;
+}
+.sig-block.dark {
+  background: var(--black-secondary);
+  border: 1px solid rgba(201,168,76,0.1);
+}
+.sig-block.light {
+  background: #F8F7F5;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.sig-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.sig-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  padding-right: 20px;
+  border-right: 1px solid rgba(201,168,76,0.15);
+}
+.sig-block.light .sig-left { border-right-color: rgba(0,0,0,0.1); }
+.sig-logo-text {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1;
+}
+.sig-brand-sub {
+  font-family: var(--font-ui);
+  font-size: 7px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.5;
+}
+.sig-right { display: flex; flex-direction: column; gap: 3px; }
+.sig-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ivory);
+}
+.sig-block.light .sig-name { color: var(--black); }
+.sig-title {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.sig-detail {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ivory);
+  opacity: 0.5;
+  margin-top: 6px;
+}
+.sig-block.light .sig-detail { color: var(--black); opacity: 0.45; }
+.sig-social {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+.sig-social-icon {
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--gold);
+}
+.sig-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+  margin: 10px 0;
+}
+.sig-block.light .sig-divider { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent); }
+
+/* ════════════════════════════════════════════════════════════
+   9. SOCIAL MEDIA KIT
+   ════════════════════════════════════════════════════════════ */
+#social { background: var(--black-secondary); }
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 30px;
+}
+.social-card {
+  border: 1px solid rgba(201,168,76,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.social-card-header {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+}
+.social-card-header h4 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.social-card-header span {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  opacity: 0.35;
+}
+.social-card-preview {
+  aspect-ratio: auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.social-card-preview .social-bg {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Profile Picture */
+.social-profile {
+  aspect-ratio: 1;
+  background: var(--black);
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  margin: 20px;
+}
+.social-profile .sp-text {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Cover Photos */
+.cover-instagram {
+  background: linear-gradient(135deg, #050507, #0a0a0e);
+  aspect-ratio: 1080/1080;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.cover-linkedin {
+  background: linear-gradient(135deg, #050507, #0a0a0e);
+  aspect-ratio: 1584/396;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cover-facebook {
+  background: linear-gradient(135deg, #050507, #0a0a0e);
+  aspect-ratio: 820/312;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+}
+.cover-twitter {
+  background: linear-gradient(135deg, #050507, #0a0a0e);
+  aspect-ratio: 3/1;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-brand-text {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.cover-brand-sub {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.4);
+  margin-top: 8px;
+}
+.cover-accent-line {
+  width: 50px;
+  height: 1px;
+  background: var(--gold);
+  margin: 12px auto;
+}
+.cover-tagline {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(240,237,232,0.5);
+  margin-top: 8px;
+}
+.cover-left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cover-right-logo {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--gold);
+  opacity: 0.8;
+}
+.cover-dim-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.3;
+  padding: 8px 12px;
+  background: rgba(201,168,76,0.05);
+}
+
+/* ════════════════════════════════════════════════════════════
+   10. PACKAGING & STATIONERY
+   ════════════════════════════════════════════════════════════ */
+#packaging { background: var(--black); }
+.packaging-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 40px;
+}
+.pkg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pkg-mockup {
+  width: 100%;
+  aspect-ratio: 3/4;
+  position: relative;
+  margin-bottom: 20px;
+}
+.pkg-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.pkg-dim {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  opacity: 0.35;
+  letter-spacing: 0.1em;
+}
+
+/* Document Folder */
+.folder-mockup {
+  width: 260px;
+  height: 340px;
+  background: var(--black-secondary);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.folder-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(201,168,76,0.08), transparent);
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+.folder-logo {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  z-index: 1;
+}
+.folder-sub {
+  font-family: var(--font-ui);
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.4;
+  margin-top: 4px;
+  z-index: 1;
+}
+.folder-line {
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+  margin-top: 16px;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+/* Thank You Card */
+.thankyou-mockup {
+  width: 260px;
+  height: 180px;
+  background: var(--black-secondary);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.thankyou-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+}
+.thankyou-text {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ivory);
+  letter-spacing: 0.02em;
+}
+.thankyou-sub {
+  font-family: var(--font-ui);
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.5;
+  margin-top: 10px;
+}
+
+/* Envelope */
+.envelope-mockup {
+  width: 280px;
+  height: 160px;
+  background: var(--black-secondary);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 140px solid transparent;
+  border-right: 140px solid transparent;
+  border-top: 60px solid rgba(201,168,76,0.06);
+}
+.envelope-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.envelope-logo-area .el-1m {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.envelope-logo-area .el-motors {
+  font-family: var(--font-ui);
+  font-size: 7px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  opacity: 0.6;
+  border-left: 1px solid rgba(201,168,76,0.3);
+  padding-left: 6px;
+}
+.envelope-address {
+  font-family: var(--font-body);
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--ivory);
+  opacity: 0.4;
+}
+.envelope-gold-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-dark));
+}
+
+/* ════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ════════════════════════════════════════════════════════════ */
+@media print {
+  html { scroll-snap-type: none; }
+  .nav-dots { display: none !important; }
+  .section { page-break-after: always; min-height: auto; padding: 40px; }
+  .section-inner { opacity: 1 !important; transform: none !important; }
+  .corner-accent { border-color: #000 !important; }
+  body { color: #000; background: #fff; }
+  .section-number, .section-title, .overview-block h3, .color-section-title,
+  .type-family-name, .logo-card-label, .sig-title, .social-card-header h4,
+  .pkg-label, .value-item h4, .logo-rule h4, .color-usage-item h5,
+  .accessibility-box h5 { color: #000 !important; }
+  .card-mockup, .letterhead-mockup, .folder-mockup, .thankyou-mockup,
+  .envelope-mockup { box-shadow: none; border: 1px solid #ccc; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .section { padding: 60px 30px; }
+  .overview-grid, .logo-showcase, .social-grid { grid-template-columns: 1fr; }
+  .values-grid { grid-template-columns: repeat(2, 1fr); }
+  .logo-rules { grid-template-columns: 1fr; }
+  .incorrect-grid { grid-template-columns: repeat(2, 1fr); }
+  .packaging-grid { grid-template-columns: 1fr; }
+  .color-spectrum { grid-template-columns: repeat(5, 1fr); }
+  .card-showcase { flex-direction: column; align-items: center; }
+  .nav-dots { right: 12px; }
+  .nav-dots a::after { display: none; }
+}
+@media (max-width: 600px) {
+  .section { padding: 40px 20px; }
+  .values-grid { grid-template-columns: 1fr; }
+  .incorrect-grid { grid-template-columns: 1fr; }
+  .a11y-row { flex-direction: column; }
+  .card-mockup { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots">
+  <a href="#cover" data-label="Cover" class="active"></a>
+  <a href="#overview" data-label="Brand Overview"></a>
+  <a href="#logos" data-label="Logo System"></a>
+  <a href="#colors" data-label="Color Palette"></a>
+  <a href="#typography" data-label="Typography"></a>
+  <a href="#business-card" data-label="Business Card"></a>
+  <a href="#letterhead" data-label="Letterhead"></a>
+  <a href="#email-sig" data-label="Email Signature"></a>
+  <a href="#social" data-label="Social Media"></a>
+  <a href="#packaging" data-label="Packaging"></a>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════
+     1. COVER PAGE
+     ════════════════════════════════════════════════════════ -->
+<section id="cover" class="section">
+  <div class="corner-accent tl"></div>
+  <div class="corner-accent tr"></div>
+  <div class="corner-accent bl"></div>
+  <div class="corner-accent br"></div>
+  <div class="section-inner" style="text-align:center;">
+    <div class="cover-brand">1M MOTORS</div>
+    <div class="cover-divider"></div>
+    <div class="cover-subtitle">Corporate Identity Program</div>
+    <div class="cover-year">EST. 2024 &nbsp;&bull;&nbsp; CONFIDENTIAL</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     2. BRAND OVERVIEW
+     ════════════════════════════════════════════════════════ -->
+<section id="overview" class="section">
+  <div class="section-inner">
+    <div class="section-number">02 / Brand Overview</div>
+    <div class="section-title">Who We Are</div>
+    <div class="section-subtitle">Foundation &amp; Philosophy</div>
+    <div class="gold-line-long" style="margin-bottom:40px;"></div>
+    <div class="overview-grid">
+      <div class="overview-block">
+        <h3>Mission</h3>
+        <p>Curating the world's finest automobiles for discerning collectors. Every vehicle we acquire has been meticulously evaluated, authenticated, and prepared to the highest standard of excellence.</p>
+      </div>
+      <div class="overview-block">
+        <h3>Vision</h3>
+        <p>To be the definitive destination for luxury automotive acquisition — where provenance meets passion, and every transaction is an experience worthy of the vehicles we represent.</p>
+      </div>
+      <div class="values-grid">
+        <div class="value-item">
+          <div class="value-icon">E</div>
+          <h4>Excellence</h4>
+          <p>No compromise in standards</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">P</div>
+          <h4>Precision</h4>
+          <p>Meticulous attention to detail</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">T</div>
+          <h4>Trust</h4>
+          <p>Transparency in every interaction</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">X</div>
+          <h4>Exclusivity</h4>
+          <p>Access to the exceptional</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     3. LOGO SYSTEM
+     ════════════════════════════════════════════════════════ -->
+<section id="logos" class="section">
+  <div class="section-inner">
+    <div class="section-number">03 / Logo System</div>
+    <div class="section-title">Logomark &amp; Lockups</div>
+    <div class="section-subtitle">Primary, Monogram &amp; Usage Guidelines</div>
+    <div class="gold-line-long" style="margin-bottom:40px;"></div>
+
+    <div class="logo-showcase">
+      <!-- Primary Horizontal -->
+      <div class="logo-card dark">
+        <div class="logo-card-label">Primary — Horizontal (Dark)</div>
+        <div class="logo-primary">
+          <span class="logo-1m">1M</span>
+          <span class="logo-motors">MOTORS</span>
+        </div>
+      </div>
+      <!-- Primary Reversed -->
+      <div class="logo-card light">
+        <div class="logo-card-label">Primary — Horizontal (Light)</div>
+        <div class="logo-primary">
+          <span class="logo-1m">1M</span>
+          <span class="logo-motors">MOTORS</span>
+        </div>
+      </div>
+      <!-- Monogram Dark -->
+      <div class="logo-card dark">
+        <div class="logo-card-label">Monogram Mark (Dark)</div>
+        <div class="logo-monogram">
+          <div class="logo-monogram-ring"></div>
+          <span class="logo-monogram-text">1M</span>
+        </div>
+      </div>
+      <!-- Monogram Light -->
+      <div class="logo-card light">
+        <div class="logo-card-label">Monogram Mark (Light)</div>
+        <div class="logo-monogram">
+          <div class="logo-monogram-ring"></div>
+          <span class="logo-monogram-text">1M</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logo Rules -->
+    <div class="logo-rules">
+      <div class="logo-rule">
+        <h4>Minimum Size</h4>
+        <p>Minimum reproduction width: 30mm for horizontal lockup, 15mm for monogram. Never render below these dimensions.</p>
+      </div>
+      <div class="logo-rule">
+        <h4>Clear Space</h4>
+        <p>Maintain a clear zone equal to the height of the "M" character on all sides. No text, imagery, or graphic elements may enter this space.</p>
+      </div>
+      <div class="logo-rule">
+        <h4>Placement</h4>
+        <p>Always align to grid. Prefer top-left for documents, center for hero applications. Never place on busy backgrounds without sufficient contrast.</p>
+      </div>
+    </div>
+
+    <!-- Incorrect Usage -->
+    <div style="margin-top:50px;">
+      <div class="section-number" style="margin-bottom:16px;">Incorrect Usage</div>
+      <div class="incorrect-grid">
+        <div class="incorrect-item stretched">
+          <div class="mock-logo">1M MOTORS</div>
+          <span>Do not stretch</span>
+        </div>
+        <div class="incorrect-item recolored">
+          <div class="mock-logo">1M MOTORS</div>
+          <span>Do not recolor</span>
+        </div>
+        <div class="incorrect-item low-contrast">
+          <div class="mock-logo">1M MOTORS</div>
+          <span>Low contrast</span>
+        </div>
+        <div class="incorrect-item rotated">
+          <div class="mock-logo">1M MOTORS</div>
+          <span>Do not rotate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     4. COLOR PALETTE
+     ════════════════════════════════════════════════════════ -->
+<section id="colors" class="section">
+  <div class="section-inner">
+    <div class="section-number">04 / Color Palette</div>
+    <div class="section-title">Brand Colors</div>
+    <div class="section-subtitle">Spectrum, Context &amp; Accessibility</div>
+    <div class="gold-line-long" style="margin-bottom:10px;"></div>
+
+    <!-- Gold Spectrum -->
+    <div class="color-section-title">Primary — Gold Spectrum</div>
+    <div class="color-spectrum">
+      <div class="color-swatch" style="background:#FDF8E8;"><span class="swatch-label" style="color:#8a7520;">50</span><span class="swatch-hex" style="color:#8a7520;">#FDF8E8</span></div>
+      <div class="color-swatch" style="background:#F9EDCA;"><span class="swatch-label" style="color:#8a7520;">100</span><span class="swatch-hex" style="color:#8a7520;">#F9EDCA</span></div>
+      <div class="color-swatch" style="background:#F1DA8E;"><span class="swatch-label" style="color:#6b5a1a;">200</span><span class="swatch-hex" style="color:#6b5a1a;">#F1DA8E</span></div>
+      <div class="color-swatch" style="background:#E8C760;"><span class="swatch-label" style="color:#4a3e0e;">300</span><span class="swatch-hex" style="color:#4a3e0e;">#E8C760</span></div>
+      <div class="color-swatch" style="background:#E0C06A;"><span class="swatch-label" style="color:#4a3e0e;">400</span><span class="swatch-hex" style="color:#4a3e0e;">#E0C06A</span></div>
+      <div class="color-swatch" style="background:#C9A84C;"><span class="swatch-label" style="color:#2a2508;">500</span><span class="swatch-hex" style="color:#2a2508;">#C9A84C</span></div>
+      <div class="color-swatch" style="background:#B5923C;"><span class="swatch-label" style="color:#2a2508;">600</span><span class="swatch-hex" style="color:#2a2508;">#B5923C</span></div>
+      <div class="color-swatch" style="background:#9A7C30;"><span class="swatch-label" style="color:#FDF8E8;">700</span><span class="swatch-hex" style="color:#FDF8E8;">#9A7C30</span></div>
+      <div class="color-swatch" style="background:#7D6420;"><span class="swatch-label" style="color:#FDF8E8;">900</span><span class="swatch-hex" style="color:#FDF8E8;">#7D6420</span></div>
+    </div>
+
+    <!-- Neutral Spectrum -->
+    <div class="color-section-title">Neutral — Deep Black</div>
+    <div class="color-spectrum" style="grid-template-columns: repeat(6,1fr);">
+      <div class="color-swatch" style="background:#2a2a30;"><span class="swatch-label" style="color:#aaa;">700</span><span class="swatch-hex" style="color:#aaa;">#2A2A30</span></div>
+      <div class="color-swatch" style="background:#1a1a1f;"><span class="swatch-label" style="color:#888;">600</span><span class="swatch-hex" style="color:#888;">#1A1A1F</span></div>
+      <div class="color-swatch" style="background:#12121a;"><span class="swatch-label" style="color:#666;">400</span><span class="swatch-hex" style="color:#666;">#12121A</span></div>
+      <div class="color-swatch" style="background:#0a0a0e;"><span class="swatch-label" style="color:#555;">300</span><span class="swatch-hex" style="color:#555;">#0A0A0E</span></div>
+      <div class="color-swatch" style="background:#070709;"><span class="swatch-label" style="color:#444;">200</span><span class="swatch-hex" style="color:#444;">#070709</span></div>
+      <div class="color-swatch" style="background:#050507;"><span class="swatch-label" style="color:#333;">900</span><span class="swatch-hex" style="color:#333;">#050507</span></div>
+    </div>
+
+    <!-- Ivory -->
+    <div class="color-section-title">Text — Ivory</div>
+    <div class="color-spectrum" style="grid-template-columns: repeat(5,1fr);">
+      <div class="color-swatch" style="background:#FDFCFA; border:1px solid rgba(201,168,76,0.1);"><span class="swatch-label" style="color:#333;">50</span><span class="swatch-hex" style="color:#333;">#FDFCFA</span></div>
+      <div class="color-swatch" style="background:#F8F6F1;"><span class="swatch-label" style="color:#555;">100</span><span class="swatch-hex" style="color:#555;">#F8F6F1</span></div>
+      <div class="color-swatch" style="background:#F0EDE8;"><span class="swatch-label" style="color:#555;">200</span><span class="swatch-hex" style="color:#555;">#F0EDE8</span></div>
+      <div class="color-swatch" style="background:#E0DDD6;"><span class="swatch-label" style="color:#555;">300</span><span class="swatch-hex" style="color:#555;">#E0DDD6</span></div>
+      <div class="color-swatch" style="background:#C8C4BC;"><span class="swatch-label" style="color:#555;">400</span><span class="swatch-hex" style="color:#555;">#C8C4BC</span></div>
+    </div>
+
+    <!-- Usage + Accessibility -->
+    <div class="color-usage">
+      <div class="color-usage-item">
+        <h5>Gold — Primary</h5>
+        <p>Logo mark, accent lines, headings, interactive states, premium highlights. Use sparingly for maximum impact.</p>
+      </div>
+      <div class="color-usage-item">
+        <h5>Deep Black — Background</h5>
+        <p>Primary background, card surfaces, navigation. Creates depth and luxury. Never pure #000.</p>
+      </div>
+      <div class="color-usage-item">
+        <h5>Ivory — Text</h5>
+        <p>Body text, descriptions, secondary content. Provides warm readability on dark backgrounds.</p>
+      </div>
+      <div class="accessibility-box">
+        <h5>Accessibility Contrast Ratios (WCAG 2.1)</h5>
+        <div class="a11y-row">
+          <div class="a11y-pair">
+            <div class="a11y-preview" style="background:#050507;color:#C9A84C;">Aa</div>
+            <span>Gold on Black</span>
+            <span class="a11y-ratio">5.2:1</span>
+            <span class="a11y-pass">AA</span>
+          </div>
+          <div class="a11y-pair">
+            <div class="a11y-preview" style="background:#050507;color:#F0EDE8;">Aa</div>
+            <span>Ivory on Black</span>
+            <span class="a11y-ratio">16.8:1</span>
+            <span class="a11y-pass">AAA</span>
+          </div>
+          <div class="a11y-pair">
+            <div class="a11y-preview" style="background:#F0EDE8;color:#050507;">Aa</div>
+            <span>Black on Ivory</span>
+            <span class="a11y-ratio">16.8:1</span>
+            <span class="a11y-pass">AAA</span>
+          </div>
+          <div class="a11y-pair">
+            <div class="a11y-preview" style="background:#0a0a0e;color:#B5923C;">Aa</div>
+            <span>Dark Gold on Sec.</span>
+            <span class="a11y-ratio">4.6:1</span>
+            <span class="a11y-pass">AA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     5. TYPOGRAPHY
+     ════════════════════════════════════════════════════════ -->
+<section id="typography" class="section">
+  <div class="section-inner">
+    <div class="section-number">05 / Typography</div>
+    <div class="section-title">Type System</div>
+    <div class="section-subtitle">Cormorant Garamond &middot; Space Grotesk &middot; Inter</div>
+    <div class="gold-line-long" style="margin-bottom:30px;"></div>
+
+    <div class="type-showcase">
+      <!-- Display -->
+      <div class="type-family">
+        <div class="type-family-header">
+          <span class="type-family-name">Cormorant Garamond</span>
+          <span class="type-family-role">Display / Headlines / Hero Text</span>
+        </div>
+        <div class="type-specimen">
+          <div class="type-specimen-display">The Art of Automotive Excellence</div>
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row">
+            <span class="ts-size">72px</span><span class="ts-name">Hero</span><span class="ts-weight">300</span>
+            <span class="ts-sample" style="font-family:var(--font-display);font-size:72px;font-weight:300;line-height:1;">Aa</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">48px</span><span class="ts-name">H1</span><span class="ts-weight">300</span>
+            <span class="ts-sample" style="font-family:var(--font-display);font-size:48px;font-weight:300;">Aa</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">32px</span><span class="ts-name">H2</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-display);font-size:32px;font-weight:400;">Aa</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">24px</span><span class="ts-name">H3</span><span class="ts-weight">500</span>
+            <span class="ts-sample" style="font-family:var(--font-display);font-size:24px;font-weight:500;">Aa</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- UI -->
+      <div class="type-family">
+        <div class="type-family-header">
+          <span class="type-family-name">Space Grotesk</span>
+          <span class="type-family-role">UI / Navigation / Buttons / Labels</span>
+        </div>
+        <div class="type-specimen">
+          <div class="type-specimen-ui">NAVIGATION &middot; BUTTONS &middot; LABELS &middot; CAPTIONS</div>
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row">
+            <span class="ts-size">18px</span><span class="ts-name">Large UI</span><span class="ts-weight">500</span>
+            <span class="ts-sample" style="font-family:var(--font-ui);font-size:18px;font-weight:500;">Explore Collection</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">14px</span><span class="ts-name">Body UI</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-ui);font-size:14px;">Schedule Consultation</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">12px</span><span class="ts-name">Caption</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-ui);font-size:12px;letter-spacing:0.15em;text-transform:uppercase;">View Details</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">10px</span><span class="ts-name">Overline</span><span class="ts-weight">500</span>
+            <span class="ts-sample" style="font-family:var(--font-ui);font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;">New Arrival</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="type-family">
+        <div class="type-family-header">
+          <span class="type-family-name">Inter</span>
+          <span class="type-family-role">Body / Paragraphs / Descriptions</span>
+        </div>
+        <div class="type-specimen">
+          <div class="type-specimen-body">Every vehicle in the 1M Motors collection has been carefully selected for its provenance, condition, and desirability. We work directly with manufacturers, private collectors, and authorized dealers worldwide to source automobiles of exceptional quality.</div>
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row">
+            <span class="ts-size">16px</span><span class="ts-name">Body</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-body);font-size:16px;">Standard paragraph text for descriptions</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">14px</span><span class="ts-name">Small</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-body);font-size:14px;">Secondary body text and details</span>
+          </div>
+          <div class="type-scale-row">
+            <span class="ts-size">12px</span><span class="ts-name">Caption</span><span class="ts-weight">400</span>
+            <span class="ts-sample" style="font-family:var(--font-body);font-size:12px;">Footnotes, metadata, legal copy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     6. BUSINESS CARD
+     ════════════════════════════════════════════════════════ -->
+<section id="business-card" class="section">
+  <div class="section-inner">
+    <div class="section-number">06 / Business Card</div>
+    <div class="section-title">Stationery — Card</div>
+    <div class="section-subtitle">3.5 × 2 in &nbsp;|&nbsp; 90 × 50 mm &nbsp;|&nbsp; 400gsm Mohawk Superfine</div>
+    <div class="gold-line-long" style="margin-bottom:30px;"></div>
+
+    <div class="card-showcase">
+      <!-- Front -->
+      <div class="card-mockup card-front">
+        <div class="card-logo-area">
+          <span class="logo-1m">1M</span>
+          <span class="logo-motors">MOTORS</span>
+        </div>
+        <div class="card-gold-accent"></div>
+        <div class="card-person">
+          <div class="card-name">Alexander Sterling</div>
+          <div class="card-title">Managing Director</div>
+        </div>
+        <div class="card-edge-line"></div>
+      </div>
+      <!-- Back -->
+      <div class="card-mockup card-back">
+        <div class="card-edge-line"></div>
+        <div class="card-contact-list">
+          <div class="card-contact-item">
+            <div class="card-contact-icon">T</div>
+            <span class="card-contact-text">+971 4 555 0199</span>
+          </div>
+          <div class="card-contact-item">
+            <div class="card-contact-icon">E</div>
+            <span class="card-contact-text">alex@1mmotors.com</span>
+          </div>
+          <div class="card-contact-item">
+            <div class="card-contact-icon">W</div>
+            <span class="card-contact-text">www.1mmotors.com</span>
+          </div>
+          <div class="card-contact-item">
+            <div class="card-contact-icon">A</div>
+            <span class="card-contact-text">DIFC Gate Village, Dubai, UAE</span>
+          </div>
+        </div>
+        <div class="card-monogram-bg">1M</div>
+      </div>
+    </div>
+    <div class="card-dimensions">3.5″ × 2″ &nbsp;&mdash;&nbsp; 90 mm × 50 mm &nbsp;&mdash;&nbsp; Round corners optional (3mm)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     7. LETTERHEAD
+     ════════════════════════════════════════════════════════ -->
+<section id="letterhead" class="section">
+  <div class="section-inner" style="display:flex; flex-direction:column; align-items:center;">
+    <div class="section-number">07 / Letterhead</div>
+    <div class="section-title">A4 Stationery</div>
+    <div class="section-subtitle">210 × 297 mm &nbsp;|&nbsp; 120gsm Premium Bond</div>
+    <div class="gold-line-long" style="margin-bottom:40px;"></div>
+
+    <div class="letterhead-mockup">
+      <div class="lh-top-accent"></div>
+      <div class="lh-header">
+        <span class="logo-1m">1M</span>
+        <span class="logo-motors">MOTORS</span>
+      </div>
+      <div class="lh-body">
+        <div class="lh-line short"></div>
+        <div class="lh-line long"></div>
+        <div class="lh-line medium"></div>
+        <div class="lh-line long"></div>
+        <div class="lh-line short"></div>
+        <div class="lh-text-block">
+          <div class="lh-line long"></div>
+          <div class="lh-line long"></div>
+          <div class="lh-line long"></div>
+          <div class="lh-line medium"></div>
+        </div>
+      </div>
+      <div class="lh-footer">
+        <div class="lh-footer-text">
+          Dubai, UAE &nbsp;&bull;&nbsp; London, UK &nbsp;&bull;&nbsp; Beverly Hills, CA<br>
+          +971 4 555 0199 &nbsp;|&nbsp; info@1mmotors.com &nbsp;|&nbsp; www.1mmotors.com
+        </div>
+        <div class="lh-footer-logo">1M</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     8. EMAIL SIGNATURE
+     ════════════════════════════════════════════════════════ -->
+<section id="email-sig" class="section">
+  <div class="section-inner">
+    <div class="section-number">08 / Email Signature</div>
+    <div class="section-title">Digital — Signature</div>
+    <div class="section-subtitle">Dark &amp; Light Versions &nbsp;|&nbsp; HTML Responsive</div>
+    <div class="gold-line-long" style="margin-bottom:40px;"></div>
+
+    <div class="sig-showcase">
+      <!-- Dark Version -->
+      <div>
+        <div class="sig-version-label">Dark Mode</div>
+        <div class="sig-block dark">
+          <div class="sig-content">
+            <div class="sig-left">
+              <span class="sig-logo-text">1M</span>
+              <span class="sig-brand-sub">MOTORS</span>
+            </div>
+            <div class="sig-right">
+              <div class="sig-name">Alexander Sterling</div>
+              <div class="sig-title">Managing Director</div>
+              <div class="sig-divider"></div>
+              <div class="sig-detail">+971 4 555 0199 &nbsp;&bull;&nbsp; +44 20 7946 0958</div>
+              <div class="sig-detail">alex@1mmotors.com</div>
+              <div class="sig-social">
+                <div class="sig-social-icon">in</div>
+                <div class="sig-social-icon">ig</div>
+                <div class="sig-social-icon">X</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Light Version -->
+      <div>
+        <div class="sig-version-label">Light Mode</div>
+        <div class="sig-block light">
+          <div class="sig-content">
+            <div class="sig-left">
+              <span class="sig-logo-text" style="color:#B5923C;">1M</span>
+              <span class="sig-brand-sub" style="color:#B5923C;">MOTORS</span>
+            </div>
+            <div class="sig-right">
+              <div class="sig-name">Alexander Sterling</div>
+              <div class="sig-title" style="color:#B5923C;">Managing Director</div>
+              <div class="sig-divider"></div>
+              <div class="sig-detail">+971 4 555 0199 &nbsp;&bull;&nbsp; +44 20 7946 0958</div>
+              <div class="sig-detail">alex@1mmotors.com</div>
+              <div class="sig-social">
+                <div class="sig-social-icon" style="border-color:rgba(181,146,60,0.3);color:#B5923C;">in</div>
+                <div class="sig-social-icon" style="border-color:rgba(181,146,60,0.3);color:#B5923C;">ig</div>
+                <div class="sig-social-icon" style="border-color:rgba(181,146,60,0.3);color:#B5923C;">X</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     9. SOCIAL MEDIA KIT
+     ════════════════════════════════════════════════════════ -->
+<section id="social" class="section">
+  <div class="section-inner">
+    <div class="section-number">09 / Social Media Kit</div>
+    <div class="section-title">Digital Presence</div>
+    <div class="section-subtitle">Profile &amp; Cover Assets by Platform</div>
+    <div class="gold-line-long" style="margin-bottom:20px;"></div>
+
+    <div class="social-grid">
+      <!-- Profile Picture -->
+      <div class="social-card">
+        <div class="social-card-header">
+          <h4>Profile Picture</h4>
+          <span>400 × 400 px</span>
+        </div>
+        <div class="social-card-preview" style="padding:30px;">
+          <div class="social-profile">
+            <span class="sp-text">1M</span>
+          </div>
+        </div>
+        <div class="cover-dim-label">All platforms &nbsp;|&nbsp; 1:1 ratio &nbsp;|&nbsp; Circle crop safe zone</div>
+      </div>
+
+      <!-- Instagram -->
+      <div class="social-card">
+        <div class="social-card-header">
+          <h4>Instagram</h4>
+          <span>1080 × 1080 px</span>
+        </div>
+        <div class="social-card-preview">
+          <div class="social-bg cover-instagram">
+            <div class="cover-brand-text">1M MOTORS</div>
+            <div class="cover-accent-line"></div>
+            <div class="cover-tagline">Curating Excellence</div>
+          </div>
+        </div>
+        <div class="cover-dim-label">Feed Post &nbsp;|&nbsp; 1080 × 1080 &nbsp;|&nbsp; 1:1</div>
+      </div>
+
+      <!-- LinkedIn -->
+      <div class="social-card">
+        <div class="social-card-header">
+          <h4>LinkedIn</h4>
+          <span>1584 × 396 px</span>
+        </div>
+        <div class="social-card-preview">
+          <div class="social-bg cover-linkedin">
+            <div class="cover-left-content">
+              <div class="cover-brand-text" style="font-size:22px;">1M MOTORS</div>
+              <div class="cover-brand-sub">Premium Automotive Acquisition</div>
+            </div>
+            <div class="cover-right-logo">1M</div>
+          </div>
+        </div>
+        <div class="cover-dim-label">Personal Banner &nbsp;|&nbsp; 1584 × 396 &nbsp;|&nbsp; 4:1</div>
+      </div>
+
+      <!-- Facebook -->
+      <div class="social-card">
+        <div class="social-card-header">
+          <h4>Facebook</h4>
+          <span>820 × 312 px</span>
+        </div>
+        <div class="social-card-preview">
+          <div class="social-bg cover-facebook" style="justify-content:center;text-align:center;flex-direction:column;">
+            <div class="cover-brand-text" style="font-size:26px;">1M MOTORS</div>
+            <div class="cover-accent-line"></div>
+            <div class="cover-brand-sub">Luxury Automotive Excellence</div>
+          </div>
+        </div>
+        <div class="cover-dim-label">Page Cover &nbsp;|&nbsp; 820 × 312 &nbsp;|&nbsp; 2.6:1</div>
+      </div>
+
+      <!-- Twitter/X -->
+      <div class="social-card" style="grid-column: 1 / -1;">
+        <div class="social-card-header">
+          <h4>Twitter / X</h4>
+          <span>1500 × 500 px</span>
+        </div>
+        <div class="social-card-preview">
+          <div class="social-bg cover-twitter">
+            <div class="cover-left-content" style="margin-right:auto;">
+              <div class="cover-brand-text" style="font-size:24px;">1M MOTORS</div>
+              <div class="cover-brand-sub">Defining Luxury in Motion</div>
+            </div>
+            <div style="width:60px;height:60px;border:1px solid rgba(201,168,76,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;right:40px;">
+              <span style="font-family:var(--font-display);font-size:24px;color:var(--gold);font-weight:300;">1M</span>
+            </div>
+          </div>
+        </div>
+        <div class="cover-dim-label">Header Photo &nbsp;|&nbsp; 1500 × 500 &nbsp;|&nbsp; 3:1</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     10. PACKAGING & STATIONERY
+     ════════════════════════════════════════════════════════ -->
+<section id="packaging" class="section">
+  <div class="section-inner">
+    <div class="section-number">10 / Packaging &amp; Stationery</div>
+    <div class="section-title">Tangible Touchpoints</div>
+    <div class="section-subtitle">Folders &middot; Cards &middot; Envelopes</div>
+    <div class="gold-line-long" style="margin-bottom:30px;"></div>
+
+    <div class="packaging-grid">
+      <!-- Document Folder -->
+      <div class="pkg-item">
+        <div class="pkg-mockup">
+          <div class="folder-mockup">
+            <div class="folder-flap"></div>
+            <div class="folder-logo">1M</div>
+            <div class="folder-sub">MOTORS</div>
+            <div class="folder-line"></div>
+          </div>
+        </div>
+        <div class="pkg-label">Document Folder</div>
+        <div class="pkg-dim">A4 &nbsp;|&nbsp; Matte Black with Gold Foil</div>
+      </div>
+
+      <!-- Thank You Card -->
+      <div class="pkg-item">
+        <div class="pkg-mockup">
+          <div class="thankyou-mockup">
+            <div class="thankyou-accent"></div>
+            <div class="thankyou-text">Thank You</div>
+            <div class="thankyou-sub">1M Motors</div>
+          </div>
+        </div>
+        <div class="pkg-label">Thank You Card</div>
+        <div class="pkg-dim">180 × 120 mm &nbsp;|&nbsp; Cotton Stock</div>
+      </div>
+
+      <!-- Handover Envelope -->
+      <div class="pkg-item">
+        <div class="pkg-mockup">
+          <div class="envelope-mockup">
+            <div class="envelope-flap"></div>
+            <div class="envelope-logo-area">
+              <span class="el-1m">1M</span>
+              <span class="el-motors">MOTORS</span>
+            </div>
+            <div class="envelope-address">
+              DIFC Gate Village, Building 3<br>
+              Dubai, United Arab Emirates
+            </div>
+            <div class="envelope-gold-line"></div>
+          </div>
+        </div>
+        <div class="pkg-label">Vehicle Handover Envelope</div>
+        <div class="pkg-dim">C5 &nbsp;|&nbsp; Black Lined Interior</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ── Intersection Observer for fade-in ──────────────────
+const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.section-inner').forEach(el => observer.observe(el));
+
+// ── Navigation Dots ──────────────────────────────────────
+const sections = document.querySelectorAll('.section');
+const dots = document.querySelectorAll('.nav-dots a');
+
+const dotObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      dots.forEach(dot => {
+        dot.classList.toggle('active', dot.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.5 });
+
+sections.forEach(s => dotObserver.observe(s));
+</script>
+</body>
+</html>

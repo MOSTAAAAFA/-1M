@@ -616,7 +616,7 @@ function CarCard({ car, index }) {
             ].map(({ label, value }) => (
               <div key={label} style={{
                 background: 'rgba(255,255,255,0.04)',
-                borderRadius: '8px',
+                borderRadius: '20px',
                 padding: '10px 12px',
                 border: '1px solid rgba(255,255,255,0.06)',
               }}>
@@ -678,7 +678,7 @@ function CarCard({ car, index }) {
                     ? 'rgba(201,168,76,0.18)'
                     : 'rgba(201,168,76,0.08)',
                 border: '1px solid rgba(201,168,76,0.4)',
-                borderRadius: '8px',
+                borderRadius: '20px',
                 color: addedPulse ? '#050507' : '#c9a84c',
                 fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: '11px',
@@ -722,7 +722,7 @@ function SearchBar({ value, onChange }) {
           padding: '11px 14px 11px 38px',
           background: 'rgba(18,18,24,0.9)',
           border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '8px',
+          borderRadius: '20px',
           color: '#f0ede8',
           fontFamily: "'Inter', sans-serif",
           fontSize: '13px',

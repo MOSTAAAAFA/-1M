@@ -979,6 +979,7 @@ const rawCars = [
     category: 'Sport',
     image: 'https://cdn.bmwblog.com/wp-content/uploads/2021/03/2021_bmw_m4_competition_test_drive_23.jpg',
     heroImage: 'https://www.carscoops.com/wp-content/uploads/2021/03/BMW-M4-2021-916-copy.jpg',
+    heroVideo: '/videos/m4.mp4',
     color: 'Isle of Man Green',
     logo: '/logos/bmw.png',
     tagline: 'The ultimate driving machine.',

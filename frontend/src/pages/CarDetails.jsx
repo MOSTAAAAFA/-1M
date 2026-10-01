@@ -156,6 +156,7 @@ export default function CarDetails() {
     <img
       src={car.heroImage || car.image}
       alt={car.name}
+      onError={(e) => { e.currentTarget.src = `https://placehold.co/1920x1080/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
       style={{
         position: 'absolute',
         inset: 0,
@@ -327,6 +328,7 @@ export default function CarDetails() {
                   <img
                     src={car.heroImage || car.image}
                     alt={car.name}
+                    onError={(e) => { e.currentTarget.src = `https://placehold.co/800x600/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -810,39 +812,41 @@ function SpecCard({ label, value }) {
 
   return (
     <div
+      className="glass-ultra"
       style={{
-        padding: '20px',
-        background: 'rgba(255,255,255,0.03)',
-        borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.06)',
-        transition: 'all 0.25s',
+        padding: '22px 24px',
+        borderRadius: '14px',
+        transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)';
-        e.currentTarget.style.background = 'rgba(201,168,76,0.04)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)';
+        e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
+        e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.6), 0 0 30px rgba(212,175,55,0.15)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+        e.currentTarget.style.transform = 'translateY(0) scale(1)';
+        e.currentTarget.style.boxShadow = '';
       }}
     >
       <p style={{
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: 'var(--font-ui)',
         fontSize: '9px',
         fontWeight: '600',
-        letterSpacing: '2.5px',
+        letterSpacing: '3px',
         textTransform: 'uppercase',
-        color: 'rgba(240,237,232,0.3)',
+        color: 'var(--ultra-gold)',
         marginBottom: '8px',
+        opacity: 0.85,
       }}>{labelMap[label] || label}</p>
       <p style={{
-        fontFamily: "'Space Grotesk', sans-serif",
-        fontSize: '15px',
+        fontFamily: 'var(--font-telemetry)',
+        fontSize: '16px',
         fontWeight: '600',
-        color: value === 'N/A' ? 'rgba(240,237,232,0.25)' : '#f0ede8',
+        letterSpacing: '0.05em',
+        color: value === 'N/A' ? 'rgba(250,250,249,0.3)' : 'var(--ultra-ivory)',
         lineHeight: 1.3,
+        textShadow: '0 0 20px rgba(212,175,55,0.25)',
       }}>{value}</p>
     </div>
   );
@@ -878,6 +882,7 @@ function RelatedCard({ car }) {
           <img
             src={car.image}
             alt={car.name}
+            onError={(e) => { e.currentTarget.src = `https://placehold.co/400x300/111117/C9A84C?text=${encodeURIComponent(car.brand)}`; }}
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
             onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}

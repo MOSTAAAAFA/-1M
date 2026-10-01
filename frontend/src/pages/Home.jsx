@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cars } from '../data/cars';
-import { useApp } from '../context/AppContext';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import Brand1M from '../components/Brand1M';
+import AnimatedCard from '../components/AnimatedCard';
 import ScrollReveal from '../components/ScrollReveal';
 import { TextRevealByWord } from '../components/TextReveal';
 import OptimizedImage from '../components/OptimizedImage';
@@ -16,7 +16,9 @@ import { colors, spacing, radius, typography, transitions, components } from '..
 const HERO_SLIDES = [
   { carId: 11, headline: 'Pure', accent: 'Racing DNA', sub: 'The race track distilled into a road car.' },
   { carId: 36, headline: 'Absolute', accent: 'Performance', sub: 'Eat the track.' },
-  { carId: 39, headline: 'Ultimate', accent: 'M Power', sub: 'Precision engineered for pure driving emotion.' },
+  { carId: 56, headline: 'The last', accent: 'pure Lotus', sub: 'Precision engineered for pure driving emotion.' },
+  { carId: 40, headline: 'final Aventador', accent: 'ultimate V12', sub: 'Precision engineered for pure driving emotion.' },
+  { carId: 32, headline: 'Open-air thrills', accent: 'with Aston soul', sub: 'Precision engineered for pure driving emotion.' },
 ];
 
 export default function Home() {
@@ -28,7 +30,7 @@ export default function Home() {
   // Performance optimization flags
   const enableKenBurns = shouldEnableKenBurns();
 
-  // Auto slide transition every 6 seconds
+  // Auto slide transition every 8 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setPrevSlide(slide);
@@ -918,7 +920,7 @@ function FeaturedSection() {
   // BMW: M3 (36), M4 (39), M5 CS (58), M5 Competition (59), M8 (22)
   // Mercedes-AMG: GT 63 S (21), GT Black Series (37), EQS 53 (47)
   const featured = cars.filter(c => [36, 39, 58, 59, 22, 21, 37, 47].includes(c.id));
-  const [ref, visible] = useIntersectionObserver();
+  const [ref] = useIntersectionObserver();
 
   return (
     <section style={{ padding: 'clamp(96px, 10vw, 144px) 0' }} ref={ref}>
@@ -946,212 +948,15 @@ function FeaturedSection() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
-          gap: 24
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
+          gap: 28
         }}>
           {featured.map((car, i) => (
-            <FeaturedCard key={car.id} car={car} index={i} visible={visible} />
+            <AnimatedCard key={car.id} car={car} index={i} />
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function FeaturedCard({ car, index, visible }) {
-  const { addToCart, toggleFavorite, isFavorite } = useApp();
-
-  return (
-    <div className="hm-card">
-    <motion.div
-      className="car-card"
-      initial={{ opacity: 0, y: 30 }}
-      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-      transition={{
-        duration: 0.5, // Faster
-        delay: index * 0.08, // Reduced delay
-        ease: [0.19, 1, 0.22, 1]
-      }}
-      style={{
-        borderRadius: radius.lg,
-        overflow: 'hidden',
-        background: 'rgba(17,17,23,0.9)',
-        border: `1px solid ${colors.border2}`,
-        cursor: 'none',
-        position: 'relative',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Top gold accent line on hover */}
-      <div className="hm-card-line" style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 3,
-        background: 'linear-gradient(to right, transparent, #E0C06A, #F4D03F, #E0C06A, transparent)',
-        boxShadow: '0 0 18px rgba(201,168,76,0.7)',
-        pointerEvents: 'none',
-      }}/>
-      {/* Removed cursor glow for performance */}
-
-      {/* Image */}
-      <div style={{
-        position: 'relative', height: 210, overflow: 'hidden', zIndex: 1,
-        boxShadow: 'inset 0 0 55px rgba(5,5,7,0.9), inset 0 -12px 30px rgba(5,5,7,0.85)',
-      }}>
-        <OptimizedImage
-          src={car.image}
-          alt={car.name}
-          objectFit="cover"
-          className="hm-card-img"
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-        />
-
-        {/* Category badge */}
-        <span style={{
-          position: 'absolute', top: spacing.lg, left: spacing.lg,
-          padding: `${spacing.xs} ${spacing.md}`, borderRadius: spacing.xs,
-          fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold,
-          letterSpacing: typography.letterSpacing.wider, textTransform: 'uppercase',
-          background: colors.goldDim, border: `1px solid ${colors.goldDim}`,
-          color: colors.gold,
-        }}>{car.category}</span>
-
-        {!car.inStock && (
-          <span style={{
-            position: 'absolute', top: spacing.lg, left: car.category ? 110 : spacing.lg,
-            padding: `${spacing.xs} ${spacing.sm}`, borderRadius: spacing.xs,
-            fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold,
-            letterSpacing: typography.letterSpacing.tight, textTransform: 'uppercase',
-            background: 'rgba(239,68,68,0.18)', border: `1px solid ${colors.red}`,
-            color: colors.red,
-          }}>Pre-Order</span>
-        )}
-
-        {/* Fav btn */}
-        <motion.button
-          onClick={(e) => { e.preventDefault(); toggleFavorite(car); }}
-          aria-label={isFavorite(car.id) ? `Remove ${car.name} from favorites` : `Add ${car.name} to favorites`}
-          aria-pressed={isFavorite(car.id)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.96 }}
-          style={{
-            position: 'absolute', top: 14, right: 14,
-            width: 36, height: 36, borderRadius: radius.full,
-            background: isFavorite(car.id) ? 'rgba(201,168,76,0.9)' : 'rgba(5,5,7,0.9)',
-            border: isFavorite(car.id) ? `1px solid ${colors.goldGlow}` : `1px solid ${colors.border2}`,
-            color: isFavorite(car.id) ? colors.gold : colors.white40,
-            fontSize: typography.fontSize.sm, cursor: 'none',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: transitions.default,
-          }}
-        >
-          {isFavorite(car.id) ? '♥' : '♡'}
-        </motion.button>
-
-        {/* Stars overlay */}
-        <div style={{ position: 'absolute', bottom: 14, right: 14, display: 'flex', alignItems: 'center', gap: spacing.xs }}>
-          <span style={{ fontSize: 11, color: colors.gold }}>{'★'.repeat(Math.round(car.rating))}</span>
-          <span style={{ fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, color: colors.white40 }}>({car.reviewCount})</span>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: `${spacing['2xl']} ${spacing['2xl']} 0`, position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <p style={{ fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, letterSpacing: typography.letterSpacing.wide, textTransform: 'uppercase', color: colors.gold, marginBottom: spacing.sm }}>{car.brand} · {car.year}</p>
-
-        {/* Car name with logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm }}>
-          <h3 style={{ fontFamily: typography.fontDisplay, fontSize: typography.fontSize['2xl'], fontWeight: typography.fontWeight.semibold, color: colors.white, lineHeight: typography.lineHeight.tight, flex: 1, minHeight: '2.2em' }}>{car.name}</h3>
-          <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: radius.full,
-            background: colors.white10,
-            border: `1px solid ${colors.border2}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: spacing.sm,
-            flexShrink: 0,
-          }}>
-            <img
-              src={car.logo}
-              alt={car.brand}
-              onError={(e) => { e.currentTarget.src = '/logos/1m-mark.svg'; }}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 0 8px currentColor) brightness(1.3)',
-              }}
-            />
-          </div>
-        </div>
-
-        <p style={{ fontSize: typography.fontSize.sm, color: colors.white40, fontStyle: 'italic', marginBottom: spacing.lg }}>{car.tagline}</p>
-
-        {/* Mini specs */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.sm, marginBottom: spacing['3xl'] }}>
-          {[
-            { l: 'Power', v: car.specs.horsepowerStr },
-            { l: '0–60', v: car.specs.accelStr },
-          ].map(({ l, v }) => (
-            <div key={l} style={{
-              padding: `${spacing.sm} ${spacing.md}`, borderRadius: spacing.sm,
-              background: 'rgba(255,255,255,0.03)',
-              border: `1px solid ${colors.border}`,
-            }}>
-              <p style={{ fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, letterSpacing: typography.letterSpacing.widest, textTransform: 'uppercase', color: colors.white20, marginBottom: 3 }}>{l}</p>
-              <p style={{ fontFamily: typography.fontUI, fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: colors.white }}>{v}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Gold price strip */}
-        <div style={{
-          position: 'relative',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md,
-          padding: '14px 24px',
-          margin: 'auto -24px 0',
-          background: 'linear-gradient(to top, rgba(201,168,76,0.10) 0%, rgba(201,168,76,0.02) 100%)',
-          borderTop: '1px solid rgba(201,168,76,0.28)',
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: -1, left: 0, right: 0,
-            height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 25%, #E0C06A 50%, rgba(201,168,76,0.5) 75%, transparent)',
-          }}/>
-          <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-            <p style={{ fontFamily: typography.fontUI, fontSize: typography.fontSize.xs, letterSpacing: typography.letterSpacing.widest, textTransform: 'uppercase', color: colors.white40, marginBottom: 2 }}>From</p>
-            <p style={{
-              fontFamily: typography.fontDisplay, fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.bold, lineHeight: 1.1,
-              ...components.goldText,
-            }}>
-              {compactPrice(car.price)}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: spacing.sm, flexShrink: 0, justifyContent: 'flex-end' }}>
-            <Link to={`/car/${car.id}`} className="btn btn-ghost" data-hover style={{ padding: '8px 12px', fontSize: 10.5, letterSpacing: '1.5px' }}>Details</Link>
-            <motion.button
-              onClick={() => addToCart(car)}
-              aria-label={`Add ${car.name} to garage`}
-              className="btn btn-gold"
-              data-hover
-              whileHover={{ scale: 1.03, y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              style={{ padding: '8px 12px', fontSize: 10.5, letterSpacing: '1.5px' }}
-            >
-              + Garage
-            </motion.button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-    </div>
   );
 }
 

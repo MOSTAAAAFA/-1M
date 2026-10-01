@@ -249,7 +249,7 @@ const inputStyle = {
   padding: '12px 14px',
   background: 'rgba(255,255,255,0.04)',
   border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: '8px',
+  borderRadius: '20px',
   color: '#f0ede8',
   fontSize: 13,
   outline: 'none',

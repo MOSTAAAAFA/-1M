@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// 1M MOTORS - ANIMATED CAR CARD
-// Premium 3D tilt card with hover effects
+// 1M MOTORS — ULTRA PREMIUM 3D ANIMATED CAR CARD
+// Full 3D tilt + mouse-tracked spotlight + gold shimmer border
 // ═══════════════════════════════════════════════════════════════════════════
 
-import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState, useCallback } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
@@ -17,349 +17,322 @@ const fmt = (n) => new Intl.NumberFormat('en-US', {
 export default function AnimatedCard({ car, index = 0 }) {
   const cardRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50 });
   const { addToCart, toggleFavorite, isFavorite } = useApp();
 
-  // DISABLED 3D effect for better usability
-  // const x = useMotionValue(0);
-  // const y = useMotionValue(0);
-  // const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [7, -7]), {
-  //   stiffness: 300,
-  //   damping: 30
-  // });
-  // const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-7, 7]), {
-  //   stiffness: 300,
-  //   damping: 30
-  // });
+  // ── 3D Tilt via Framer Motion spring physics ──
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  // const handleMouseMove = (e) => {
-  //   if (!cardRef.current) return;
-  //   const rect = cardRef.current.getBoundingClientRect();
-  //   const centerX = rect.left + rect.width / 2;
-  //   const centerY = rect.top + rect.height / 2;
-  //   x.set((e.clientX - centerX) / (rect.width / 2));
-  //   y.set((e.clientY - centerY) / (rect.height / 2));
-  // };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [9, -9]), {
+    stiffness: 280, damping: 28
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-9, 9]), {
+    stiffness: 280, damping: 28
+  });
+  const scale = useSpring(isHovered ? 1.035 : 1, { stiffness: 300, damping: 25 });
 
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) / rect.width  - 0.5;
+    const cy = (e.clientY - rect.top)  / rect.height - 0.5;
+    mouseX.set(cx);
+    mouseY.set(cy);
+
+    // Spotlight follows mouse
+    const sx = ((e.clientX - rect.left) / rect.width)  * 100;
+    const sy = ((e.clientY - rect.top)  / rect.height) * 100;
+    setSpotlight({ x: sx, y: sy });
+  }, [mouseX, mouseY]);
+
+  const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => {
-    // x.set(0);
-    // y.set(0);
     setIsHovered(false);
+    mouseX.set(0);
+    mouseY.set(0);
+    setSpotlight({ x: 50, y: 50 });
   };
 
   return (
     <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      initial={{ opacity: 0, y: 48, scale: 0.94 }}
       whileInView={{
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-          duration: 0.5,
-          delay: index * 0.08,
-          ease: [0.19, 1, 0.22, 1]
-        }
+        opacity: 1, y: 0, scale: 1,
+        transition: { duration: 0.6, delay: index * 0.09, ease: [0.22, 1, 0.36, 1] }
       }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.15 }}
+      style={{ perspective: 1000 }}
     >
+      {/* ── 3D Tilt wrapper ── */}
       <motion.div
-        onMouseEnter={() => setIsHovered(true)}
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        whileHover={{
-          y: -6,
-          transition: { duration: 0.3 }
+        style={{
+          rotateX,
+          rotateY,
+          scale,
+          transformStyle: 'preserve-3d',
+          borderRadius: 20,
+          overflow: 'hidden',
+          background: isHovered
+            ? 'rgba(22,22,30,0.98)'
+            : 'rgba(17,17,23,0.92)',
+          border: isHovered
+            ? '1px solid rgba(201,168,76,0.35)'
+            : '1px solid rgba(255,255,255,0.07)',
+          boxShadow: isHovered
+            ? '0 32px 80px rgba(0,0,0,0.75), 0 0 60px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,255,255,0.08)'
+            : '0 8px 32px rgba(0,0,0,0.5)',
+          cursor: 'none',
+          position: 'relative',
+          willChange: 'transform',
+          transition: 'border-color 0.35s, box-shadow 0.35s, background 0.35s',
         }}
       >
-        <motion.div
+        {/* ── Mouse-tracked spotlight ── */}
+        <div
           style={{
-            borderRadius: 'var(--radius-lg)',
-            overflow: 'hidden',
-            background: isHovered ? 'rgba(25,25,33,0.98)' : 'rgba(17,17,23,0.9)',
-            border: isHovered ? '1px solid rgba(201,168,76,0.3)' : '1px solid var(--border)',
-            transition: 'all 0.3s ease',
-            boxShadow: isHovered
-              ? '0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(201,168,76,0.2)'
-              : '0 4px 16px rgba(0,0,0,0.4)',
-            cursor: 'none',
-            position: 'relative',
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 20,
+            opacity: isHovered ? 1 : 0,
+            background: `radial-gradient(ellipse 280px 220px at ${spotlight.x}% ${spotlight.y}%, rgba(201,168,76,0.13) 0%, rgba(244,208,63,0.06) 40%, transparent 70%)`,
+            transition: 'opacity 0.3s',
+            pointerEvents: 'none',
+            zIndex: 2,
           }}
-        >
-          {/* Image */}
-          <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
-            <motion.img
-              src={car.image}
-              alt={car.name}
-              animate={{
-                scale: isHovered ? 1.05 : 1,
-              }}
-              transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(17,17,23,0.95) 0%, rgba(17,17,23,0.1) 55%)'
-            }}/>
+        />
 
-            {/* Category badge */}
+        {/* ── Top gold accent line ── */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 3,
+          background: isHovered
+            ? 'linear-gradient(to right, transparent 5%, #C9A84C 30%, #F4D03F 50%, #E0C06A 70%, transparent 95%)'
+            : 'linear-gradient(to right, transparent, rgba(201,168,76,0.15), transparent)',
+          boxShadow: isHovered ? '0 0 24px rgba(201,168,76,0.8), 0 0 50px rgba(201,168,76,0.3)' : 'none',
+          transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)',
+          pointerEvents: 'none',
+        }}/>
+
+        {/* ── Image area ── */}
+        <div style={{ position: 'relative', height: 260, overflow: 'hidden', zIndex: 1 }}>
+          <motion.img
+            src={car.image}
+            alt={car.name}
+            onError={(e) => { e.currentTarget.src = `https://placehold.co/800x600/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
+            animate={{ scale: isHovered ? 1.08 : 1 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', willChange: 'transform' }}
+          />
+
+          {/* Deep gradient overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: isHovered
+              ? 'linear-gradient(to top, rgba(22,22,30,0.98) 0%, rgba(22,22,30,0.45) 45%, rgba(22,22,30,0.1) 75%)'
+              : 'linear-gradient(to top, rgba(17,17,23,0.98) 0%, rgba(17,17,23,0.5) 50%, rgba(17,17,23,0.1) 80%)',
+            transition: 'background 0.4s',
+          }}/>
+
+          {/* Category badge */}
+          <motion.span
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: index * 0.1 + 0.3 }}
+            style={{
+              position: 'absolute', top: 16, left: 16,
+              padding: '5px 12px',
+              borderRadius: 6,
+              fontFamily: 'var(--font-ui)', fontSize: 9,
+              fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase',
+              background: 'rgba(201,168,76,0.15)',
+              border: '1px solid rgba(201,168,76,0.45)',
+              color: 'var(--gold)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 0 16px rgba(201,168,76,0.15)',
+            }}
+          >
+            {car.category}
+          </motion.span>
+
+          {!car.inStock && (
             <motion.span
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: index * 0.1 + 0.3 }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: index * 0.1 + 0.4, type: 'spring', stiffness: 260 }}
               style={{
-                position: 'absolute',
-                top: 16,
-                left: 16,
-                padding: '6px 14px',
+                position: 'absolute', top: 16, right: 16,
+                padding: '5px 10px',
                 borderRadius: 6,
-                fontFamily: 'var(--font-ui)',
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                background: 'rgba(201,168,76,0.18)',
-                border: '1px solid rgba(201,168,76,0.5)',
-                color: 'var(--gold)',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              {car.category}
-            </motion.span>
-
-            {!car.inStock && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: index * 0.1 + 0.4, type: 'spring' }}
-                style={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  padding: '6px 12px',
-                  borderRadius: 6,
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase',
-                  background: 'rgba(239,68,68,0.2)',
-                  border: '1px solid rgba(239,68,68,0.5)',
-                  color: 'var(--red)',
-                  backdropFilter: 'blur(10px)'
-                }}
-              >
-                PRE-ORDER
-              </motion.span>
-            )}
-
-            {/* Favorite button */}
-            <motion.button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleFavorite(car);
-              }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                position: 'absolute',
-                bottom: 16,
-                right: 16,
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: isFavorite(car.id)
-                  ? 'rgba(201,168,76,0.3)'
-                  : 'rgba(5,5,7,0.7)',
-                border: isFavorite(car.id)
-                  ? '1px solid rgba(201,168,76,0.6)'
-                  : '1px solid rgba(255,255,255,0.15)',
-                color: isFavorite(car.id) ? 'var(--gold)' : 'var(--white-40)',
-                fontSize: 16,
-                cursor: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                fontFamily: 'var(--font-ui)', fontSize: 9,
+                fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase',
+                background: 'rgba(239,68,68,0.18)',
+                border: '1px solid rgba(239,68,68,0.5)',
+                color: 'var(--red)',
                 backdropFilter: 'blur(12px)',
-                boxShadow: isFavorite(car.id)
-                  ? '0 0 20px rgba(201,168,76,0.4)'
-                  : 'none',
-                zIndex: 10,
+                WebkitBackdropFilter: 'blur(12px)',
               }}
             >
-              {isFavorite(car.id) ? '♥' : '♡'}
-            </motion.button>
+              PRE-ORDER
+            </motion.span>
+          )}
+
+          {/* Favorite button */}
+          <motion.button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(car); }}
+            aria-label={isFavorite(car.id) ? `Remove ${car.name} from favorites` : `Add ${car.name} to favorites`}
+            aria-pressed={isFavorite(car.id)}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.92 }}
+            style={{
+              position: 'absolute', bottom: 16, right: 16,
+              width: 40, height: 40, borderRadius: '50%',
+              background: isFavorite(car.id)
+                ? 'rgba(201,168,76,0.25)'
+                : 'rgba(5,5,7,0.75)',
+              border: isFavorite(car.id)
+                ? '1px solid rgba(201,168,76,0.7)'
+                : '1px solid rgba(255,255,255,0.18)',
+              color: isFavorite(car.id) ? 'var(--gold)' : 'var(--white-40)',
+              fontSize: 16, cursor: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              boxShadow: isFavorite(car.id)
+                ? '0 0 24px rgba(201,168,76,0.5)'
+                : '0 4px 14px rgba(0,0,0,0.4)',
+              zIndex: 10,
+              transition: 'all 0.3s',
+            }}
+          >
+            {isFavorite(car.id) ? '♥' : '♡'}
+          </motion.button>
+        </div>
+
+        {/* ── Body ── */}
+        <div style={{ padding: '24px 26px 26px', position: 'relative', zIndex: 1 }}>
+          <p style={{
+            fontFamily: 'var(--font-ui)', fontSize: 9,
+            letterSpacing: '3px', textTransform: 'uppercase',
+            color: 'var(--gold)', marginBottom: 8,
+          }}>
+            {car.brand} · {car.year}
+          </p>
+
+          <h3 style={{
+            fontFamily: 'var(--font-display)', fontSize: 28,
+            fontWeight: 600, color: 'var(--white)',
+            marginBottom: 10, lineHeight: 1.1,
+          }}>
+            {car.name}
+          </h3>
+
+          <p style={{
+            fontSize: 13, color: 'var(--white-40)',
+            fontStyle: 'italic', marginBottom: 20, lineHeight: 1.55,
+          }}>
+            {car.tagline}
+          </p>
+
+          {/* Mini specs — glass pill style */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr',
+            gap: 10, marginBottom: 22,
+          }}>
+            {[
+              { l: 'Power', v: car.specs?.horsepower || car.specs?.horsepowerStr || '–' },
+              { l: '0–60',  v: car.specs?.acceleration || car.specs?.accelStr     || '–' },
+            ].map(({ l, v }) => (
+              <div key={l} style={{
+                padding: '11px 14px',
+                borderRadius: 10,
+                background: isHovered
+                  ? 'rgba(201,168,76,0.05)'
+                  : 'rgba(255,255,255,0.03)',
+                border: isHovered
+                  ? '1px solid rgba(201,168,76,0.18)'
+                  : '1px solid rgba(255,255,255,0.06)',
+                transition: 'all 0.35s',
+                backdropFilter: 'blur(4px)',
+              }}>
+                <p style={{
+                  fontFamily: 'var(--font-ui)', fontSize: 9,
+                  letterSpacing: '2px', textTransform: 'uppercase',
+                  color: 'var(--white-20)', marginBottom: 4,
+                }}>{l}</p>
+                <p style={{
+                  fontFamily: 'var(--font-ui)', fontSize: 15,
+                  fontWeight: 600, color: 'var(--white)',
+                }}>{v}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Body */}
-          <div style={{ padding: '24px 26px 26px' }}>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.2 }}
-              style={{
-                fontFamily: 'var(--font-ui)',
-                fontSize: 10,
-                letterSpacing: '3px',
-                textTransform: 'uppercase',
-                color: 'var(--gold)',
-                marginBottom: 8
-              }}
-            >
-              {car.brand} · {car.year}
-            </motion.p>
+          {/* Price + CTA gold strip */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 12,
+            paddingTop: 18,
+            borderTop: isHovered
+              ? '1px solid rgba(201,168,76,0.25)'
+              : '1px solid rgba(255,255,255,0.06)',
+            transition: 'border-color 0.35s',
+          }}>
+            <div>
+              <p style={{
+                fontFamily: 'var(--font-ui)', fontSize: 9,
+                letterSpacing: '2px', textTransform: 'uppercase',
+                color: 'var(--white-20)', marginBottom: 3,
+              }}>From</p>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 22,
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #C9A84C, #E0C06A 55%, #F4D03F)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                lineHeight: 1.1,
+              }}>
+                {fmt(car.price)}
+              </p>
+            </div>
 
-            <motion.h3
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.3 }}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 28,
-                fontWeight: 600,
-                color: 'var(--white)',
-                marginBottom: 10,
-                lineHeight: 1.1
-              }}
-            >
-              {car.name}
-            </motion.h3>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: index * 0.1 + 0.4 }}
-              style={{
-                fontSize: 13,
-                color: 'var(--white-40)',
-                fontStyle: 'italic',
-                marginBottom: 20,
-                lineHeight: 1.5
-              }}
-            >
-              {car.tagline}
-            </motion.p>
-
-            {/* Mini specs */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.5 }}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-                marginBottom: 22
-              }}
-            >
-              {[
-                { l: 'Power', v: car.specs.horsepower || '–' },
-                { l: '0–60', v: car.specs.acceleration || '–' },
-              ].map(({ l, v }) => (
-                <div
-                  key={l}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    transition: 'all 0.3s'
-                  }}
-                >
-                  <p style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 9,
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    color: 'var(--white-20)',
-                    marginBottom: 4
-                  }}>
-                    {l}
-                  </p>
-                  <p style={{
-                    fontFamily: 'var(--font-ui)',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: 'var(--white)'
-                  }}>
-                    {v}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Price + CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.6 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12
-              }}
-            >
-              <div>
-                <p style={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 9,
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                  color: 'var(--white-20)',
-                  marginBottom: 3
-                }}>
-                  From
-                </p>
-                <p style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 24,
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>
-                  {fmt(car.price)}
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Link
-                  to={`/car/${car.id}`}
-                  className="btn btn-ghost"
-                  data-hover
-                  style={{ padding: '10px 16px', fontSize: 11 }}
-                >
-                  Details
-                </Link>
-                <motion.button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    addToCart(car);
-                  }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="btn btn-gold"
-                  data-hover
-                  style={{
-                    padding: '10px 16px',
-                    fontSize: 11,
-                    zIndex: 10,
-                  }}
-                >
-                  + Garage
-                </motion.button>
-              </div>
-            </motion.div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <Link
+                to={`/car/${car.id}`}
+                className="btn btn-ghost"
+                data-hover
+                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px' }}
+              >
+                Details
+              </Link>
+              <motion.button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(car); }}
+                whileHover={{ scale: 1.04, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                className="btn btn-gold"
+                data-hover
+                style={{ padding: '9px 14px', fontSize: 10, letterSpacing: '1.5px', zIndex: 10 }}
+              >
+                + Garage
+              </motion.button>
+            </div>
           </div>
+        </div>
 
-          {/* Removed shine effect for better performance */}
-        </motion.div>
+        {/* ── 3D floating layer depth indicator ── */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          borderRadius: 20,
+          background: isHovered
+            ? 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%)'
+            : 'none',
+          pointerEvents: 'none',
+          zIndex: 4,
+          transition: 'background 0.4s',
+        }}/>
       </motion.div>
     </motion.div>
   );

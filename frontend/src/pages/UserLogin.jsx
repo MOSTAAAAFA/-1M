@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Brand1M from '../components/Brand1M';
 import API_BASE from '../utils/api';
 
@@ -13,6 +13,9 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [shakeError, setShakeError] = useState(false);
   const navigate = useNavigate();
 
   // Real-time validation
@@ -25,6 +28,31 @@ export default function Login() {
     return password.length >= 6;
   };
 
+  // Get validation state for visual indicators
+  const getFieldValidation = (field) => {
+    if (!touched[field] || !formData[field]) return null;
+    if (field === 'email') return validateEmail(formData.email) ? 'valid' : 'invalid';
+    if (field === 'password') return validatePassword(formData.password) ? 'valid' : 'invalid';
+    return null;
+  };
+
+  // Password strength calculation
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: '', color: 'transparent' };
+    let strength = 0;
+    if (password.length >= 6) strength += 25;
+    if (password.length >= 8) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
+
+    if (strength <= 25) return { strength: 25, label: 'Weak', color: '#ef4444' };
+    if (strength <= 50) return { strength: 50, label: 'Fair', color: '#f59e0b' };
+    if (strength <= 75) return { strength: 75, label: 'Good', color: '#C9A84C' };
+    return { strength: 100, label: 'Strong', color: '#10b981' };
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
@@ -33,6 +61,9 @@ export default function Login() {
       ...prev,
       [name]: newValue,
     }));
+
+    // Mark as touched
+    setTouched(prev => ({ ...prev, [name]: true }));
 
     // Clear errors on change
     if (errors[name]) {
@@ -46,6 +77,8 @@ export default function Login() {
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+
     let error = '';
 
     if (name === 'email') {
@@ -88,6 +121,9 @@ export default function Login() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setTouched({ email: true, password: true });
+      setShakeError(true);
+      setTimeout(() => setShakeError(false), 500);
       return;
     }
 
@@ -99,6 +135,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
@@ -107,23 +144,30 @@ export default function Login() {
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
+      if (response.ok && data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
 
-        // Redirect to home
-        navigate('/');
+        // Show success animation
+        setShowSuccess(true);
+
+        // Redirect after animation
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       } else {
         setServerError(data.message || 'Invalid credentials. Please try again.');
+        setShakeError(true);
+        setTimeout(() => setShakeError(false), 500);
       }
     } catch (error) {
       console.error('Login error:', error);
       setServerError('Connection error. Please check your internet connection and try again.');
+      setShakeError(true);
+      setTimeout(() => setShakeError(false), 500);
     } finally {
       setLoading(false);
     }
@@ -149,6 +193,66 @@ export default function Login() {
         backgroundImage: 'radial-gradient(circle at 2px 2px, var(--gold) 1px, transparent 0)',
         backgroundSize: '40px 40px',
       }}/>
+
+      {/* Success Animation Overlay */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.85)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 200,
+                damping: 15,
+                delay: 0.1
+              }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #C9A84C, #E0C06A)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 60px rgba(201,168,76,0.6)',
+              }}
+            >
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#000"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <motion.path
+                  d="M20 6L9 17l-5-5"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                />
+              </svg>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header Section - Stacked Vertically */}
       <div style={{
@@ -236,7 +340,11 @@ export default function Login() {
       {/* Login Box */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          x: shakeError ? [0, -10, 10, -10, 10, 0] : 0
+        }}
         transition={{ duration: 0.6 }}
         style={{
           maxWidth: 480,
@@ -306,40 +414,67 @@ export default function Login() {
               }}>
                 Email Address
               </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@example.com"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: errors.email ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  color: 'var(--white)',
-                  fontSize: 14,
-                  fontFamily: 'var(--font-ui)',
-                  transition: 'all 0.3s ease',
-                  outline: 'none',
-                }}
-                onFocus={(e) => {
-                  if (!errors.email) {
-                    e.target.style.border = '1px solid var(--gold)';
-                    e.target.style.background = 'rgba(201,168,76,0.05)';
-                  }
-                }}
-                onBlur={(e) => {
-                  handleBlur(e);
-                  if (!errors.email) {
-                    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                  }
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="john@example.com"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  className={`premium-input ${getFieldValidation('email') || ''}`}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    paddingRight: getFieldValidation('email') ? '44px' : '16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: errors.email ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    color: 'var(--white)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                  }}
+                />
+                {/* Validation Indicator */}
+                <AnimatePresence>
+                  {getFieldValidation('email') && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      style={{
+                        position: 'absolute',
+                        right: 16,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      aria-live="polite"
+                    >
+                      {getFieldValidation('email') === 'valid' ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" fill="#10b981" />
+                          <path d="M8 12l3 3 5-6" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" fill="#ef4444" />
+                          <path d="M8 8l8 8M16 8l-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               {errors.email && (
-                <p style={{
+                <p id="email-error" role="alert" style={{
                   fontSize: 12,
                   color: '#ef4444',
                   marginTop: 6,
@@ -364,40 +499,116 @@ export default function Login() {
               }}>
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••••"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: errors.password ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  color: 'var(--white)',
-                  fontSize: 14,
-                  fontFamily: 'var(--font-ui)',
-                  transition: 'all 0.3s ease',
-                  outline: 'none',
-                }}
-                onFocus={(e) => {
-                  if (!errors.password) {
-                    e.target.style.border = '1px solid var(--gold)';
-                    e.target.style.background = 'rgba(201,168,76,0.05)';
-                  }
-                }}
-                onBlur={(e) => {
-                  handleBlur(e);
-                  if (!errors.password) {
-                    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                  }
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="••••••••••"
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? 'password-error' : formData.password ? 'password-strength' : undefined}
+                  className={`premium-input ${getFieldValidation('password') || ''}`}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    paddingRight: getFieldValidation('password') ? '44px' : '16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: errors.password ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    color: 'var(--white)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                  }}
+                />
+                {/* Validation Indicator */}
+                <AnimatePresence>
+                  {getFieldValidation('password') && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      style={{
+                        position: 'absolute',
+                        right: 16,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      aria-live="polite"
+                    >
+                      {getFieldValidation('password') === 'valid' ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" fill="#10b981" />
+                          <path d="M8 12l3 3 5-6" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" fill="#ef4444" />
+                          <path d="M8 8l8 8M16 8l-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Password Strength Indicator */}
+              <AnimatePresence>
+                {formData.password && touched.password && !errors.password && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    id="password-strength"
+                    aria-live="polite"
+                    style={{ marginTop: 8 }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginBottom: 4,
+                    }}>
+                      <div style={{
+                        flex: 1,
+                        height: 3,
+                        background: 'rgba(255,255,255,0.1)',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                      }}>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${passwordStrength.strength}%` }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            height: '100%',
+                            background: passwordStrength.color,
+                            borderRadius: 2,
+                          }}
+                        />
+                      </div>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: passwordStrength.color,
+                        minWidth: 48,
+                      }}>
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {errors.password && (
-                <p style={{
+                <p id="password-error" role="alert" style={{
                   fontSize: 12,
                   color: '#ef4444',
                   marginTop: 6,
@@ -454,29 +665,35 @@ export default function Login() {
             </div>
 
             {/* Server Error */}
-            {serverError && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  padding: '12px 16px',
-                  background: 'rgba(239,68,68,0.1)',
-                  border: '1px solid rgba(239,68,68,0.3)',
-                  borderRadius: '8px',
-                  color: '#ef4444',
-                  fontSize: 13,
-                  marginBottom: 24,
-                  textAlign: 'center',
-                }}
-              >
-                {serverError}
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {serverError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  role="alert"
+                  aria-live="assertive"
+                  style={{
+                    padding: '12px 16px',
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: '8px',
+                    color: '#ef4444',
+                    fontSize: 13,
+                    marginBottom: 24,
+                    textAlign: 'center',
+                  }}
+                >
+                  {serverError}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
+              aria-busy={loading}
               style={{
                 width: '100%',
                 padding: '16px',
@@ -514,14 +731,17 @@ export default function Login() {
               }}
             >
               {loading && (
-                <div style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid #000',
-                  borderTop: '2px solid transparent',
-                  borderRadius: '50%',
-                  animation: 'spin 0.6s linear infinite',
-                }}/>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    border: '2px solid #000',
+                    borderTop: '2px solid transparent',
+                    borderRadius: '50%',
+                  }}
+                />
               )}
               {loading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
@@ -571,8 +791,18 @@ export default function Login() {
       </motion.div>
 
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        .premium-input:focus {
+          border: 1px solid var(--gold) !important;
+          background: rgba(201,168,76,0.05) !important;
+          box-shadow: 0 0 0 3px rgba(201,168,76,0.1), 0 0 20px rgba(201,168,76,0.2) !important;
+        }
+
+        .premium-input.valid:not(:focus) {
+          border: 1px solid rgba(16,185,129,0.4) !important;
+        }
+
+        .premium-input.invalid:not(:focus) {
+          border: 1px solid rgba(239,68,68,0.4) !important;
         }
       `}</style>
     </div>

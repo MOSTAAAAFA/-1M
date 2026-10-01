@@ -1,0 +1,201 @@
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  darkMode: ['class'],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./index.html"
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Brand Colors
+        gold: {
+          50: '#FFF8E1',
+          100: '#FDE68A',
+          200: '#F4D03F',
+          300: '#E0C06A',
+          400: '#D4B85C',
+          500: '#C9A84C',
+          600: '#B5923C',
+          700: '#A38934',
+          800: '#8B7428',
+          900: '#6B5A1E',
+        },
+        black: {
+          50: '#27272f',
+          100: '#1f1f28',
+          200: '#18181f',
+          300: '#111117',
+          400: '#0f0f15',
+          500: '#0a0a0e',
+          600: '#050507',
+          700: '#030305',
+          800: '#020203',
+          900: '#010102',
+        },
+        white: {
+          50: '#FFFFFF',
+          100: '#F7F6F3',
+          200: '#F0EDE8',
+          300: 'rgba(240,237,232,0.85)',
+          400: 'rgba(240,237,232,0.70)',
+          500: 'rgba(240,237,232,0.62)',
+          600: 'rgba(240,237,232,0.48)',
+          700: 'rgba(240,237,232,0.40)',
+          800: 'rgba(240,237,232,0.32)',
+          900: 'rgba(240,237,232,0.20)',
+        },
+        // Semantic Colors
+        success: '#4ADE80',
+        error: '#EF4444',
+        warning: '#FBBF24',
+        info: '#60A5FA',
+      },
+      fontFamily: {
+        display: ['Cormorant Garamond', 'Georgia', 'serif'],
+        ui: ['Space Grotesk', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+      },
+      fontSize: {
+        'xs': '10px',
+        'sm': '12px',
+        'base': '15px',
+        'lg': '17px',
+        'xl': '20px',
+        '2xl': '26px',
+        '3xl': '32px',
+        '4xl': '42px',
+        '5xl': '56px',
+        '6xl': '72px',
+        '7xl': '100px',
+        '8xl': '120px',
+      },
+      spacing: {
+        '1': '4px',
+        '2': '8px',
+        '3': '12px',
+        '4': '16px',
+        '5': '20px',
+        '6': '24px',
+        '8': '32px',
+        '10': '40px',
+        '12': '48px',
+        '16': '64px',
+        '20': '80px',
+        '24': '100px',
+      },
+      borderRadius: {
+        'none': '0',
+        'sm': '6px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '20px',
+        '2xl': '32px',
+        'full': '9999px',
+      },
+      boxShadow: {
+        'sm': '0 4px 16px rgba(0,0,0,0.4)',
+        'md': '0 8px 40px rgba(0,0,0,0.55)',
+        'lg': '0 20px 80px rgba(0,0,0,0.7)',
+        'gold-sm': '0 4px 16px rgba(201,168,76,0.20)',
+        'gold-md': '0 8px 32px rgba(201,168,76,0.30)',
+        'gold-lg': '0 0 80px rgba(201,168,76,0.30)',
+      },
+      animation: {
+        'gold-shimmer': 'goldShimmer 4s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'fade-up': 'fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+        'scale-in': 'scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        'ken-burns': 'kenBurns 20s ease-in-out infinite',
+        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'shimmer': 'shimmer 1.4s ease infinite',
+        'slide-in-right': 'slideInRight 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        'spin': 'spin 1s linear infinite',
+      },
+      keyframes: {
+        goldShimmer: {
+          '0%, 100%': { backgroundPosition: '0% center' },
+          '50%': { backgroundPosition: '100% center' },
+        },
+        fadeIn: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        fadeUp: {
+          from: { opacity: '0', transform: 'translateY(32px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          from: { opacity: '0', transform: 'scale(0.92)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        kenBurns: {
+          '0%': { transform: 'scale(1) translateX(0) translateY(0)' },
+          '33%': { transform: 'scale(1.06) translateX(-1%) translateY(-0.5%)' },
+          '66%': { transform: 'scale(1.04) translateX(1%) translateY(0.5%)' },
+          '100%': { transform: 'scale(1) translateX(0) translateY(0)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(201,168,76,0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(201,168,76,0.6)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        shimmer: {
+          from: { backgroundPosition: '-400px 0' },
+          to: { backgroundPosition: '400px 0' },
+        },
+        slideInRight: {
+          from: { transform: 'translateX(100%)', opacity: '0' },
+          to: { transform: 'translateX(0)', opacity: '1' },
+        },
+        spin: {
+          to: { transform: 'rotate(360deg)' },
+        },
+      },
+      transitionTimingFunction: {
+        'premium': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'cinematic': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'bounce': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '250ms',
+        'default': '350ms',
+        'slow': '500ms',
+        'slower': '700ms',
+      },
+      backdropBlur: {
+        'sm': '8px',
+        'md': '16px',
+        'lg': '24px',
+        'xl': '32px',
+      },
+      zIndex: {
+        'base': '1',
+        'dropdown': '1000',
+        'sticky': '1100',
+        'overlay': '1200',
+        'modal': '1300',
+        'notification': '1400',
+        'tooltip': '1500',
+        'cursor': '9999',
+        'grain': '9998',
+      },
+      maxWidth: {
+        'container': '1400px',
+      },
+      minHeight: {
+        'touch': '44px',
+      },
+    },
+  },
+  plugins: [],
+}
+
+export default config

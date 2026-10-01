@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1M Motors — Brand Presentation</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('../frontend/src/styles/design-tokens.css');
+    :root {
+      --color-primary: #C9A84C;
+      --color-primary-light: #E0C06A;
+      --color-primary-bright: #F4D03F;
+      --color-background: #050507;
+      --color-surface: #111117;
+      --color-surface-2: #18181f;
+      --color-foreground: #F0EDE8;
+      --color-foreground-muted: rgba(240,237,232,0.62);
+      --color-border: rgba(255,255,255,0.06);
+      --gradient-primary: linear-gradient(135deg, #C9A84C 0%, #E0C06A 50%, #F4D03F 100%);
+      --gradient-gold-text: linear-gradient(135deg, #F4D03F 0%, #E0C06A 50%, #C9A84C 100%);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-ui: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--color-background);
+      color: var(--color-foreground);
+      font-family: var(--font-body);
+      overflow: hidden;
+    }
+
+    .slide-deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    @media (min-width: 769px) {
+      .slide-deck {
+        max-width: calc(100vh * 16 / 9);
+        max-height: calc(100vw * 9 / 16);
+        margin: auto;
+        position: absolute;
+        inset: 0;
+      }
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      background: var(--color-background);
+      overflow: hidden;
+    }
+
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide-content {
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .eyebrow {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 72px);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--color-foreground);
+    }
+
+    .slide-title .gold {
+      background: var(--gradient-gold-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+
+    .slide-subtitle {
+      font-family: var(--font-body);
+      font-size: clamp(14px, 2vw, 18px);
+      color: var(--color-foreground-muted);
+      max-width: 600px;
+      line-height: 1.65;
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--gradient-primary);
+      margin: 8px 0;
+    }
+
+    .logo-circle {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.5);
+      margin-bottom: 16px;
+    }
+
+    /* Slide backgrounds */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    }
+
+    .gold-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--color-primary), var(--color-primary-light), var(--color-primary), transparent);
+    }
+
+    /* Grid layout for feature slides */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .feature-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: left;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--color-foreground);
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--color-foreground-muted);
+      line-height: 1.6;
+    }
+
+    .feature-card .icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(201,168,76,0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--color-primary);
+      font-size: 24px;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 32px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 700;
+      background: var(--gradient-gold-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-foreground-muted);
+    }
+
+    /* Chart container */
+    .chart-container {
+      width: min(80%, 700px);
+      height: clamp(200px, 35vh, 350px);
+    }
+
+    /* Navigation */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--gradient-primary);
+      transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1000;
+    }
+
+    .nav-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--color-primary);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(201,168,76,0.2);
+      border-color: rgba(201,168,76,0.6);
+    }
+
+    .slide-counter {
+      color: var(--color-foreground-muted);
+      font-family: var(--font-ui);
+      font-size: 14px;
+    }
+
+    /* Animations */
+    .animate-fade-up {
+      animation: fadeUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-stagger > * {
+      opacity: 0;
+      animation: fadeUp 0.5s ease-out forwards;
+    }
+    .animate-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+    .animate-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+    .animate-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+    .animate-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+    .animate-stagger > *:nth-child(5) { animation-delay: 0.5s; }
+    .animate-stagger > *:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .slide { padding: 32px 24px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="slide-deck">
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+      <div class="slide-content">
+        <div class="logo-circle">1M</div>
+        <div class="eyebrow">Brand Presentation</div>
+        <h1 class="slide-title">Where Engineering<br>Becomes <span class="gold">Emotion</span></h1>
+        <div class="divider"></div>
+        <p class="slide-subtitle">A luxury automotive experience built on precision, exclusivity, and uncompromising excellence.</p>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 2: Mission -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Our Mission</div>
+        <h1 class="slide-title">Redefining <span class="gold">Luxury</span><br>Automotive</h1>
+        <div class="divider"></div>
+        <p class="slide-subtitle">To curate and deliver the world's most exceptional vehicles to discerning clients who demand nothing less than perfection.</p>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 3: Values -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Core Values</div>
+        <h1 class="slide-title">The <span class="gold">1M</span> Standard</h1>
+        <div class="divider" style="margin-bottom: 32px;"></div>
+        <div class="feature-grid animate-stagger">
+          <div class="feature-card">
+            <div class="icon">precision</div>
+            <h3>Precision</h3>
+            <p>Every detail matters. From horsepower figures to delivery experience, we obsess over accuracy.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">luxury</div>
+            <h3>Luxury</h3>
+            <p>Confident, understated, never shouty. Our experience speaks through quality, not volume.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">exclusive</div>
+            <h3>Exclusivity</h3>
+            <p>Private allocations, by appointment. Scarcity done with taste and respect for our clients.</p>
+          </div>
+        </div>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 4: By The Numbers -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Performance</div>
+        <h1 class="slide-title">By The <span class="gold">Numbers</span></h1>
+        <div class="divider" style="margin-bottom: 32px;"></div>
+        <div class="stats-grid animate-stagger">
+          <div class="stat-card">
+            <div class="stat-number">690</div>
+            <div class="stat-label">Horsepower</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">3.0s</div>
+            <div class="stat-label">0-60 MPH</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">205</div>
+            <div class="stat-label">Top Speed MPH</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">$274K</div>
+            <div class="stat-label">Starting From</div>
+          </div>
+        </div>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 5: Collection -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">The Collection</div>
+        <h1 class="slide-title">Curated <span class="gold">Excellence</span></h1>
+        <div class="divider"></div>
+        <p class="slide-subtitle">Each vehicle in our collection is hand-selected for its engineering prowess, design excellence, and emotional resonance.</p>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 6: Market -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Market Opportunity</div>
+        <h1 class="slide-title">The Luxury <span class="gold">Market</span></h1>
+        <div class="divider" style="margin-bottom: 32px;"></div>
+        <div class="chart-container">
+          <canvas id="marketChart"></canvas>
+        </div>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 7: Technology -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Technology</div>
+        <h1 class="slide-title">Digital <span class="gold">Experience</span></h1>
+        <div class="divider" style="margin-bottom: 32px;"></div>
+        <div class="feature-grid animate-stagger">
+          <div class="feature-card">
+            <div class="icon">3D</div>
+            <h3>3D Showroom</h3>
+            <p>Interactive Three.js-powered vehicle visualization from every angle.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">AI</div>
+            <h3>AI Assistant</h3>
+            <p>Groq-powered concierge for instant vehicle recommendations and specs.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">Config</div>
+            <h3>Configurator</h3>
+            <p>Real-time vehicle customization with live pricing and availability.</p>
+          </div>
+        </div>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 8: Brand Identity -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Brand Identity</div>
+        <h1 class="slide-title">Visual <span class="gold">Language</span></h1>
+        <div class="divider"></div>
+        <p class="slide-subtitle">Gold on black. Precision in every pixel. Our visual identity reflects the engineering excellence of the vehicles we represent.</p>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 9: Revenue -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="eyebrow">Growth Strategy</div>
+        <h1 class="slide-title">Revenue <span class="gold">Projection</span></h1>
+        <div class="divider" style="margin-bottom: 32px;"></div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Slide 10: CTA -->
+    <div class="slide">
+      <div class="slide-content">
+        <div class="logo-circle">1M</div>
+        <div class="eyebrow">Experience Excellence</div>
+        <h1 class="slide-title">Join The <span class="gold">1M</span> Family</h1>
+        <div class="divider"></div>
+        <p class="slide-subtitle">Where engineering becomes emotion. Where precision meets passion. Where you belong.</p>
+      </div>
+      <div class="gold-line"></div>
+    </div>
+
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()">←</button>
+    <span class="slide-counter"><span id="current">1</span> / <span id="total">10</span></span>
+    <button class="nav-btn" onclick="nextSlide()">→</button>
+  </div>
+
+  <script>
+    let current = 1;
+    const total = document.querySelectorAll('.slide').length;
+    document.getElementById('total').textContent = total;
+
+    function showSlide(n) {
+      if (n < 1) n = 1;
+      if (n > total) n = total;
+      current = n;
+      document.querySelectorAll('.slide').forEach((s, i) => {
+        s.classList.toggle('active', i === n - 1);
+      });
+      document.getElementById('current').textContent = n;
+      document.getElementById('progressBar').style.width = (n / total * 100) + '%';
+    }
+
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-controls')) nextSlide();
+    });
+
+    showSlide(1);
+
+    // Market Chart
+    new Chart(document.getElementById('marketChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Ultra-Luxury', 'Performance', 'Grand Touring', 'Electric'],
+        datasets: [{
+          data: [35, 30, 20, 15],
+          backgroundColor: ['#C9A84C', '#E0C06A', '#F4D03F', '#B5923C'],
+          borderColor: '#050507',
+          borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#F0EDE8',
+              font: { family: 'Space Grotesk', size: 12 },
+              padding: 20
+            }
+          }
+        }
+      }
+    });
+
+    // Revenue Chart
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: {
+        labels: ['Q1 2026', 'Q2 2026', 'Q3 2026', 'Q4 2026', 'Q1 2027', 'Q2 2027'],
+        datasets: [{
+          label: 'Revenue ($M)',
+          data: [2.1, 3.4, 5.2, 7.8, 10.5, 14.2],
+          borderColor: '#C9A84C',
+          backgroundColor: 'rgba(201,168,76,0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#C9A84C',
+          pointBorderColor: '#050507',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: 'rgba(240,237,232,0.62)', font: { family: 'Space Grotesk' } }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: {
+              color: 'rgba(240,237,232,0.62)',
+              font: { family: 'Space Grotesk' },
+              callback: (v) => '$' + v + 'M'
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

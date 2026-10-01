@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Brand1M from '../components/Brand1M';
 import API_BASE from '../utils/api';
 
-export default function Login() {
+export default function AdminLogin() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
   });
   const [errors, setErrors] = useState({});
+  const [validFields, setValidFields] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [shakeError, setShakeError] = useState(false);
   const navigate = useNavigate();
 
   // Real-time validation
@@ -34,6 +37,21 @@ export default function Login() {
       [name]: newValue,
     }));
 
+    // Real-time validation
+    if (name === 'email' && value) {
+      const isValid = validateEmail(value);
+      setValidFields(prev => ({ ...prev, email: isValid }));
+      if (isValid) {
+        setErrors(prev => ({ ...prev, email: '' }));
+      }
+    } else if (name === 'password' && value) {
+      const isValid = validatePassword(value);
+      setValidFields(prev => ({ ...prev, password: isValid }));
+      if (isValid) {
+        setErrors(prev => ({ ...prev, password: '' }));
+      }
+    }
+
     // Clear errors on change
     if (errors[name]) {
       setErrors(prev => ({
@@ -51,14 +69,18 @@ export default function Login() {
     if (name === 'email') {
       if (!value) {
         error = 'Email is required';
+        setValidFields(prev => ({ ...prev, email: false }));
       } else if (!validateEmail(value)) {
         error = 'Please enter a valid email address';
+        setValidFields(prev => ({ ...prev, email: false }));
       }
     } else if (name === 'password') {
       if (!value) {
         error = 'Password is required';
+        setValidFields(prev => ({ ...prev, password: false }));
       } else if (!validatePassword(value)) {
         error = 'Password must be at least 6 characters';
+        setValidFields(prev => ({ ...prev, password: false }));
       }
     }
 
@@ -71,6 +93,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
+    setShakeError(false);
 
     // Validate all fields
     const newErrors = {};
@@ -88,6 +111,8 @@ export default function Login() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setShakeError(true);
+      setTimeout(() => setShakeError(false), 500);
       return;
     }
 
@@ -99,6 +124,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
@@ -107,23 +133,34 @@ export default function Login() {
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
+      if (response.ok && data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
 
-        // Redirect to home
-        navigate('/');
+        // Show success animation
+        setShowSuccess(true);
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (data.user.role === 'admin' || data.user.isAdmin === true) {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/');
+          }
+        }, 1500);
       } else {
         setServerError(data.message || 'Invalid credentials. Please try again.');
+        setShakeError(true);
+        setTimeout(() => setShakeError(false), 500);
       }
     } catch (error) {
       console.error('Login error:', error);
       setServerError('Connection error. Please check your internet connection and try again.');
+      setShakeError(true);
+      setTimeout(() => setShakeError(false), 500);
     } finally {
       setLoading(false);
     }
@@ -149,6 +186,51 @@ export default function Login() {
         backgroundImage: 'radial-gradient(circle at 2px 2px, var(--gold) 1px, transparent 0)',
         backgroundSize: '40px 40px',
       }}/>
+
+      {/* Success Animation Overlay */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', duration: 0.8 }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #C9A84C, #E0C06A)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 80px rgba(201,168,76,0.6)',
+              }}
+            >
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <motion.path
+                  d="M20 6L9 17l-5-5"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                />
+              </svg>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header Section - Stacked Vertically */}
       <div style={{
@@ -236,7 +318,11 @@ export default function Login() {
       {/* Login Box */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          x: shakeError ? [0, -10, 10, -10, 10, 0] : 0
+        }}
         transition={{ duration: 0.6 }}
         style={{
           maxWidth: 480,
@@ -259,6 +345,38 @@ export default function Login() {
 
         {/* Content */}
         <div style={{ padding: '48px 40px' }}>
+          {/* Admin Portal Badge */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: 24,
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 20px',
+              background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(224,192,106,0.15))',
+              border: '1px solid rgba(201,168,76,0.4)',
+              borderRadius: '12px',
+              boxShadow: '0 0 20px rgba(201,168,76,0.2)',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span style={{
+                fontFamily: 'var(--font-ui)',
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                color: 'var(--gold)',
+              }}>
+                Admin Portal
+              </span>
+            </div>
+          </div>
+
           {/* Title */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <h1 style={{
@@ -279,19 +397,19 @@ export default function Login() {
               color: 'var(--gold)',
               marginBottom: 4,
             }}>
-              Customer Login
+              Administrator Access
             </p>
 
             <p style={{
               fontSize: 13,
               color: 'var(--white-40)',
             }}>
-              Sign in to access your account
+              Sign in to manage the platform
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} role="form" aria-label="Admin login form">
             {/* Email */}
             <div style={{ marginBottom: 20 }}>
               <label style={{
@@ -306,40 +424,73 @@ export default function Login() {
               }}>
                 Email Address
               </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@example.com"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: errors.email ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  color: 'var(--white)',
-                  fontSize: 14,
-                  fontFamily: 'var(--font-ui)',
-                  transition: 'all 0.3s ease',
-                  outline: 'none',
-                }}
-                onFocus={(e) => {
-                  if (!errors.email) {
-                    e.target.style.border = '1px solid var(--gold)';
-                    e.target.style.background = 'rgba(201,168,76,0.05)';
-                  }
-                }}
-                onBlur={(e) => {
-                  handleBlur(e);
-                  if (!errors.email) {
-                    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                  }
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="admin@1mmotors.com"
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px 14px 16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: errors.email ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '20px',
+                    color: 'var(--white)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                    boxShadow: validFields.email ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none',
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.email) {
+                      e.target.style.border = '1px solid var(--gold)';
+                      e.target.style.background = 'rgba(201,168,76,0.05)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(201,168,76,0.15), 0 0 20px rgba(201,168,76,0.2)';
+                    }
+                  }}
+                  onBlur={(e) => {
+                    handleBlur(e);
+                    if (!errors.email) {
+                      e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+                      e.target.style.background = 'rgba(255,255,255,0.05)';
+                      e.target.style.boxShadow = validFields.email ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none';
+                    }
+                  }}
+                />
+                {/* Validation indicator */}
+                <div style={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 24,
+                  height: 24,
+                }}>
+                  {validFields.email && !errors.email && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  )}
+                  {errors.email && formData.email && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
               {errors.email && (
-                <p style={{
+                <p id="email-error" role="alert" style={{
                   fontSize: 12,
                   color: '#ef4444',
                   marginTop: 6,
@@ -364,40 +515,73 @@ export default function Login() {
               }}>
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••••"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: errors.password ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  color: 'var(--white)',
-                  fontSize: 14,
-                  fontFamily: 'var(--font-ui)',
-                  transition: 'all 0.3s ease',
-                  outline: 'none',
-                }}
-                onFocus={(e) => {
-                  if (!errors.password) {
-                    e.target.style.border = '1px solid var(--gold)';
-                    e.target.style.background = 'rgba(201,168,76,0.05)';
-                  }
-                }}
-                onBlur={(e) => {
-                  handleBlur(e);
-                  if (!errors.password) {
-                    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                  }
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="••••••••••"
+                  aria-invalid={errors.password ? 'true' : 'false'}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px 14px 16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: errors.password ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '20px',
+                    color: 'var(--white)',
+                    fontSize: 14,
+                    fontFamily: 'var(--font-ui)',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                    boxShadow: validFields.password ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none',
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.password) {
+                      e.target.style.border = '1px solid var(--gold)';
+                      e.target.style.background = 'rgba(201,168,76,0.05)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(201,168,76,0.15), 0 0 20px rgba(201,168,76,0.2)';
+                    }
+                  }}
+                  onBlur={(e) => {
+                    handleBlur(e);
+                    if (!errors.password) {
+                      e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+                      e.target.style.background = 'rgba(255,255,255,0.05)';
+                      e.target.style.boxShadow = validFields.password ? '0 0 0 3px rgba(34,197,94,0.1)' : 'none';
+                    }
+                  }}
+                />
+                {/* Validation indicator */}
+                <div style={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 24,
+                  height: 24,
+                }}>
+                  {validFields.password && !errors.password && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  )}
+                  {errors.password && formData.password && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
               {errors.password && (
-                <p style={{
+                <p id="password-error" role="alert" style={{
                   fontSize: 12,
                   color: '#ef4444',
                   marginTop: 6,
@@ -454,29 +638,32 @@ export default function Login() {
             </div>
 
             {/* Server Error */}
-            {serverError && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  padding: '12px 16px',
-                  background: 'rgba(239,68,68,0.1)',
-                  border: '1px solid rgba(239,68,68,0.3)',
-                  borderRadius: '8px',
-                  color: '#ef4444',
-                  fontSize: 13,
-                  marginBottom: 24,
-                  textAlign: 'center',
-                }}
-              >
-                {serverError}
-              </motion.div>
-            )}
+            <div role="alert" aria-live="assertive">
+              {serverError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: '8px',
+                    color: '#ef4444',
+                    fontSize: 13,
+                    marginBottom: 24,
+                    textAlign: 'center',
+                  }}
+                >
+                  {serverError}
+                </motion.div>
+              )}
+            </div>
 
             {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
+              aria-busy={loading}
               style={{
                 width: '100%',
                 padding: '16px',
@@ -514,13 +701,12 @@ export default function Login() {
               }}
             >
               {loading && (
-                <div style={{
+                <div className="gold-spinner" style={{
                   width: 16,
                   height: 16,
-                  border: '2px solid #000',
-                  borderTop: '2px solid transparent',
+                  border: '2px solid rgba(0,0,0,0.2)',
+                  borderTop: '2px solid #000',
                   borderRadius: '50%',
-                  animation: 'spin 0.6s linear infinite',
                 }}/>
               )}
               {loading ? 'SIGNING IN...' : 'SIGN IN'}
@@ -539,23 +725,14 @@ export default function Login() {
               color: 'var(--white-40)',
               marginBottom: 12,
             }}>
-              Don't have an account?
+              Need admin access?
             </p>
-            <Link
-              to="/register"
-              style={{
-                color: 'var(--gold)',
-                fontSize: 14,
-                fontWeight: 600,
-                textDecoration: 'none',
-                letterSpacing: '1px',
-                transition: 'all 0.3s ease',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--gold-light)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--gold)'}
-            >
-              CREATE ACCOUNT →
-            </Link>
+            <p style={{
+              color: 'var(--white-20)',
+              fontSize: 12,
+            }}>
+              Contact your system administrator
+            </p>
           </div>
 
           {/* Footer */}
@@ -573,6 +750,27 @@ export default function Login() {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        .gold-spinner {
+          animation: spin 0.6s linear infinite;
+        }
+
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        input:focus {
+          animation: focusGlow 0.3s ease-out forwards;
+        }
+
+        @keyframes focusGlow {
+          from {
+            box-shadow: 0 0 0 0 rgba(201,168,76,0);
+          }
+          to {
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15), 0 0 20px rgba(201,168,76,0.2);
+          }
         }
       `}</style>
     </div>

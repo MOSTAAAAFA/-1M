@@ -1,133 +1,251 @@
-/* Design Tokens - Auto-generated */
-/* Do not edit directly - modify tokens.json instead */
+/* ═══════════════════════════════════════════════════════════════════════
+   1M MOTORS — COMPLETE DESIGN SYSTEM
+   Generated from: ui-ux-pro-max + design-system + brand + ui-styling
+   Source of Truth: docs/brand-guidelines.md
+   ═══════════════════════════════════════════════════════════════════════ */
 
-/* === PRIMITIVES === */
+/* ── PRIMITIVE TOKENS (Raw Values) ── */
 :root {
-  --primitive-color-black-base: #050507;
-  --primitive-color-black2: #0A0A0E;
-  --primitive-color-black3: #0F0F15;
-  --primitive-color-gold: #C9A84C;
-  --primitive-color-goldLight: #E0C06A;
-  --primitive-color-goldBright: #F4D03F;
-  --primitive-color-goldDim: rgba(201,168,76,0.15);
-  --primitive-color-goldGlow: rgba(201,168,76,0.25);
-  --primitive-color-white: #F0EDE8;
-  --primitive-color-white70: rgba(240,237,232,0.70);
-  --primitive-color-white62: rgba(240,237,232,0.62);
-  --primitive-color-white48: rgba(240,237,232,0.48);
-  --primitive-color-white32: rgba(240,237,232,0.32);
-  --primitive-color-white20: rgba(240,237,232,0.20);
-  --primitive-color-white10: rgba(240,237,232,0.10);
-  --primitive-color-surface: #111117;
-  --primitive-color-surface2: #18181F;
-  --primitive-color-surface3: #1F1F28;
-  --primitive-color-border: rgba(255,255,255,0.06);
-  --primitive-color-border2: rgba(255,255,255,0.10);
-  --primitive-color-border3: rgba(255,255,255,0.16);
-  --primitive-color-success: #4ADE80;
-  --primitive-color-error: #EF4444;
-  --primitive-fontFamily-display: 'Cormorant Garamond', Georgia, serif;
-  --primitive-fontFamily-ui: 'Space Grotesk', sans-serif;
-  --primitive-fontFamily-body: 'Inter', sans-serif;
-  --primitive-fontSize-xs: 10px;
-  --primitive-fontSize-sm: 12px;
-  --primitive-fontSize-base: 15px;
-  --primitive-fontSize-lg: 17px;
-  --primitive-fontSize-xl: 20px;
-  --primitive-fontSize-2xl: 26px;
-  --primitive-fontSize-3xl: 32px;
-  --primitive-fontSize-4xl: 42px;
-  --primitive-fontSize-5xl: 56px;
-  --primitive-fontSize-6xl: 72px;
-  --primitive-fontWeight-light: 300;
-  --primitive-fontWeight-regular: 400;
-  --primitive-fontWeight-medium: 500;
-  --primitive-fontWeight-semibold: 600;
-  --primitive-fontWeight-bold: 700;
-  --primitive-spacing-xs: 4px;
-  --primitive-spacing-sm: 8px;
-  --primitive-spacing-md: 12px;
-  --primitive-spacing-lg: 16px;
-  --primitive-spacing-xl: 20px;
-  --primitive-spacing-2xl: 24px;
-  --primitive-spacing-3xl: 32px;
-  --primitive-spacing-4xl: 40px;
-  --primitive-spacing-5xl: 48px;
-  --primitive-spacing-6xl: 64px;
-  --primitive-spacing-7xl: 80px;
-  --primitive-radius-sm: 6px;
-  --primitive-radius-md: 12px;
-  --primitive-radius-lg: 20px;
-  --primitive-radius-xl: 32px;
-  --primitive-radius-full: 9999px;
-  --primitive-shadow-sm: 0 4px 16px rgba(0,0,0,0.4);
-  --primitive-shadow-md: 0 8px 40px rgba(0,0,0,0.55);
-  --primitive-shadow-lg: 0 20px 80px rgba(0,0,0,0.7);
-  --primitive-shadow-gold: 0 0 40px rgba(201,168,76,0.20);
-  --primitive-shadow-goldLg: 0 0 80px rgba(201,168,76,0.30);
-  --primitive-duration-fast: 0.15s;
-  --primitive-duration-normal: 0.25s;
-  --primitive-duration-default: 0.35s;
-  --primitive-duration-slow: 0.5s;
-  --primitive-duration-slower: 0.7s;
-  --primitive-easing-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --primitive-easing-inOut: cubic-bezier(0.45, 0, 0.55, 1);
-  --primitive-breakpoint-mobile: 600px;
-  --primitive-breakpoint-tablet: 900px;
-  --primitive-breakpoint-desktop: 1100px;
-  --primitive-breakpoint-wide: 1400px;
-  --primitive-layout-navHeight: 72px;
-  --primitive-layout-containerMax: 1400px;
-}
+  /* Gold Scale */
+  --color-gold-50: #FFF8E1;
+  --color-gold-100: #FDE68A;
+  --color-gold-200: #F4D03F;
+  --color-gold-300: #E0C06A;
+  --color-gold-400: #D4B85C;
+  --color-gold-500: #C9A84C;
+  --color-gold-600: #B5923C;
+  --color-gold-700: #A38934;
+  --color-gold-800: #8B7428;
+  --color-gold-900: #6B5A1E;
 
-/* === SEMANTIC === */
-:root {
-  --color-background: #050507;
-  --color-foreground: #F0EDE8;
-  --color-primary: #C9A84C;
-  --color-primaryHover: #E0C06A;
-  --color-primaryActive: #F4D03F;
-  --color-onPrimary: #050507;
-  --color-textPrimary: #F0EDE8;
-  --color-textSecondary: rgba(240,237,232,0.62);
-  --color-textMuted: rgba(240,237,232,0.48);
-  --color-textDisabled: rgba(240,237,232,0.32);
-  --color-surface: #111117;
-  --color-surfaceRaised: #18181F;
-  --color-surfaceHover: #1F1F28;
-  --color-border: rgba(255,255,255,0.06);
-  --color-borderStrong: rgba(255,255,255,0.10);
+  /* Black Scale */
+  --color-black-50: #27272f;
+  --color-black-100: #1f1f28;
+  --color-black-200: #18181f;
+  --color-black-300: #111117;
+  --color-black-400: #0f0f15;
+  --color-black-500: #0a0a0e;
+  --color-black-600: #050507;
+  --color-black-700: #030305;
+  --color-black-800: #020203;
+  --color-black-900: #010102;
+
+  /* White Scale */
+  --color-white-50: #FFFFFF;
+  --color-white-100: #F7F6F3;
+  --color-white-200: #F0EDE8;
+  --color-white-300: rgba(240,237,232,0.85);
+  --color-white-400: rgba(240,237,232,0.70);
+  --color-white-500: rgba(240,237,232,0.62);
+  --color-white-600: rgba(240,237,232,0.48);
+  --color-white-700: rgba(240,237,232,0.40);
+  --color-white-800: rgba(240,237,232,0.32);
+  --color-white-900: rgba(240,237,232,0.20);
+
+  /* Semantic Colors */
   --color-success: #4ADE80;
-  --color-destructive: #EF4444;
-  --fontFamily-display: 'Cormorant Garamond', Georgia, serif;
-  --fontFamily-ui: 'Space Grotesk', sans-serif;
-  --fontFamily-body: 'Inter', sans-serif;
-  --spacing-section: 64px;
-  --spacing-component: 32px;
+  --color-error: #EF4444;
+  --color-warning: #FBBF24;
+  --color-info: #60A5FA;
+
+  /* Spacing Scale */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 100px;
+
+  /* Font Sizes */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 26px;
+  --text-3xl: 32px;
+  --text-4xl: 42px;
+  --text-5xl: 56px;
+  --text-6xl: 72px;
+  --text-7xl: 100px;
+  --text-8xl: 120px;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose: 1.8;
+
+  /* Letter Spacing */
+  --tracking-tighter: -1px;
+  --tracking-tight: -0.5px;
+  --tracking-normal: 0;
+  --tracking-wide: 0.2px;
+  --tracking-wider: 0.5px;
+  --tracking-widest: 2px;
+  --tracking-ultra: 4px;
+  --tracking-extreme: 7px;
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 40px rgba(0,0,0,0.55);
+  --shadow-lg: 0 20px 80px rgba(0,0,0,0.7);
+  --shadow-gold-sm: 0 4px 16px rgba(201,168,76,0.20);
+  --shadow-gold-md: 0 8px 32px rgba(201,168,76,0.30);
+  --shadow-gold-lg: 0 0 80px rgba(201,168,76,0.30);
+
+  /* Duration */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-default: 350ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+
+  /* Easing */
+  --ease-default: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-Index Layers */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-notification: 1400;
+  --z-tooltip: 1500;
+  --z-cursor: 9999;
+  --z-grain: 9998;
 }
 
-/* === COMPONENTS === */
+/* ── SEMANTIC TOKENS (Purpose Aliases) ── */
 :root {
-  --button-bg: #C9A84C;
-  --button-fg: #050507;
-  --button-hoverBg: #E0C06A;
-  --button-activeBg: #F4D03F;
-  --button-paddingX: 32px;
-  --button-paddingY: 12px;
-  --button-radius: 6px;
-  --button-shadow: 0 0 40px rgba(201,168,76,0.20);
-  --input-bg: #0A0A0E;
-  --input-border: rgba(255,255,255,0.10);
-  --input-focusRing: #C9A84C;
-  --input-paddingX: 16px;
-  --input-paddingY: 12px;
-  --input-radius: 6px;
-  --card-bg: #111117;
-  --card-border: rgba(255,255,255,0.06);
-  --card-padding: 32px;
-  --card-radius: 20px;
-  --card-shadow: 0 8px 40px rgba(0,0,0,0.55);
-  --glass-bg: rgba(17,17,23,0.75);
-  --glass-blur: 24px;
-  --glass-border: rgba(255,255,255,0.06);
+  /* Background */
+  --bg-primary: var(--color-black-600);
+  --bg-secondary: var(--color-black-500);
+  --bg-elevated: var(--color-black-300);
+  --bg-surface: var(--color-black-200);
+  --bg-surface-2: var(--color-black-100);
+
+  /* Foreground */
+  --fg-primary: var(--color-white-200);
+  --fg-secondary: var(--color-white-500);
+  --fg-muted: var(--color-white-600);
+  --fg-subtle: var(--color-white-700);
+  --fg-disabled: var(--color-white-800);
+
+  /* Gold */
+  --gold: var(--color-gold-500);
+  --gold-light: var(--color-gold-300);
+  --gold-bright: var(--color-gold-200);
+  --gold-dim: rgba(201,168,76,0.15);
+  --gold-glow: rgba(201,168,76,0.25);
+  --gold-text: var(--color-gold-500);
+  --gold-text-dim: var(--color-gold-600);
+
+  /* Border */
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.10);
+  --border-strong: rgba(255,255,255,0.16);
+  --border-gold: rgba(201,168,76,0.30);
+  --border-gold-bright: rgba(201,168,76,0.60);
+
+  /* Focus */
+  --focus-ring: 2px solid var(--color-gold-500);
+  --focus-offset: 2px;
+  --min-touch-target: 44px;
+
+  /* Transition */
+  --transition-default: var(--duration-default) var(--ease-default);
+  --transition-fast: var(--duration-fast) var(--ease-default);
+  --transition-slow: var(--duration-slow) var(--ease-default);
+
+  /* Container */
+  --container-max: 1400px;
+  --container-padding-desktop: 48px;
+  --container-padding-tablet: 24px;
+  --container-padding-mobile: 16px;
+  --nav-height: 72px;
+}
+
+/* ── COMPONENT TOKENS ── */
+:root {
+  /* Button */
+  --btn-padding-x: var(--space-8);
+  --btn-padding-y: var(--space-3);
+  --btn-radius: var(--radius-sm);
+  --btn-font-size: var(--text-sm);
+  --btn-font-weight: var(--font-weight-bold);
+  --btn-letter-spacing: var(--tracking-ultra);
+  --btn-min-height: var(--min-touch-target);
+  --btn-transition: var(--transition-default);
+
+  /* Card */
+  --card-padding: var(--space-8);
+  --card-radius: var(--radius-xl);
+  --card-bg: var(--bg-elevated);
+  --card-border: 1px solid var(--border-subtle);
+  --card-shadow: var(--shadow-md);
+
+  /* Input */
+  --input-padding-x: var(--space-4);
+  --input-padding-y: var(--space-3);
+  --input-radius: var(--radius-md);
+  --input-font-size: var(--text-base);
+  --input-border: 1px solid var(--border-subtle);
+  --input-min-height: var(--min-touch-target);
+
+  /* Nav */
+  --nav-bg: rgba(5,5,7,0.85);
+  --nav-backdrop: blur(24px);
+  --nav-border: 1px solid var(--border-subtle);
+}
+
+/* ── DARK MODE OVERRIDES ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: var(--color-black-600);
+    --fg-primary: var(--color-white-200);
+  }
+}
+
+/* ── LIGHT MODE OVERRIDES ── */
+[data-theme="light"] {
+  --bg-primary: var(--color-white-100);
+  --bg-secondary: var(--color-white-200);
+  --bg-elevated: var(--color-white-50);
+  --fg-primary: var(--color-black-600);
+  --fg-secondary: var(--color-black-400);
+  --fg-muted: var(--color-black-300);
+  --border-subtle: rgba(0,0,0,0.08);
+  --border-default: rgba(0,0,0,0.12);
+  --border-strong: rgba(0,0,0,0.20);
 }

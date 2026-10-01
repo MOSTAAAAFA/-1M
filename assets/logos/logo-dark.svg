@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E0C06A"/>
+      <stop offset="50%" style="stop-color:#C9A84C"/>
+      <stop offset="100%" style="stop-color:#B5923C"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="120" fill="#050507"/>
+  <!-- Gold accent line -->
+  <rect x="20" y="50" width="40" height="2" fill="url(#goldGrad)"/>
+  <!-- 1M mark -->
+  <text x="75" y="72" font-family="Georgia, serif" font-size="48" font-weight="700" fill="url(#goldGrad)" letter-spacing="2">1M</text>
+  <!-- MOTORS -->
+  <text x="175" y="72" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="300" fill="#F0EDE8" letter-spacing="8" text-transform="uppercase">MOTORS</text>
+  <!-- Tagline -->
+  <text x="75" y="95" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="rgba(240,237,232,0.4)" letter-spacing="4" text-transform="uppercase">LUXURY AUTOMOTIVE</text>
+  <!-- Bottom gold line -->
+  <rect x="20" y="110" width="360" height="1" fill="url(#goldGrad)" opacity="0.3"/>
+</svg>
