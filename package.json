@@ -1,0 +1,9 @@
+{
+  "name": "velocitas",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "npm install --prefix backend",
+    "start": "node backend/server.js"
+  },
+  "engines": { "node": "22.x" }
+}
