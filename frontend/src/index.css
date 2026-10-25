@@ -16,19 +16,50 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+body {
+  margin: 0;
+  padding: 0;
+  background: #000000;
+  min-height: 100vh;
+}
+
+/* Glass Background Layer - Pure Black Dark */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.98);
+  backdrop-filter: blur(60px) saturate(100%);
+  -webkit-backdrop-filter: blur(60px) saturate(100%);
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Subtle noise texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: -1;
+}
+
 :root {
   /* ═══ DESIGN SYSTEM TOKENS (Three-Layer Architecture) ═══ */
-  /* Primitive Colors */
-  --color-gold-50: #FFF8E1;
-  --color-gold-100: #FDE68A;
-  --color-gold-200: #F4D03F;
-  --color-gold-300: #E0C06A;
-  --color-gold-400: #D4B85C;
-  --color-gold-500: #C9A84C;
-  --color-gold-600: #B5923C;
-  --color-gold-700: #A38934;
-  --color-gold-800: #8B7428;
-  --color-gold-900: #6B5A1E;
+  /* Primitive Colors - Enhanced Brightness */
+  --color-gold-50: #FFFEF5;
+  --color-gold-100: #FFF4C4;
+  --color-gold-200: #FFE566;
+  --color-gold-300: #F4D870;
+  --color-gold-400: #EFCD5F;
+  --color-gold-500: #E8C04E;
+  --color-gold-600: #D4AF3E;
+  --color-gold-700: #C19E36;
+  --color-gold-800: #A88A2E;
+  --color-gold-900: #8B7228;
 
   --color-black-50: #27272f;
   --color-black-100: #1f1f28;
@@ -66,9 +97,9 @@
   --color-on-primary: #F0EDE8;
   --color-secondary: #18181f;
   --color-on-secondary: #F0EDE8;
-  --color-accent: #C9A84C;
+  --color-accent: #E8C04E;
   --color-on-accent: #08080a;
-  --color-ring: #C9A84C;
+  --color-ring: #E8C04E;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -285,12 +316,27 @@ button:disabled, [disabled] { cursor: not-allowed; }
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  background: transparent;
 }
 
 /* The transitioning route region. flex-grow pushes it to fill, flex-shrink 0
    stops long pages from being compressed. */
 .site-main {
   flex: 1 0 auto;
+  background: transparent;
+}
+
+body {
+  background: transparent !important;
+}
+
+/* Make all pages transparent on video background */
+.container {
+  background: transparent;
+}
+
+section {
+  background: transparent !important;
 }
 
 .site-footer {
@@ -474,7 +520,15 @@ button:disabled, [disabled] { cursor: not-allowed; }
 }
 
 body {
-  background: var(--black);
+  /* 🌟 Strong Gold Gradient Background - Visible Luxury */
+  background: radial-gradient(
+    ellipse at center,
+    #1a1510 0%,      /* ذهبي بني واضح */
+    #15120d 25%,     /* انتقال */
+    #0f0d0a 50%,     /* ذهبي داكن */
+    #0a0908 75%,     /* بني غامق */
+    #050507 100%     /* أسود */
+  );
   color: var(--white);
   font-family: var(--font-body);
   font-size: 16px;
@@ -592,12 +646,12 @@ p {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* ─── Glassmorphism ─── */
+/* ─── Glassmorphism ─── Enhanced Premium Version */
 .glass {
-  background: rgba(17,17,23,0.75);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border);
+  background: rgba(10, 10, 14, 0.65);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(201,168,76,0.12);
 }
 .glass-strong {
   background: rgba(10,10,14,0.88);
@@ -697,7 +751,7 @@ p {
   background: linear-gradient(90deg, transparent, var(--border-2), transparent);
 }
 
-/* ─── Grain overlay ─── */
+/* ─── Grain overlay ─── Subtle Cinema Effect */
 body::after {
   content: '';
   position: fixed;
@@ -705,7 +759,7 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.4;
+  opacity: 0.25;
 }
 
 /* ─── Keyframe Animations ─── */

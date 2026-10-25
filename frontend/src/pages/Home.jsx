@@ -93,7 +93,33 @@ export default function Home() {
   const heroCar = cars.find(c => c.id === current.carId);
 
   return (
-    <div style={{ background: 'transparent', minHeight: '100vh', position: 'relative', zIndex: 0 }}>
+    <div style={{
+      background: '#000000',
+      minHeight: '100vh',
+      position: 'relative',
+      zIndex: 0
+    }}>
+      {/* Glass Background Layer */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(5,5,5,0.98) 50%, rgba(0,0,0,0.95) 100%)',
+        backdropFilter: 'blur(40px) saturate(120%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(120%)',
+        zIndex: -1,
+      }} />
+
+      {/* Subtle noise texture overlay */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
+        opacity: 0.03,
+        mixBlendMode: 'overlay',
+        pointerEvents: 'none',
+        zIndex: -1,
+      }} />
+
       {/* ══ HERO ══ */}
       <section
         ref={heroRef}
@@ -120,111 +146,26 @@ export default function Home() {
             the photo without reducing text contrast. */}
         <div className="spotlight-layer" aria-hidden="true" />
 
-        {/* Gradient overlays (minimum needed for legibility) */}
+        {/* Gradient overlays - reduced for brighter video */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(5,5,7,0.92) 30%, rgba(5,5,7,0.5) 62%, rgba(5,5,7,0.12) 100%)',
+          background: 'linear-gradient(to right, rgba(5,5,7,0.4) 30%, rgba(5,5,7,0.2) 62%, transparent 100%)',
         }}/>
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.95) 16%, rgba(5,5,7,0.6) 40%, rgba(5,5,7,0.22) 62%, transparent 80%)',
+          background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.6) 16%, rgba(5,5,7,0.2) 40%, transparent 62%)',
         }}/>
 
-        {/* Bottom fade edge - hero (dissolves hard image edge) */}
+        {/* Bottom fade edge - reduced darkness */}
         <div style={{
           position: 'absolute', left: 0, right: 0, bottom: 0,
           height: '38%',
-          background: 'linear-gradient(to top, #050507 0%, #050507 30%, rgba(5,5,7,0.55) 60%, transparent 100%)',
+          background: 'linear-gradient(to top, #050507 0%, rgba(5,5,7,0.8) 30%, rgba(5,5,7,0.3) 60%, transparent 100%)',
           pointerEvents: 'none',
           zIndex: 3,
         }}/>
 
-        {/* Slide indicators */}
-        <div
-          role="tablist"
-          aria-label="Hero carousel controls"
-          style={{
-          position: 'absolute', top: '50%', right: 48,
-          transform: 'translateY(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 18, zIndex: 10,
-        }}>
-          {HERO_SLIDES.map((s, i) => {
-            const c = cars.find(x => x.id === s.carId);
-            const active = i === slide;
-            return (
-              <button
-                key={i}
-                onClick={() => goToSlide(i)}
-                role="tab"
-                aria-label={`Go to slide ${i + 1} of ${HERO_SLIDES.length}: ${c?.name}`}
-                aria-selected={active}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  background: 'none', border: 'none', padding: 0,
-                }}
-              >
-                <span style={{
-                  fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  letterSpacing: '2px',
-                  color: active ? '#C9A84C' : 'rgba(240,237,232,0.62)',
-                  transform: active ? 'translateX(0)' : 'translateX(4px)',
-                  transition: 'all 0.4s var(--ease-out)',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {active ? c?.name : `0${i + 1}`}
-                </span>
-                <span style={{
-                  width: active ? 44 : 20,
-                  height: 1,
-                  background: active
-                    ? 'linear-gradient(to right, #E0C06A, #C9A84C)'
-                    : 'rgba(255,255,255,0.25)',
-                  boxShadow: active ? '0 0 12px rgba(201,168,76,0.7)' : 'none',
-                  transition: 'all 0.4s var(--ease-out)',
-                  transformOrigin: 'right',
-                }}/>
-              </button>
-            );
-          })}
-          {!prefersReducedMotion && (
-            <button
-              onClick={() => setAutoplayPaused(p => !p)}
-              aria-pressed={autoplayPaused}
-              aria-label={autoplayPaused ? 'Play slideshow' : 'Pause slideshow'}
-              title={autoplayPaused ? 'Play' : 'Pause'}
-              style={{
-                marginTop: 8,
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(5,5,7,0.55)',
-                border: '1px solid rgba(201,168,76,0.45)',
-                color: 'var(--gold)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                transition: 'all 0.3s',
-                boxShadow: autoplayPaused ? '0 0 14px rgba(201,168,76,0.45)' : 'none',
-              }}
-            >
-              {autoplayPaused ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-                </svg>
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Content */}
+        {/* Content - Empty for now, will add video-based content */}
         <div className="container" style={{
           height: '100%',
           maxWidth: 'none',
@@ -239,266 +180,20 @@ export default function Home() {
         }}>
           <div style={{ maxWidth: 660, textAlign: 'left', width: '100%' }}>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={slide}
-                initial={{ opacity: 0, x: -24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 24 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              >
-              <div style={{
-                marginBottom: 28,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
-              }}>
-                {/* Signature gold crest — same emblem as the footer */}
-                <div style={{
-                  position: 'relative',
-                  width: 50,
-                  height: 50,
-                  flexShrink: 0,
-                }}>
-                  <Crest1M size={50} />
-                </div>
-
-                {/* Vertical divider */}
-                <div style={{
-                  width: 1,
-                  height: 28,
-                  background: 'rgba(201,168,76,0.4)',
-                  flexShrink: 0,
-                }}/>
-
-                {/* Eyebrow text */}
-                <div>
-                  <p style={{
-                    fontFamily: 'var(--font-data)', fontSize: 11, fontWeight: 400,
-                    letterSpacing: '0.2em', textTransform: 'uppercase',
-                    color: '#C9A84C',
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}>
-                    <Brand1M name={settings.siteName} style={{ fontSize: 11, fontWeight: 400, color: '#C9A84C' }} /> {settings.siteSuffix || 'MOTORS'}
-                  </p>
-                  <p style={{
-                    fontFamily: 'var(--font-data)', fontSize: 10, fontWeight: 400,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: 'rgba(240,237,232,0.62)',
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}>
-                    {settings.heroEyebrowTop || 'Luxury Performance'} · {settings.heroEyebrowBottom || 'Est. 2026'}
-                  </p>
-                </div>
-              </div>
-
-              <h1 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2.3rem, 5vw, 4.6rem)',
-                fontWeight: 400,
-                lineHeight: 1.08,
-                color: 'var(--white)',
-                marginBottom: 18,
-                letterSpacing: '-0.02em',
-                wordBreak: 'keep-all',
-                overflowWrap: 'normal',
-                whiteSpace: 'normal',
-              }}>
-                {current.headline}
-                <br/>
-                <em style={{
-                  fontStyle: 'italic',
-                  color: '#C9A84C',
-                  fontWeight: 400,
-                }}>
-                  {current.accent}
-                </em>
-              </h1>
-
-              {/* Gold tick */}
-              <div style={{
-                width: 48,
-                height: 1,
-                background: '#C9A84C',
-                marginBottom: 24,
-              }}/>
-
-              <p style={{
-                fontSize: 16, fontWeight: 300,
-                color: 'rgba(240,237,232,0.72)',
-                lineHeight: 1.75, marginBottom: 40, maxWidth: 440,
-                letterSpacing: '0.2px',
-              }}>{current.sub}</p>
-
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                <RippleButton
-                  className="btn btn-gold hover-lift"
-                  onClick={() => navigate(`/car/${heroCar?.id}`)}
-                  data-hover
-                  data-no-magnetic
-                >View Vehicle</RippleButton>
-                <RippleButton
-                  className="btn btn-ghost hover-lift"
-                  onClick={() => carsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  data-hover
-                  data-no-magnetic
-                >Explore Collection</RippleButton>
-              </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Animations Keyframes */}
-            <style>{`
-              @keyframes slideInRight {
-                from {
-                  opacity: 0;
-                  transform: translateX(60px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateX(0);
-                }
-              }
-
-              @keyframes fadeInUp {
-                from {
-                  opacity: 0;
-                  transform: translateY(20px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-
-              @keyframes borderGlow {
-                0%, 100% {
-                  opacity: 0.6;
-                  box-shadow: 0 0 20px rgba(201,168,76,0.6);
-                }
-                50% {
-                  opacity: 1;
-                  box-shadow: 0 0 30px rgba(201,168,76,0.9);
-                }
-              }
-
-              @keyframes shieldGlowPulse {
-                0%, 100% {
-                  filter: drop-shadow(0 0 8px rgba(212,175,55,0.6)) drop-shadow(0 0 16px rgba(212,175,55,0.4));
-                }
-                50% {
-                  filter: drop-shadow(0 0 12px rgba(212,175,55,0.85)) drop-shadow(0 0 24px rgba(212,175,55,0.6));
-                }
-              }
-
-              @keyframes fadeIn {
-                from {
-                  opacity: 0;
-                }
-                to {
-                  opacity: 1;
-                }
-              }
-
-              @keyframes scrollWheel {
-                0% {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-                60% {
-                  opacity: 0.2;
-                  transform: translateY(12px);
-                }
-                100% {
-                  opacity: 0.2;
-                  transform: translateY(12px);
-                }
-              }
-
-              @media (max-width: 900px) {
-                .container {
-                  padding-right: 24px !important;
-                  justify-content: flex-start !important;
-                }
-                /* Hide vertical slide counter on mobile */
-                div[role="tablist"],
-                .hero-slide-counter {
-                  display: none !important;
-                }
-              }
-
-              @media (max-width: 768px) {
-                .container {
-                  padding-right: 24px !important;
-                  justify-content: center !important;
-                }
-                /* Compact specs strip on mobile */
-                .hero-specs-cell {
-                  padding: 0 14px !important;
-                  border-left: 1px solid rgba(255,255,255,0.08) !important;
-                }
-              }
-
-              @media (max-width: 640px) {
-                .container {
-                  padding: 0 20px !important;
-                  text-align: center !important;
-                }
-              }
-            `}</style>
-
-            {/* Live specs strip */}
-            <ScrollReveal animation="fadeUp">
-              <div style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0,
-                borderTop: '1px solid rgba(201,168,76,0.18)',
-                background: 'linear-gradient(to top, rgba(5,5,7,0.85) 0%, rgba(5,5,7,0.45) 60%, rgba(5,5,7,0) 100%)',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                padding: '28px 0 30px',
-              }}>
-                <div className="container" style={{
-                  display: 'flex', gap: 0, flexWrap: 'wrap', maxWidth: 'none',
-                }}>
-                  {[
-                    { v: heroCar?.specs.horsepowerStr || '–', l: 'Power' },
-                    { v: heroCar?.specs.accelStr || '–', l: '0–60 mph' },
-                    { v: heroCar?.specs.topSpeedStr || '–', l: 'Top Speed' },
-                    { v: heroCar?.specs.engine || '–', l: 'Powertrain' },
-                  ].map(({ v, l }, i) => (
-                    <div key={l} className="hero-specs-cell" style={{
-                      display: 'flex', alignItems: 'center',
-                      padding: '0 36px',
-                      borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                      minWidth: 0,
-                    }}>
-                      <div>
-                        <div key={`${slide}-${l}`} style={{
-                          fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 600,
-                          background: 'linear-gradient(135deg, #C9A84C, #E0C06A 60%, #F4D03F)',
-                          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                          lineHeight: 1.1,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          maxWidth: 220,
-                        }}>{v}</div>
-                        <div style={{
-                          fontFamily: 'var(--font-ui)', fontSize: 9, letterSpacing: '2.5px',
-                          fontWeight: 500, textTransform: 'uppercase',
-                          color: 'rgba(240,237,232,0.4)',
-                          marginTop: 4,
-                        }}>{l}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
           </div>
         </div>
+
+        {/* Bottom border/divider - makes the hero end clear and visible */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(232, 192, 78, 0.4) 10%, rgba(255, 229, 102, 0.8) 50%, rgba(232, 192, 78, 0.4) 90%, transparent 100%)',
+          boxShadow: '0 0 30px rgba(255, 229, 102, 0.5), 0 0 60px rgba(232, 192, 78, 0.3)',
+          zIndex: 10,
+        }} />
 
       </section>
 
@@ -533,100 +228,117 @@ export default function Home() {
 
 /* ── Hero Backdrop (isolated parallax: updates DOM directly, no page re-render) ── */
 function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
-  const parallaxLayers = useRef([]);
-  const scrollY = useRef(0);
-  const target = useRef({ x: 0, y: 0 });
-  const current = useRef({ x: 0, y: 0 });
-  const rafRef = useRef(null);
-  const isHidden = useRef(false);
+  const videoRef = useRef(null);
+  const [currentVideo, setCurrentVideo] = useState(0);
+  const [prefersReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  const videos = [
+    {
+      src: '/videos/Porsche GT3RS 991.2 Mountain Road Cinematic 4K_2160p.mp4',
+      startTime: 0,
+      endTime: 103,
+      name: 'Porsche GT3RS'
+    },
+    {
+      src: '/videos/Rolls-Royce Introduces Spectre_ The World\'s First Ultra-Luxury Electric Super Coupé_1440p.mp4',
+      startTime: 3,
+      endTime: 59,
+      name: 'Rolls-Royce Spectre'
+    }
+  ];
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (prefersReducedMotion) return;
 
-    const onScroll = () => { scrollY.current = window.scrollY; };
-    const onMouse = (e) => {
-      target.current.x = (e.clientX / window.innerWidth - 0.5) * 15;
-      target.current.y = (e.clientY / window.innerHeight - 0.5) * 15;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const currentVideoData = videos[currentVideo];
+    video.currentTime = currentVideoData.startTime;
+
+    const handleTimeUpdate = () => {
+      if (video.currentTime >= currentVideoData.endTime) {
+        setCurrentVideo(prev => (prev + 1) % videos.length);
+      }
     };
-    const onVisibility = () => { isHidden.current = document.hidden; };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('mousemove', onMouse, { passive: true });
-    document.addEventListener('visibilitychange', onVisibility);
-
-    const animate = () => {
-      // Always schedule the next frame first so the loop survives tab switches
-      rafRef.current = requestAnimationFrame(animate);
-      if (isHidden.current) return; // skip work while tab is in the background
-
-      // Smooth easing (same feel as the original useMouseParallax hook)
-      current.current.x += (target.current.x - current.current.x) * 0.1;
-      current.current.y += (target.current.y - current.current.y) * 0.1;
-      const ty = scrollY.current * 0.35 + current.current.y;
-      const tx = current.current.x;
-
-      parallaxLayers.current.forEach((el) => {
-        if (el) el.style.transform = `translate(${tx}px, ${ty}px)`;
-      });
+    const handleLoadedMetadata = () => {
+      video.currentTime = currentVideoData.startTime;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.warn('Video autoplay blocked:', err);
+        });
+      }
     };
-    rafRef.current = requestAnimationFrame(animate);
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    if (video.readyState >= 2) {
+      video.currentTime = currentVideoData.startTime;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.warn('Video autoplay blocked:', err);
+        });
+      }
+    }
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('mousemove', onMouse);
-      document.removeEventListener('visibilitychange', onVisibility);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, []);
+  }, [currentVideo, prefersReducedMotion]);
+
+  // Show poster for reduced motion users
+  if (prefersReducedMotion) {
+    return (
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: 'url(/videos/poster.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }} />
+    );
+  }
 
   return (
-    <>
-      {HERO_SLIDES.map((s, i) => {
-        const car = cars.find(c => c.id === s.carId);
-        const isActive = i === slide;
-        const isLeaving = i === prevSlide && !isActive;
-        return (
-          <div key={i} style={{
-            position: 'absolute', inset: 0,
-            opacity: isActive ? 1 : 0,
-            transition: 'opacity 1.1s cubic-bezier(0.4,0,0.2,1)',
-            zIndex: isActive ? 2 : 1,
-          }}>
-            {/* Slow Ken Burns zoom layer (isolated so it never conflicts) */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              animation: (isActive && enableKenBurns) ? 'heroZoom 7s ease-in-out both' : 'none',
-            }}>
-              {/* Parallax layer - updated via rAF, no React re-render */}
-              <div
-                ref={el => { parallaxLayers.current[i] = el; }}
-                style={{ position: 'absolute', inset: 0, willChange: 'transform' }}
-              >
-                <img
-                  src={car?.heroImage || car?.image}
-                  alt=""
-                  loading={i === 0 ? "eager" : "lazy"}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = `https://placehold.co/1920x1080/111117/C9A84C?text=${encodeURIComponent(car ? `${car.brand} ${car.name}` : '1M Motors')}`;
-                  }}
-                  style={{
-                    width: '100%', height: '100%', objectFit: 'cover',
-                    objectPosition: 'center 35%',
-                    transform: `scale(${isActive ? 1 : isLeaving ? 1.06 : 1.16})`,
-                    transition: 'transform 1.6s cubic-bezier(0.22,1,0.36,1), filter 1.1s ease',
-                    filter: isActive
-                      ? 'blur(0) saturate(1.05) brightness(1)'
-                      : 'blur(10px) saturate(0.75) brightness(0.85)',
-                    willChange: 'transform',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      overflow: 'hidden',
+    }}>
+      <video
+        ref={videoRef}
+        key={currentVideo}
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        poster="/videos/poster.jpg"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          minWidth: '100%',
+          minHeight: '100%',
+          width: 'auto',
+          height: 'auto',
+          transform: 'translate(-50%, -50%)',
+          objectFit: 'cover',
+          filter: 'brightness(1.02) contrast(1.05)',
+        }}
+      >
+        <source
+          src={videos[currentVideo].src}
+          type="video/mp4"
+        />
+      </video>
+    </div>
   );
 }
 
@@ -753,11 +465,8 @@ function StatsBar() {
                 fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(34px, 3.2vw, 46px)',
                 fontWeight: 600,
-                color: 'var(--white)',
-                background: 'linear-gradient(135deg, #C9A84C, #E0C06A 50%, #F4D03F)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                color: '#FFE566',
+                textShadow: '0 0 20px rgba(255, 229, 102, 0.6), 0 2px 4px rgba(0,0,0,0.8)',
                 lineHeight: 1,
               }}>
                 {metric}

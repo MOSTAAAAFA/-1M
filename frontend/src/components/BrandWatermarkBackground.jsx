@@ -56,7 +56,7 @@ export default function BrandWatermarkBackground() {
             width: logo.size,
             maxWidth: '28vw',
             transformOrigin: 'center',
-            opacity: 0.15,
+            opacity: 0.08,
             userSelect: 'none',
             WebkitUserSelect: 'none',
             pointerEvents: 'none',

@@ -12,6 +12,7 @@ import soundManager from './utils/soundManager';
 import LazyLoadWrapper from './components/LazyLoadWrapper';
 import { LenisSmoothScroll, ScrollToTop, FilmGrain } from './components/GlobalPremiumEffects';
 import { SparklesIcon } from './components/icons';
+import VideoBackground from './components/VideoBackground';
 
 import Navbar from './components/Navbar';
 import CartSidebar from './components/CartSidebar';
@@ -416,7 +417,6 @@ function AnimatedRoutes() {
       {/* Public site components - only render if NOT on admin route */}
       {!isAdminRoute && (
         <>
-          <BrandWatermarkBackground />
           <ScrollProgressBar />
           <Navbar />
           <CartSidebar />

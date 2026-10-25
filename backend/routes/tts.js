@@ -4,14 +4,14 @@ const { synthesizeEleven, getUsage, ELEVEN_VOICE_NAME } = require("../services/e
 
 const router = express.Router();
 
-// ── TTS: ElevenLabs (Egyptian Arabic) → browser fallback ───────────────────
-// 1. ElevenLabs is PRIMARY: Amr voice (Egyptian male voice).
-//    Free tier: 10,000 chars/month
+// ── TTS: ElevenLabs (Egyptian Arabic Female) → browser fallback ───────
+// 1. ElevenLabs is PRIMARY: Bella voice (clear female voice).
+//    Free tier: 10,000 chars/month (no credit card required!)
 // 2. browser speechSynthesis is the FALLBACK tier, signaled via 429 {fallback:true}
 //
 // ELEVENLABS_API_KEY stays server-side only — never exposed to client.
 
-const MAX_PER_MINUTE = 3; // soft guard against runaway loops
+const MAX_PER_MINUTE = 1000; // soft guard against runaway loops
 const minuteHits = new Map(); // ip -> [timestamps]
 const cache = new Map(); // key -> { audio: Buffer, tier: string }
 
@@ -46,7 +46,7 @@ router.post("/tts", async (req, res) => {
     return res.status(429).json({ fallback: true, error: "minute" });
   }
 
-  // ── Tier 1: ElevenLabs TTS (Egyptian Arabic - Amr) ─────────────
+  // ── Tier 1: ElevenLabs TTS (Egyptian Arabic - Bella) ─────────────
   try {
     const audio = await synthesizeEleven(clean);
     if (cache.size > 300) cache.delete(cache.keys().next().value);

@@ -6,10 +6,10 @@ const path = require('path');
 // API key loaded from GOOGLE_CLOUD_TTS_KEY env var
 const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_TTS_KEY;
 
-// Best Egyptian Arabic voice from Google Cloud:
-// ar-XA-Wavenet-B is a male Arabic voice with natural, clear pronunciation
-// Similar quality to ElevenLabs but with broader Arabic dialect support
-const VOICE_NAME = 'ar-XA-Wavenet-B';
+// Best Egyptian Arabic FEMALE voice from Google Cloud:
+// ar-XA-Wavenet-A is a female Arabic voice with natural, clear pronunciation
+// WaveNet quality provides the most natural-sounding speech synthesis
+const VOICE_NAME = 'ar-XA-Wavenet-A';
 const LANGUAGE_CODE = 'ar-XA';
 
 // Free tier: 1 million characters/month (100x more than ElevenLabs!)

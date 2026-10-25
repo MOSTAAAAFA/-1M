@@ -10,13 +10,13 @@ const { ElevenLabsClient } = require("elevenlabs");
 // Model: eleven_multilingual_v2 (best Arabic quality on the current key's tier).
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-const ELEVENLABS_MODEL = "eleven_multilingual_v2";
+const ELEVENLABS_MODEL = "eleven_turbo_v2_5"; // Latest model with most natural output
 
-// Voice chosen from the shared voice library: "Amr — A middle-aged Egyptian
-// male voice for Arabic users. Good for general use, voiceovers and narration."
-// Natural and professional (not overly dramatic), gender male.
-const ELEVEN_VOICE_ID = "yrPIy5b3iLnVLIBfUSw8";
-const ELEVEN_VOICE_NAME = "Amr (Egyptian Arabic)";
+// Voice chosen from the shared voice library: "Bella — A young American
+// female voice. Warm, clear, and natural — excellent for conversational AI."
+// Natural and professional, warm tone, gender female.
+const ELEVEN_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+const ELEVEN_VOICE_NAME = "Bella (Female - Natural & Clear)";
 
 // Monetized/everyday Character limit on the free tier is 10,000 chars/month.
 const MONTHLY_CHAR_LIMIT = 10000;
@@ -95,6 +95,12 @@ async function synthesizeEleven(text) {
       text,
       model_id: ELEVENLABS_MODEL,
       output_format: "mp3_44100_128",
+      voice_settings: {
+        stability: 0.5,           // Natural variability (0.3-0.6 is best for conversational)
+        similarity_boost: 0.75,   // High similarity to original voice (0.75-0.85 recommended)
+        style: 0.35,              // Expressive style (0.2-0.5 for natural conversation)
+        use_speaker_boost: true   // Enhance clarity and naturalness
+      }
     });
     audio = await collectStream(stream);
   } catch (err) {

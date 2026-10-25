@@ -327,34 +327,38 @@ export default function AIAssistant() {
         className="ai-floating-button"
         style={{
           position: 'fixed',
-          bottom: 25,
-          right: 25,
-          width: 64,
-          height: 64,
+          bottom: 24,
+          right: 24,
+          width: 56,
+          height: 56,
           borderRadius: '50%',
-          background: 'rgba(10,10,14,0.82)',
+          background: 'rgba(10,10,14,0.7)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(201,168,76,0.5)',
-          color: '#E0C06A',
+          border: '2px solid #E8C04E',
+          color: '#E8C04E',
           fontWeight: 700,
           cursor: 'pointer',
-          zIndex: 9999,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(201,168,76,0.18)',
-          fontSize: 13,
-          letterSpacing: '0.05em',
+          zIndex: 9998,
+          fontSize: 16,
+          letterSpacing: '1px',
           transition: 'all 0.3s ease',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(232, 192, 78, 0.3)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 48px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.4)';
-          e.currentTarget.style.borderColor = 'rgba(224,192,106,0.9)';
+          e.currentTarget.style.background = 'rgba(232, 192, 78, 0.15)';
+          e.currentTarget.style.borderColor = '#FFE566';
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.6), 0 0 30px rgba(255, 229, 102, 0.5)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(201,168,76,0.18)';
-          e.currentTarget.style.borderColor = 'rgba(201,168,76,0.5)';
+          e.currentTarget.style.background = 'rgba(10,10,14,0.7)';
+          e.currentTarget.style.borderColor = '#E8C04E';
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(232, 192, 78, 0.3)';
         }}
       >
         {open ? '✕' : 'AI'}

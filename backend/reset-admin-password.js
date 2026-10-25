@@ -5,7 +5,7 @@ require("dotenv").config();
 const User = require("./models/User");
 
 // 🔧 تغيير هذه الكلمة إلى كلمة المرور الجديدة التي تريدها
-const NEW_PASSWORD = "Admin@123456";
+const NEW_PASSWORD = "admin m1";
 
 async function resetAdminPassword() {
     try {
