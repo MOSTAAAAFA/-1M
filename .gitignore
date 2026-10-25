@@ -4,4 +4,4 @@ node_modules
 **/.env
 opencode.json
 backend/logs/
-*.log
+*.log.github/workflows
