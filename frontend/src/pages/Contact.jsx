@@ -1,8 +1,8 @@
 export default function Contact() {
   // ⚠️ غيّر السطرين دول لبياناتك الحقيقية
-  const whatsappNumber = '201001234567'; // رقمك بالكود الدولي، من غير + أو صفر في الأول
+  const whatsappNumber = '201032849750'; // رقمك بالكود الدولي، من غير + أو صفر في الأول
   const instagramHandle = '1m_motors'; // يوزر نيم الانستجرام من غير @
-
+  
   return (
     <section
       style={{
