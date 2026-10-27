@@ -50,7 +50,12 @@ app.use(cookieParser());
 
 // CORS configuration - restrict in production
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL]
+  ? [
+      process.env.FRONTEND_URL,
+      "https://velocitas-ehvt.vercel.app",
+      "https://velocitas-eta.vercel.app",
+      "https://velocitas.vercel.app"
+    ].filter(Boolean)
   : ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"];
 
 app.use(cors({
