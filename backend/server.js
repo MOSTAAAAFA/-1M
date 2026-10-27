@@ -181,7 +181,6 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => {
     console.error("MongoDB Error ❌:", err.message);
     logger.error("MongoDB Connection Error:", err);
-    process.exit(1);
   });
 
 // Handle MongoDB connection errors after initial connection
@@ -193,27 +192,31 @@ mongoose.connection.on("disconnected", () => {
   logger.warn("MongoDB disconnected");
 });
 
-// 🟢 PORT (IMPORTANT for Railway)
-const PORT = process.env.PORT || 3000;
+// 🟢 PORT (local / Railway only, not on Vercel)
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT} 🚀`);
-  logger.info(`Server started on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT} 🚀`);
+    logger.info(`Server started on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
 
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  logger.info("SIGTERM signal received: closing HTTP server");
-  server.close(() => {
-    logger.info("HTTP server closed");
-    mongoose.connection.close(false, () => {
-      logger.info("MongoDB connection closed");
-      process.exit(0);
+  process.on("SIGTERM", () => {
+    logger.info("SIGTERM signal received: closing HTTP server");
+    server.close(() => {
+      logger.info("HTTP server closed");
+      mongoose.connection.close(false, () => {
+        logger.info("MongoDB connection closed");
+        process.exit(0);
+      });
     });
   });
-});
 
-process.on("unhandledRejection", (err) => {
-  logger.error("Unhandled Promise Rejection:", err);
-  server.close(() => process.exit(1));
-});
+  process.on("unhandledRejection", (err) => {
+    logger.error("Unhandled Promise Rejection:", err);
+    server.close(() => process.exit(1));
+  });
+}
+
+// Vercel needs the app exported
+module.exports = app;
