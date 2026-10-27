@@ -15,12 +15,12 @@ VOICE MODE: When replying via voice, respond in natural Egyptian colloquial Arab
 
 // ✅ Backend API endpoint — local backend in dev, deployed URL in production
 const API_URL = process.env.NODE_ENV === 'production'
-  ? (process.env.REACT_APP_CHAT_URL || 'https://velocitas-api.vercel.app/api/chat')
+  ? 'https://velocitas-api.vercel.app/api/chat'
   : 'http://localhost:5000/api/chat';
 
 // Voice API endpoints
 const VOICE_URL = process.env.NODE_ENV === 'production'
-  ? (process.env.REACT_APP_VOICE_URL || 'https://velocitas-api.vercel.app/api/v1/voice/speak')
+  ? 'https://velocitas-api.vercel.app/api/v1/voice/speak'
   : 'http://localhost:5000/api/v1/voice/speak';
 
 // Web Speech API recognition singleton (defined once per app load).
