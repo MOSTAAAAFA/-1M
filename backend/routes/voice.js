@@ -38,7 +38,7 @@ function voiceLimiter(req, res, next) {
  */
 router.post('/voice/speak', voiceLimiter, async (req, res) => {
   try {
-    const { text, voice = 'female', format = 'mp3' } = req.body;
+    const { text, voice = 'male', format = 'mp3' } = req.body;
 
     if (!text) {
       return res.status(400).json({

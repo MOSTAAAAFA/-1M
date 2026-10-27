@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const { EdgeTTS } = require('edge-tts');
 
 // In-memory cache: text hash → {audio: Buffer, voice: string, timestamp: number}
 const cache = new Map();
@@ -19,41 +18,68 @@ function getCacheKey(text, voice) {
 }
 
 /**
- * Generate speech using Microsoft Edge TTS (Free)
- * Egyptian Arabic Neural Voices
+ * Generate speech using ElevenLabs TTS API (Arabic support)
+ * Free tier: 10,000 characters/month, no credit card required
  */
-async function generateSpeechEdgeTTS(text, voice = 'female') {
+async function generateSpeechElevenLabs(text, voice = 'male') {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('ELEVENLABS_API_KEY not configured in .env');
+  }
+
+  // ElevenLabs premade voices with Arabic support
+  const voiceId = voice === 'female'
+    ? 'EXAVITQu4vr4xnSDxMaL'  // Sarah - female voice
+    : 'pNInz6obpgDQGcFmaJgB';  // Adam - male voice
+
   try {
-    // Egyptian Arabic voices - very natural
-    const voiceId = voice === 'female'
-      ? 'ar-EG-SalmaNeural'  // بنت مصرية - صوت طبيعي جدًا
-      : 'ar-EG-ShakirNeural'; // راجل مصري
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey
+        },
+        body: JSON.stringify({
+          text,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.0,
+            use_speaker_boost: true
+          }
+        })
+      }
+    );
 
-    const tts = new EdgeTTS(text, voiceId, {
-      rate: '+0%',
-      pitch: '+0Hz',
-      volume: '+0%'
-    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('[TTS] ElevenLabs API error:', error);
+      throw new Error(`ElevenLabs TTS failed: ${error.detail?.message || response.statusText}`);
+    }
 
-    const audioBuffer = await tts.synthesize();
-
-    console.log('[TTS] Edge TTS synthesis completed:', audioBuffer.length, 'bytes');
+    const audioBuffer = Buffer.from(await response.arrayBuffer());
+    console.log('[TTS] ElevenLabs TTS synthesis completed:', audioBuffer.length, 'bytes');
 
     return {
-      audio: Buffer.from(audioBuffer),
-      voice: voice === 'female' ? 'Salma (Egyptian)' : 'Shakir (Egyptian)',
-      service: 'edge-tts'
+      audio: audioBuffer,
+      voice: voice === 'female' ? 'Sarah' : 'Adam',
+      service: 'elevenlabs'
     };
   } catch (error) {
-    console.error('[TTS] Edge TTS error:', error.message);
-    throw new Error('edge_tts_failed');
+    console.error('[TTS] ElevenLabs TTS error:', error.message);
+    throw new Error('elevenlabs_tts_failed');
   }
 }
 
 /**
- * Main TTS function with Egyptian Arabic voices
+ * Main TTS function with fallback chain
  */
-async function generateSpeech(text, voice = 'female') {
+async function generateSpeech(text, voice = 'male') {
   if (!text || text.length > 1000) {
     throw new Error('النص مطلوب ولازم يكون أقل من 1000 حرف');
   }
@@ -67,18 +93,18 @@ async function generateSpeech(text, voice = 'female') {
   }
 
   try {
-    console.log('[TTS] Calling Edge TTS (Egyptian Arabic)...');
-    const result = await generateSpeechEdgeTTS(text, voice);
+    console.log('[TTS] Calling ElevenLabs TTS...');
+    const result = await generateSpeechElevenLabs(text, voice);
     addToCache(cacheKey, { audio: result.audio, voice: result.voice, service: result.service });
     return { ...result, cached: false };
-  } catch (edgeError) {
-    console.error('[TTS] Edge TTS failed:', edgeError.message);
+  } catch (elevenLabsError) {
+    console.error('[TTS] ElevenLabs TTS failed:', elevenLabsError.message);
 
     return {
       fallback: true,
       text,
       voice,
-      message: 'معذرة، الصوت مش متاح دلوقتي'
+      message: 'معذرة، الصوت مش متاح دلوقتي. لازم تضبط ElevenLabs API key الأول.'
     };
   }
 }
