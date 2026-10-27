@@ -38,7 +38,7 @@ function voiceLimiter(req, res, next) {
  */
 router.post('/voice/speak', voiceLimiter, async (req, res) => {
   try {
-    const { text, voice = 'male', format = 'mp3' } = req.body;
+    const { text, voice = 'female', format = 'mp3' } = req.body;
 
     if (!text) {
       return res.status(400).json({
@@ -56,7 +56,7 @@ router.post('/voice/speak', voiceLimiter, async (req, res) => {
 
     // Success: return audio
     res.set({
-      'Content-Type': format === 'wav' ? 'audio/wav' : 'audio/mpeg',
+      'Content-Type': 'audio/mpeg',
       'Content-Length': result.audio.length,
       'Cache-Control': 'public, max-age=86400',
       'X-Voice-Service': result.service,
