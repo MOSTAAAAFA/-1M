@@ -16,12 +16,12 @@ import { useSiteSettings } from '../context/SiteSettingsContext';
 import { colors, spacing, radius, typography, transitions, components } from '../styles/designTokens';
 
 const HERO_SLIDES = [
-  { carId: 20, headline: 'Absolute', accent: 'Power', sub: 'Absolute power. Absolute art.' },
-  { carId: 11, headline: 'Pure', accent: 'Racing DNA', sub: 'The race track distilled into a road car.' },
-  { carId: 36, headline: 'Absolute', accent: 'Performance', sub: 'Eat the track.' },
-  { carId: 56, headline: 'The last', accent: 'pure Lotus', sub: 'Precision engineered for pure driving emotion.' },
-  { carId: 40, headline: 'final Aventador', accent: 'ultimate V12', sub: 'Precision engineered for pure driving emotion.' },
-  { carId: 32, headline: 'Open-air thrills', accent: 'with Aston soul', sub: 'Precision engineered for pure driving emotion.' },
+  { carId: 20, headline: 'Chiron', accent: 'Super Sport', sub: 'Absolute power. Absolute art. The ultimate expression of Bugatti performance.' },
+  { carId: 40, headline: 'Aventador', accent: 'Ultimae', sub: 'The final Aventador. The ultimate naturally aspirated V12 masterpiece.' },
+  { carId: 53, headline: 'Spectre', accent: 'Electric Super-Coupé', sub: 'The first fully electric Rolls-Royce, redefining ultra-luxury performance.' },
+  { carId: 32, headline: 'Vantage', accent: 'Roadster', sub: 'Open-air thrills with pure Aston Martin soul and twin-turbo V8 power.' },
+  { carId: 34, headline: 'Revuelto', accent: 'Hybrid V12', sub: 'The next chapter of the raging bull with electrified V12 performance.' },
+  { carId: 41, headline: 'F8', accent: 'Tributo', sub: 'A tribute to the most powerful V8 in Ferrari history.' },
 ];
 
 export default function Home() {
@@ -165,7 +165,7 @@ export default function Home() {
           zIndex: 3,
         }}/>
 
-        {/* Content - Empty for now, will add video-based content */}
+        {/* Content */}
         <div className="container" style={{
           height: '100%',
           maxWidth: 'none',
@@ -176,11 +176,76 @@ export default function Home() {
           zIndex: 5,
           paddingTop: 'var(--nav-offset)',
           paddingLeft: 28,
+          paddingRight: 28,
           paddingBottom: 'clamp(104px, 13vh, 140px)',
         }}>
-          <div style={{ maxWidth: 660, textAlign: 'left', width: '100%' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current.carId}
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              style={{ maxWidth: 700, textAlign: 'left', width: '100%' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+                <span style={{ width: 34, height: 1, background: '#C9A84C' }} />
+                <p style={{
+                  margin: 0,
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: '3px',
+                  textTransform: 'uppercase',
+                  color: '#C9A84C',
+                }}>
+                  {heroCar?.brand || 'Featured'}
+                </p>
+              </div>
 
-          </div>
+              <h1 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(42px, 6vw, 78px)',
+                fontWeight: 300,
+                lineHeight: 1.02,
+                color: 'var(--white)',
+                margin: '0 0 18px 0',
+              }}>
+                {current.headline}{' '}
+                <em style={{
+                  fontStyle: 'italic',
+                  background: 'linear-gradient(135deg,#C9A84C,#E0C06A 55%,#F4D03F)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>
+                  {current.accent}
+                </em>
+              </h1>
+
+              <p style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'clamp(15px, 1.4vw, 18px)',
+                lineHeight: 1.7,
+                color: 'rgba(240,237,232,0.78)',
+                maxWidth: 560,
+                margin: '0 0 28px 0',
+              }}>
+                {current.sub}
+              </p>
+
+              <Link
+                to={heroCar ? `/car/${heroCar.id}` : '/cars'}
+                className="btn btn-gold"
+                data-hover
+                data-magnetic
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
+              >
+                اكتشف العربية
+                <span aria-hidden="true">→</span>
+              </Link>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Bottom border/divider - makes the hero end clear and visible */}
