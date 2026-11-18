@@ -5,6 +5,7 @@ export default function Contact() {
   
   return (
     <section
+      className="contact-page"
       style={{
         minHeight: '100vh',
         background: 'var(--black, #050507)',
@@ -90,6 +91,12 @@ export default function Contact() {
       <style>{`
         @media (max-width: 720px) {
           .contact-grid { grid-template-columns: 1fr !important; }
+          .contact-page {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            padding-top: calc(var(--nav-offset, 72px) + 56px) !important;
+            padding-bottom: 72px !important;
+          }
         }
       `}</style>
     </section>

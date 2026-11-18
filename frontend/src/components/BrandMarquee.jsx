@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * BrandMarquee - Infinite scrolling brand strip
@@ -48,7 +49,8 @@ export default function BrandMarquee() {
       >
         {allBrands.map((brand, i) => (
           <React.Fragment key={i}>
-            <span
+            <Link
+              to={`/cars?brand=${encodeURIComponent(brand)}`}
               style={{
                 fontFamily: 'var(--font-ui)',
                 fontSize: '14px',
@@ -56,7 +58,8 @@ export default function BrandMarquee() {
                 textTransform: 'uppercase',
                 color: 'rgba(240,237,232,0.7)',
                 transition: 'color 0.3s ease',
-                cursor: 'default',
+                cursor: 'pointer',
+                textDecoration: 'none',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = 'var(--color-gold-500)';
@@ -66,7 +69,7 @@ export default function BrandMarquee() {
               }}
             >
               {brand}
-            </span>
+            </Link>
             {i < allBrands.length - 1 && (
               <svg
                 width="6"

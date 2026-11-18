@@ -53,7 +53,6 @@ export default function CarDetails() {
     : [];
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
     const t = setTimeout(() => setLoaded(true), 80);
     if (car) trackActivity('view', car);
     return () => clearTimeout(t);
@@ -282,7 +281,7 @@ export default function CarDetails() {
         </div>
 
         {/* Title overlay */}
-        <div className="container" style={{
+        <div className="container car-details-hero-title" style={{
           position: 'absolute',
           bottom: '48px',
           left: '50%',
@@ -326,7 +325,7 @@ export default function CarDetails() {
       {/* Main content */}
       <section style={{ padding: '0 0 100px' }}>
         <div className="container">
-          <div style={{
+          <div className="car-details-layout" style={{
             display: 'grid',
             gridTemplateColumns: '1fr 380px',
             gap: '48px',
@@ -338,7 +337,7 @@ export default function CarDetails() {
               {/* Showcase image */}
               <div style={{ marginBottom: '40px' }}>
                 <div style={{
-                  height: 380,
+                  height: 'clamp(240px, 50vw, 380px)',
                   borderRadius: 16,
                   overflow: 'hidden',
                   background: '#000',
@@ -502,8 +501,8 @@ export default function CarDetails() {
             </div>
 
             {/* Right column — Purchase card */}
-            <div style={{ position: 'sticky', top: '96px' }}>
-              <div style={{
+            <div className="car-details-purchase" style={{ position: 'sticky', top: '96px' }}>
+              <div className="car-details-purchase-card" style={{
                 background: 'rgba(16,16,22,0.9)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
@@ -609,6 +608,7 @@ export default function CarDetails() {
                   onClick={handleAddToCart}
                   aria-label={`Add ${car.name} to garage`}
                   data-magnetic
+                  data-no-magnetic
                   style={{
                     width: '100%',
                     padding: '16px',
@@ -625,11 +625,18 @@ export default function CarDetails() {
                     textTransform: 'uppercase',
                     cursor: 'pointer',
                     marginBottom: '12px',
-                    transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                    transform: addedPulse ? 'scale(0.98)' : 'scale(1)',
+                    transition: 'background 0.35s cubic-bezier(0.22,1,0.36,1), color 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s cubic-bezier(0.22,1,0.36,1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    gap: '8px',
+                    lineHeight: 1.3,
+                    whiteSpace: 'normal',
+                    boxSizing: 'border-box',
                   }}
                 >
-                  {addedPulse ? '✓ Added to Garage' : '+ Add to Garage'}
+                  <span>{addedPulse ? '✓ Added to Garage' : '+ Add to Garage'}</span>
                 </button>
 
                 <button
@@ -813,6 +820,38 @@ export default function CarDetails() {
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
       />
+
+      <style>{`
+        @media (max-width: 980px) {
+          .car-details-layout {
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
+            padding-top: 28px !important;
+          }
+          .car-details-purchase {
+            position: static !important;
+            top: auto !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .car-details-layout {
+            gap: 20px !important;
+            padding-top: 20px !important;
+          }
+          .car-details-hero-title {
+            bottom: 24px !important;
+          }
+          .car-details-purchase-card {
+            padding: 20px !important;
+            border-radius: 16px !important;
+          }
+        }
+        @media (max-width: 420px) {
+          .car-details-purchase-card {
+            padding: 16px !important;
+          }
+        }
+      `}</style>
     </motion.div>
   );
 }

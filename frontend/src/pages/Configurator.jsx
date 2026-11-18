@@ -100,7 +100,7 @@ export default function Configurator() {
   });
 
   return (
-    <div style={pageStyle}>
+    <div className="configurator-page" style={pageStyle}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <p style={{
@@ -127,7 +127,7 @@ export default function Configurator() {
         </p>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem', alignItems: 'start' }}>
+      <div className="configurator-layout" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem', alignItems: 'start' }}>
 
         {/* LEFT - Preview */}
         <div>
@@ -183,7 +183,7 @@ export default function Configurator() {
           {/* Select Car */}
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={labelStyle}>Select Model</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+            <div className="configurator-model-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
               {cars.slice(0, 6).map(car => (
                 <div
                   key={car.id}
@@ -239,7 +239,7 @@ export default function Configurator() {
             <h3 style={labelStyle}>
               Interior — <span style={{ color: '#f0ede8' }}>{selectedInterior.name}</span>
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+            <div className="configurator-interior-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
               {INTERIORS.map(int => (
                 <div
                   key={int.name}
@@ -269,7 +269,7 @@ export default function Configurator() {
           {/* Wheels */}
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={labelStyle}>Wheel Package</h3>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="configurator-wheel-row" style={{ display: 'flex', gap: '0.75rem' }}>
               {WHEELS.map(wheel => (
                 <div
                   key={wheel.name}
@@ -289,7 +289,7 @@ export default function Configurator() {
           {/* Packages */}
           <div>
             <h3 style={labelStyle}>Optional Packages</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="configurator-packages-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               {PACKAGES.map(pkg => {
                 const active = selectedPackages.find(p => p.name === pkg.name);
                 return (
@@ -311,7 +311,7 @@ export default function Configurator() {
         </div>
 
         {/* RIGHT - Summary */}
-        <div style={{ position: 'sticky', top: '5rem', alignSelf: 'start' }}>
+        <div className="configurator-summary" style={{ position: 'sticky', top: '5rem', alignSelf: 'start' }}>
           <div style={{
             background: '#0d0d12',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -413,6 +413,43 @@ export default function Configurator() {
         </div>
 
       </div>
+
+      <style>{`
+        @media (max-width: 980px) {
+          .configurator-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .configurator-summary {
+            position: static !important;
+            top: auto !important;
+          }
+        }
+        @media (max-width: 720px) {
+          .configurator-page {
+            padding: 84px 16px 2.5rem !important;
+          }
+          .configurator-model-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .configurator-interior-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .configurator-packages-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .configurator-wheel-row {
+            flex-wrap: wrap !important;
+          }
+          .configurator-wheel-row > * {
+            flex: 1 1 140px;
+          }
+        }
+        @media (max-width: 480px) {
+          .configurator-model-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -43,6 +43,17 @@ const HeartIcon = ({ filled }) => (
   </svg>
 );
 
+const CompareIcon = ({ active }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M10 3H5a2 2 0 0 0-2 2v5" />
+    <path d="M14 21h5a2 2 0 0 0 2-2v-5" />
+    <path d="M21 3l-7 7" />
+    <path d="M3 21l7-7" />
+    {active && <path d="M9 12l2 2 4-4" />}
+  </svg>
+);
+
 // ── Shared stat pill: label above value, the way a spec sheet reads ──────────
 const SpecPill = ({ label, value, active }) => (
   <div className="car-spec" data-active={active || undefined}>
@@ -56,8 +67,9 @@ function CarCard({ car, index = 0, priority = false, hideDetails = false }) {
   const [hovered, setHovered] = useState(false);
   const reduced = useReducedMotion();
 
-  const { addToCart, toggleFavorite, isFavorite } = useApp();
+  const { addToCart, toggleFavorite, isFavorite, addToCompare, removeFromCompare, isInCompare } = useApp();
   const fav = isFavorite(car.id);
+  const inCompare = isInCompare(car.id);
 
   // Fine pointer + no reduced motion are required for tilt. Coarse pointers
   // (touch) would get a sticky tilt with no pointer to drive it back to centre.
@@ -174,35 +186,53 @@ function CarCard({ car, index = 0, priority = false, hideDetails = false }) {
           </div>
 
           <div className="car-card-foot">
-            <div>
+            <div className="car-card-price-block">
               <p className="car-card-foot-label">From</p>
               <p className="car-card-price">{compactPrice(car.price)}</p>
             </div>
-            {/* Explicit "View Details" next to the price. The stretched link
-                already makes the whole card clickable, but the price is the
-                place people actually reach for when deciding, and a control
-                that is visibly a control is worth more than an invisible
-                hit area. Sits above the stretched link via z-index. */}
-            {/* "View Details" is hidden on the /cars collection grid. The whole
-                card is already a clickable surface through the stretched link,
-                so the control is redundant there, and at catalogue column widths
-                it crowded the primary "Add to Garage" pill and pushed its label
-                out of view. */}
-            {!hideDetails && (
-              <Link
-                to={`/car/${car.id}`}
-                className="car-card-details"
-                aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
+            <div className="car-card-actions">
+              {/* Explicit "View Details" next to the price. The stretched link
+                  already makes the whole card clickable, but the price is the
+                  place people actually reach for when deciding, and a control
+                  that is visibly a control is worth more than an invisible
+                  hit area. Sits above the stretched link via z-index. */}
+              {/* "View Details" is hidden on the /cars collection grid. The whole
+                  card is already a clickable surface through the stretched link,
+                  so the control is redundant there, and at catalogue column widths
+                  it crowded the primary "Add to Garage" pill and pushed its label
+                  out of view. */}
+              {!hideDetails && (
+                <Link
+                  to={`/car/${car.id}`}
+                  className="car-card-details"
+                  aria-label={`View details for ${car.brand} ${car.name} ${car.year}`}
+                >
+                  View Details
+                </Link>
+              )}
+              <button
+                type="button"
+                className="car-card-compare-btn"
+                data-on={inCompare || undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (inCompare) removeFromCompare(car.id);
+                  else addToCompare(car);
+                }}
+                aria-label={inCompare ? `Remove ${car.brand} ${car.name} from compare` : `Add ${car.brand} ${car.name} to compare`}
+                aria-pressed={inCompare}
               >
-                View Details
-              </Link>
-            )}
-            <button
-              className="car-card-cta"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(car); }}
-            >
-              Add to Garage
-            </button>
+                <CompareIcon active={inCompare} />
+                <span>{inCompare ? 'In Compare' : 'Compare'}</span>
+              </button>
+              <button
+                className="car-card-cta"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(car); }}
+              >
+                Add to Garage
+              </button>
+            </div>
           </div>
         </div>
       </motion.article>

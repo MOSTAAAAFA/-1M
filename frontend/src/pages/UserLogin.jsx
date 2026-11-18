@@ -175,7 +175,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{
+    <div className="auth-page" style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #050507 0%, #0a0a0e 50%, #050507 100%)',
       display: 'flex',
@@ -256,7 +256,7 @@ export default function Login() {
       </AnimatePresence>
 
       {/* Header Section - Stacked Vertically */}
-      <div style={{
+      <div className="auth-page-header" style={{
         position: 'absolute',
         top: 0,
         left: 0,
@@ -347,6 +347,7 @@ export default function Login() {
           x: shakeError ? [0, -10, 10, -10, 10, 0] : 0
         }}
         transition={{ duration: 0.6 }}
+        className="auth-card"
         style={{
           maxWidth: 480,
           width: '100%',
@@ -367,7 +368,7 @@ export default function Login() {
         }}/>
 
         {/* Content */}
-        <div style={{ padding: '48px 40px' }}>
+        <div className="auth-card-content" style={{ padding: '48px 40px' }}>
           {/* Title */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <h1 style={{
@@ -830,6 +831,26 @@ export default function Login() {
 
         .premium-input.invalid:not(:focus) {
           border: 1px solid rgba(239,68,68,0.4) !important;
+        }
+
+        @media (max-width: 640px) {
+          .auth-page {
+            justify-content: flex-start !important;
+            padding: 20px 16px 32px !important;
+          }
+          .auth-page-header {
+            position: relative !important;
+            padding: 0 0 16px !important;
+            gap: 12px !important;
+            width: 100%;
+            max-width: 480px;
+          }
+          .auth-card {
+            margin-top: 0 !important;
+          }
+          .auth-card-content {
+            padding: 28px 20px !important;
+          }
         }
       `}</style>
     </div>

@@ -126,10 +126,11 @@ export default function CheckoutPage() {
         background: 'rgba(8,8,11,0.9)',
         backdropFilter: 'blur(20px)',
       }}>
-        <div style={{
+        <div className="checkout-header-inner" style={{
           maxWidth: 1280, margin: '0 auto',
           padding: '20px 40px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 16,
         }}>
           {/* Back */}
           <button
@@ -183,6 +184,7 @@ export default function CheckoutPage() {
       <div
         role="navigation"
         aria-label="Checkout progress"
+        className="checkout-progress"
         style={{
         position: 'relative', zIndex: 10,
         maxWidth: 1280, margin: '0 auto',
@@ -192,7 +194,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* ── Main Content ── */}
-      <main style={{
+      <main className="checkout-main" style={{
         position: 'relative', zIndex: 10,
         maxWidth: 1280, margin: '0 auto',
         padding: '40px 40px 80px',
@@ -240,6 +242,57 @@ export default function CheckoutPage() {
         {/* Right — Order Summary */}
         <OrderSummary cart={cart} cartTotal={cartTotal} tax={tax} grandTotal={grandTotal} />
       </main>
+
+      <style>{`
+        @media (max-width: 980px) {
+          .checkout-header-inner {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            padding: 16px 20px !important;
+          }
+          .checkout-progress {
+            padding: 24px 20px 0 !important;
+          }
+          .checkout-main {
+            grid-template-columns: 1fr !important;
+            padding: 24px 20px 56px !important;
+            gap: 24px !important;
+          }
+          .checkout-summary {
+            position: static !important;
+            top: auto !important;
+          }
+        }
+        @media (max-width: 720px) {
+          .checkout-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .checkout-form-grid > * {
+            grid-column: span 1 !important;
+          }
+          .checkout-step-footer {
+            flex-wrap: wrap !important;
+          }
+          .checkout-step-footer > * {
+            flex: 1 1 100% !important;
+            width: 100%;
+          }
+          .checkout-step-progress {
+            gap: 4px;
+          }
+        }
+        @media (max-width: 520px) {
+          .checkout-header-inner > div:nth-child(2) h1 {
+            font-size: 18px !important;
+          }
+          .checkout-step-progress p {
+            font-size: 9px !important;
+            letter-spacing: 1px !important;
+            white-space: normal !important;
+            text-align: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -249,7 +302,7 @@ export default function CheckoutPage() {
 ───────────────────────────────────────────── */
 function StepProgress({ currentStep }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+    <div className="checkout-step-progress" style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
       {STEPS.map((s, idx) => (
         <React.Fragment key={s.id}>
           {/* Step node */}
@@ -310,7 +363,7 @@ function StepProgress({ currentStep }) {
 ───────────────────────────────────────────── */
 function OrderSummary({ cart, cartTotal, tax, grandTotal }) {
   return (
-    <div style={{
+    <div className="checkout-summary" style={{
       background: 'rgba(255,255,255,0.025)',
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: 20,
@@ -423,7 +476,7 @@ function PersonalInfoStep({ data, onChange, onNext }) {
     <div>
       <SectionHeader icon="◈" title="Personal Information" subtitle="Your details for registration & delivery" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <Field label="First Name" value={data.firstName} onChange={set('firstName')} placeholder="John" />
         <Field label="Last Name" value={data.lastName} onChange={set('lastName')} placeholder="Doe" />
         <Field label="Email Address" value={data.email} onChange={set('email')} placeholder="john@example.com" type="email" span={2} />
@@ -433,7 +486,7 @@ function PersonalInfoStep({ data, onChange, onNext }) {
 
       <SectionHeader icon="◈" title="Delivery Address" subtitle="Where we deliver your vehicle" small />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Field label="Street Address" value={data.address} onChange={set('address')} placeholder="123 Luxury Ave" span={2} />
         <Field label="City" value={data.city} onChange={set('city')} placeholder="Los Angeles" />
         <Field label="State" value={data.state} onChange={set('state')} placeholder="CA" />
@@ -508,7 +561,7 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
 
       {/* Card Form */}
       {data.method === 'card' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Field
             label="Card Number" span={2}
             value={formatCard(data.cardNumber)}
@@ -571,7 +624,7 @@ function PaymentStep({ data, onChange, onNext, onBack }) {
 
       {/* Bank Transfer */}
       {data.method === 'bank' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Field label="Bank Name" value={data.bankName} onChange={set('bankName')} placeholder="Chase, BofA..." span={2} />
           <Field label="Account Holder" value={data.accountHolder} onChange={set('accountHolder')} placeholder="Full legal name" span={2} />
           <div style={{
@@ -946,7 +999,7 @@ function ReviewRow({ label, value }) {
 
 function StepFooter({ children }) {
   return (
-    <div style={{ display: 'flex', gap: 12, marginTop: 32, alignItems: 'center' }}>
+    <div className="checkout-step-footer" style={{ display: 'flex', gap: 12, marginTop: 32, alignItems: 'center' }}>
       {children}
     </div>
   );

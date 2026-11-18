@@ -18,7 +18,6 @@ import Navbar from './components/Navbar';
 import CartSidebar from './components/CartSidebar';
 import Toast from './components/Toast';
 import CustomCursor from './components/CustomCursor';
-import { ParticleTrail } from './components/MouseTrail';
 import AIAssistant from './components/AiAssistant';
 import AnnouncementBar from './components/AnnouncementBar';
 import BrandWatermarkBackground from './components/BrandWatermarkBackground';
@@ -51,6 +50,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminCars = lazy(() => import('./pages/AdminCars'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminReviews = lazy(() => import('./pages/AdminReviews'));
 const AdminSettings = lazy(() => import('./pages/AdminSettings'));
 
 // User & informational pages - lazy load (less frequent)
@@ -406,9 +406,6 @@ function AnimatedRoutes() {
       {/* Custom Cursor - works everywhere */}
       <CustomCursor />
 
-      {/* Subtle gold particles behind cursor (- fine pointers only) */}
-      {showPointerEffects && <ParticleTrail color="#C9A84C" particleCount={2} />}
-
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-to-content">
         Skip to main content
@@ -543,6 +540,11 @@ function AnimatedRoutes() {
             <Route path="/admin/users" element={
               <LazyLoadWrapper fallbackMessage="Loading Users...">
                 <AdminUsers />
+              </LazyLoadWrapper>
+            } />
+            <Route path="/admin/reviews" element={
+              <LazyLoadWrapper fallbackMessage="Loading Reviews...">
+                <AdminReviews />
               </LazyLoadWrapper>
             } />
             <Route path="/admin/settings" element={

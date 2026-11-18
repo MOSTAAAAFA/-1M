@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
 import { useReducedMotion } from '../context/ReducedMotionContext';
 import { getOptimizedAnimationConfig } from '../utils/performanceOptimization';
@@ -45,19 +45,73 @@ export function LenisSmoothScroll() {
 }
 
 /**
- * ScrollToTop - Resets scroll position to the top on every route change.
- * Uses Lenis when active (instant, no visible jump), native otherwise.
+ * ScrollToTop - Resets scroll position to the top on forward navigation,
+ * and restores the previous scroll position on back/forward (POP) navigation.
+ * Uses Lenis when active, native otherwise.
  */
 export function ScrollToTop() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const positionsRef = useRef(new Map());
 
   useEffect(() => {
-    if (window.lenis) {
-      window.lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
     }
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    const key = location.key || `${location.pathname}${location.search}${location.hash}`;
+    const routeKey = `${location.pathname}${location.search}${location.hash}`;
+    const savePosition = () => {
+      const y = window.lenis ? window.lenis.scroll : window.scrollY;
+      positionsRef.current.set(key, y);
+      positionsRef.current.set(routeKey, y);
+    };
+
+    window.addEventListener('scroll', savePosition, { passive: true });
+    return () => {
+      savePosition();
+      window.removeEventListener('scroll', savePosition);
+    };
+  }, [location.key, location.pathname, location.search, location.hash]);
+
+  useEffect(() => {
+    const key = location.key || `${location.pathname}${location.search}${location.hash}`;
+    const routeKey = `${location.pathname}${location.search}${location.hash}`;
+    const isPop = navigationType === 'POP';
+    const savedY = positionsRef.current.has(key)
+      ? positionsRef.current.get(key)
+      : positionsRef.current.get(routeKey);
+
+    const scrollToY = (y, immediate = true) => {
+      if (window.lenis) {
+        window.lenis.scrollTo(y, { immediate });
+      } else {
+        window.scrollTo({ top: y, left: 0, behavior: immediate ? 'instant' : 'auto' });
+      }
+    };
+
+    if (isPop && typeof savedY === 'number') {
+      // Restore after route content renders/layout settles (content height may grow as images/cards mount)
+      let attempts = 0;
+      const maxAttempts = 12;
+      const tryRestore = () => {
+        const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const targetY = Math.min(savedY, maxY);
+        scrollToY(targetY, true);
+        attempts += 1;
+        if (attempts < maxAttempts) {
+          setTimeout(tryRestore, attempts <= 4 ? 60 : 120);
+        }
+      };
+      requestAnimationFrame(() => {
+        requestAnimationFrame(tryRestore);
+      });
+    } else {
+      scrollToY(0, true);
+    }
+  }, [location.key, location.pathname, location.search, location.hash, navigationType]);
 
   return null;
 }

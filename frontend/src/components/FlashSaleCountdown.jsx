@@ -238,6 +238,7 @@ export const StockAlert = ({ onNotify, productName }) => {
       {!subscribed ? (
         <div style={{
           display: 'flex',
+          flexWrap: 'wrap',
           gap: '12px',
         }}>
           <input
@@ -246,7 +247,9 @@ export const StockAlert = ({ onNotify, productName }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             style={{
-              flex: 1,
+              flex: '1 1 180px',
+              minWidth: 0,
+              width: '100%',
               padding: '12px 16px',
               borderRadius: '20px',
               border: '1px solid rgba(201,168,76,0.2)',
@@ -262,6 +265,7 @@ export const StockAlert = ({ onNotify, productName }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{
+              flex: '1 1 120px',
               padding: '12px 24px',
               borderRadius: '20px',
               border: 'none',
@@ -272,6 +276,7 @@ export const StockAlert = ({ onNotify, productName }) => {
               fontWeight: 600,
               cursor: 'none',
               whiteSpace: 'nowrap',
+              textAlign: 'center',
             }}
           >
             Notify Me
@@ -340,6 +345,7 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
         <>
           <div style={{
             display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
             gap: '12px',
             marginBottom: '12px',
@@ -350,7 +356,9 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
               onChange={(e) => setTargetPrice(e.target.value)}
               placeholder={`Below $${currentPrice.toLocaleString()}`}
               style={{
-                flex: 1,
+                flex: '1 1 180px',
+                minWidth: 0,
+                width: '100%',
                 padding: '10px 14px',
                 borderRadius: '20px',
                 border: '1px solid rgba(201,168,76,0.2)',
@@ -366,6 +374,8 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{
+                flex: '0 0 auto',
+                minWidth: '88px',
                 padding: '10px 20px',
                 borderRadius: '20px',
                 border: 'none',
@@ -375,6 +385,7 @@ export const PriceAlert = ({ currentPrice, onSetAlert }) => {
                 fontSize: '14px',
                 fontWeight: 600,
                 cursor: 'none',
+                textAlign: 'center',
               }}
             >
               Set

@@ -20,6 +20,8 @@ const adminMiddleware = (req, res, next) => {
   next();
 };
 
+const escapeRegex = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // 🔐 VERIFY Admin Token
 router.get("/verify", authMiddleware, adminMiddleware, asyncHandler(async (req, res) => {
   res.json({
@@ -407,10 +409,11 @@ router.get("/stats/real-time", authMiddleware, adminMiddleware, asyncHandler(asy
 router.get("/users", authMiddleware, adminMiddleware, asyncHandler(async (req, res) => {
   const { page = 1, limit = 20, search = '' } = req.query;
 
-  const query = search
+  const safeSearch = search ? escapeRegex(search) : '';
+  const query = safeSearch
     ? { $or: [
-        { name: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') }
+        { name: new RegExp(safeSearch, 'i') },
+        { email: new RegExp(safeSearch, 'i') }
       ]}
     : {};
 
@@ -588,6 +591,44 @@ router.delete("/products/:id", authMiddleware, adminMiddleware, asyncHandler(asy
   res.json({
     success: true,
     message: "Product deleted successfully"
+  });
+}));
+
+// 🔐 GET All Reviews (admin moderation)
+router.get("/reviews", authMiddleware, adminMiddleware, asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, search = '', product = '' } = req.query;
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 20));
+
+  const query = {};
+  if (product) query.product = product;
+
+  if (search) {
+    const safeSearch = escapeRegex(search);
+    query.$or = [
+      { title: new RegExp(safeSearch, 'i') },
+      { comment: new RegExp(safeSearch, 'i') }
+    ];
+  }
+
+  const [reviews, total] = await Promise.all([
+    Review.find(query)
+      .populate('user', 'name email')
+      .populate('product', 'name brand image images')
+      .sort({ createdAt: -1 })
+      .limit(limitNum)
+      .skip((pageNum - 1) * limitNum)
+      .lean(),
+    Review.countDocuments(query)
+  ]);
+
+  res.json({
+    success: true,
+    reviews,
+    totalPages: Math.ceil(total / limitNum) || 1,
+    currentPage: pageNum,
+    total
   });
 }));
 

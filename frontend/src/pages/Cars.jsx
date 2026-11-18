@@ -24,15 +24,25 @@ const HP_OPTIONS = [
 
 export default function Cars() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
-  const [selectedBrand, setSelectedBrand] = useState('All');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [priceRange, setPriceRange] = useState([0, MAX_PRICE]);
-  const [selectedYear, setSelectedYear] = useState('All');
-  const [minHp, setMinHp] = useState(0);
-  const [sortBy, setSortBy] = useState('featured');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || ''); // (kept for clarity)
+  const [selectedBrand, setSelectedBrand] = useState(() => searchParams.get('brand') || 'All');
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'All');
+  const [priceRange, setPriceRange] = useState(() => {
+    const min = Number(searchParams.get('min'));
+    const max = Number(searchParams.get('max'));
+    return [
+      Number.isFinite(min) && min >= 0 ? min : 0,
+      Number.isFinite(max) && max > 0 ? max : MAX_PRICE,
+    ];
+  });
+  const [selectedYear, setSelectedYear] = useState(() => searchParams.get('year') || 'All');
+  const [minHp, setMinHp] = useState(() => {
+    const hp = Number(searchParams.get('hp'));
+    return Number.isFinite(hp) && hp >= 0 ? hp : 0;
+  });
+  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || 'featured');
 
   // Extract unique brands and years
   const brands = useMemo(() => {
@@ -49,6 +59,24 @@ export default function Cars() {
     const allCategories = [...new Set(cars.map(c => c.category).filter(Boolean))];
     return ['All', ...allCategories.sort()];
   }, []);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('q', searchQuery);
+    if (selectedBrand && selectedBrand !== 'All') params.set('brand', selectedBrand);
+    if (selectedCategory && selectedCategory !== 'All') params.set('category', selectedCategory);
+    if (selectedYear && selectedYear !== 'All') params.set('year', String(selectedYear));
+    if (sortBy && sortBy !== 'featured') params.set('sort', sortBy);
+    if (Number.isFinite(priceRange[0]) && priceRange[0] > 0) params.set('min', String(priceRange[0]));
+    if (Number.isFinite(priceRange[1]) && priceRange[1] < MAX_PRICE) params.set('max', String(priceRange[1]));
+    if (minHp > 0) params.set('hp', String(minHp));
+
+    const next = params.toString();
+    const current = searchParams.toString();
+    if (next !== current) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [searchQuery, selectedBrand, selectedCategory, selectedYear, sortBy, priceRange, minHp, searchParams, setSearchParams]);
 
   // Filter and sort cars
   const filteredCars = useMemo(() => {
@@ -200,9 +228,10 @@ export default function Cars() {
               onChange={(e) => setSelectedBrand(e.target.value)}
               style={styles.filterSelect}
               className="cars-select"
+              data-no-magnetic
             >
               {brands.map(brand => (
-                <option key={brand} value={brand}>Brand: {brand}</option>
+                <option key={brand} value={brand}>{brand === 'All' ? 'All Brands' : brand}</option>
               ))}
             </select>
 
@@ -211,9 +240,10 @@ export default function Cars() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               style={styles.filterSelect}
               className="cars-select"
+              data-no-magnetic
             >
               {categories.map(category => (
-                <option key={category} value={category}>Category: {category}</option>
+                <option key={category} value={category}>{category === 'All' ? 'All Categories' : category}</option>
               ))}
             </select>
 
@@ -222,9 +252,10 @@ export default function Cars() {
               onChange={(e) => setSelectedYear(e.target.value)}
               style={styles.filterSelect}
               className="cars-select"
+              data-no-magnetic
             >
               {years.map(year => (
-                <option key={year} value={year}>Year: {year}</option>
+                <option key={year} value={year}>{year === 'All' ? 'All Years' : year}</option>
               ))}
             </select>
 
@@ -233,6 +264,7 @@ export default function Cars() {
               onChange={(e) => setMinHp(Number(e.target.value))}
               style={styles.filterSelect}
               className="cars-select"
+              data-no-magnetic
             >
               {HP_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -244,8 +276,9 @@ export default function Cars() {
               onChange={(e) => setSortBy(e.target.value)}
               style={styles.filterSelect}
               className="cars-select"
+              data-no-magnetic
             >
-              <option value="featured">Sort: Featured</option>
+              <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
               <option value="year">Newest First</option>
@@ -621,12 +654,14 @@ const styles = {
     opacity: 0.6,
   },
   filtersRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    gap: '12px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '16px',
     marginBottom: '16px',
   },
   filterSelect: {
+    flex: '1 1 160px',
+    minWidth: '160px',
     padding: `${spacing.md} ${spacing.lg}`,
     background: colors.black2,
     border: `1px solid ${colors.goldGlow}`,
@@ -691,7 +726,7 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
     gap: '24px',
     maxWidth: '1400px',
     margin: '0 auto',

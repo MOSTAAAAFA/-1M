@@ -93,7 +93,7 @@ export default function Register() {
   };
 
   return (
-    <div style={{
+    <div className="register-page" style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #050507 0%, #0a0a0e 50%, #050507 100%)',
       display: 'flex',
@@ -105,6 +105,7 @@ export default function Register() {
     }}>
       {/* Back to Home Button */}
       <button
+        className="register-back-btn"
         onClick={() => navigate('/')}
         style={{
           position: 'fixed',
@@ -154,6 +155,7 @@ export default function Register() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
+        className="register-card"
         style={{
           maxWidth: 480,
           width: '100%',
@@ -173,7 +175,7 @@ export default function Register() {
         }}/>
 
         {/* Content */}
-        <div style={{ padding: '48px 40px' }}>
+        <div className="register-card-content" style={{ padding: '48px 40px' }}>
           {/* Logo & Title */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <div style={{
@@ -527,6 +529,29 @@ export default function Register() {
           </div>
         </div>
       </motion.div>
+      <style>{`
+        @media (max-width: 640px) {
+          .register-page {
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            flex-direction: column;
+            padding: 16px !important;
+            gap: 12px;
+          }
+          .register-back-btn {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            align-self: flex-start;
+          }
+          .register-card {
+            margin-top: 0 !important;
+          }
+          .register-card-content {
+            padding: 28px 20px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

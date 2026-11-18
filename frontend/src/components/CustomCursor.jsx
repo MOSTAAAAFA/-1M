@@ -32,6 +32,7 @@ export default function CustomCursor() {
       // Skip magnetic pull on/inside car cards: they have their own 3D tilt
       // animation (Card3DTilt) and writing transform here would fight it.
       const insideCard = e.target.closest('.car-card');
+      const isFormControl = isHoverable && ['SELECT', 'INPUT', 'TEXTAREA'].includes(isHoverable.tagName);
 
       // Skip magnetic pull on elements that opt out via [data-no-magnetic].
       // Used on adjacent CTA buttons where the pull would push them toward
@@ -39,7 +40,7 @@ export default function CustomCursor() {
       const noMagnet = isHoverable && isHoverable.closest('[data-no-magnetic]');
 
       // ELITE Premium Magnetic effect - Weighted physics
-      if (isHoverable && !insideCard && !noMagnet) {
+      if (isHoverable && !insideCard && !noMagnet && !isFormControl) {
         // Cache rect per element so we don't force layout on every mousemove
         let cached = magnetRef.current;
         if (!cached || cached.el !== isHoverable) {

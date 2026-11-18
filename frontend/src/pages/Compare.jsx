@@ -238,6 +238,7 @@ export default function Compare() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="compare-hero"
         style={{
           padding: '80px 48px 40px',
           background: 'linear-gradient(180deg, rgba(10,10,14,0.8) 0%, rgba(5,5,7,0) 100%)',
@@ -493,11 +494,13 @@ export default function Compare() {
           >
             {/* Car Header Cards */}
             <div
+              className="compare-header-cards"
               style={{
                 display: 'grid',
                 gridTemplateColumns: selected.length > 2 ? 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' : `repeat(${selected.length}, 1fr)`,
                 gap: '24px',
                 marginBottom: '40px',
+                '--compare-cols': selected.length,
               }}
             >
               {selected.map((car, carIdx) => (
@@ -715,9 +718,10 @@ export default function Compare() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.5, delay: 0.4 + idx * 0.05 }}
+                      className="compare-spec-row"
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: window.innerWidth > 768 ? `280px repeat(${selected.length}, 1fr)` : '1fr',
+                        gridTemplateColumns: `280px repeat(${selected.length}, 1fr)`,
                         borderBottom:
                           idx < Object.keys(SPEC_LABELS).length - 1
                             ? '1px solid rgba(255,255,255,0.04)'
@@ -733,6 +737,7 @@ export default function Compare() {
                     >
                       {/* Label Cell */}
                       <div
+                        className="compare-spec-label"
                         style={{
                           padding: '24px 32px',
                           display: 'flex',
@@ -772,6 +777,7 @@ export default function Compare() {
                         return (
                           <div
                             key={`${car.id}-${key}`}
+                            className="compare-spec-value"
                             style={{
                               padding: '24px 20px',
                               display: 'flex',
@@ -783,6 +789,9 @@ export default function Compare() {
                               position: 'relative',
                             }}
                           >
+                            <span className="compare-spec-car-label" style={{ display: 'none' }}>
+                              {car.brand} {car.name}
+                            </span>
                             {isWinner && (
                               <div
                                 style={{
@@ -879,6 +888,47 @@ export default function Compare() {
           </div>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .compare-hero {
+            padding: 64px 24px 32px !important;
+          }
+          .compare-header-cards {
+            grid-template-columns: 1fr !important;
+          }
+          .compare-spec-row {
+            grid-template-columns: 1fr !important;
+          }
+          .compare-spec-label {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 18px 20px !important;
+          }
+          .compare-spec-value {
+            align-items: flex-start !important;
+            text-align: left !important;
+            padding: 14px 20px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+          }
+          .compare-spec-car-label {
+            display: block !important;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(240,237,232,0.45);
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+          }
+        }
+        @media (max-width: 640px) {
+          .compare-hero {
+            padding: 56px 16px 28px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

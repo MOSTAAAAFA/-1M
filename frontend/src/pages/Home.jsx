@@ -695,8 +695,12 @@ function StatsBar() {
 
 /* ── Brand Marquee ── */
 const MARQUEE_BRANDS = ['PORSCHE', 'FERRARI', 'LAMBORGHINI', 'BUGATTI', 'MCLAREN', 'ASTON MARTIN', 'BMW M', 'MERCEDES-AMG', 'BENTLEY', 'AUDI', 'TESLA', 'CHEVROLET'];
+const MARQUEE_BRAND_FILTERS = {
+  'BMW M': 'BMW',
+};
 
 function BrandMarquee() {
+  const navigate = useNavigate();
   const items = [...MARQUEE_BRANDS, ...MARQUEE_BRANDS];
   return (
     <div style={{
@@ -711,16 +715,29 @@ function BrandMarquee() {
     }}>
       <div className="marquee-track" style={{ display: 'flex', gap: '72px', whiteSpace: 'nowrap', width: 'max-content' }}>
         {items.map((brand, i) => (
-          <span key={i} style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 17,
-            letterSpacing: '6px',
-            color: i % 2 === 0 ? 'rgba(240,237,232,0.28)' : 'rgba(201,168,76,0.45)',
-            textShadow: i % 2 === 0
-              ? '0 0 10px rgba(240,237,232,0.18), 0 0 26px rgba(240,237,232,0.08)'
-              : '0 0 10px rgba(201,168,76,0.5), 0 0 28px rgba(201,168,76,0.22)',
-            transition: 'color 0.3s',
-          }}>
+          <span
+            key={i}
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate(`/cars?brand=${encodeURIComponent(MARQUEE_BRAND_FILTERS[brand] || brand)}`)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate(`/cars?brand=${encodeURIComponent(MARQUEE_BRAND_FILTERS[brand] || brand)}`);
+              }
+            }}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 17,
+              letterSpacing: '6px',
+              color: i % 2 === 0 ? 'rgba(240,237,232,0.28)' : 'rgba(201,168,76,0.45)',
+              textShadow: i % 2 === 0
+                ? '0 0 10px rgba(240,237,232,0.18), 0 0 26px rgba(240,237,232,0.08)'
+                : '0 0 10px rgba(201,168,76,0.5), 0 0 28px rgba(201,168,76,0.22)',
+              transition: 'color 0.3s',
+              cursor: 'pointer',
+            }}
+          >
             {brand}
             <span
               aria-hidden="true"
@@ -802,6 +819,7 @@ function FeaturedSection() {
 
 /* ── Brands Section ── */
 function BrandsSection() {
+  const navigate = useNavigate();
   const [ref, visible] = useIntersectionObserver();
   const [hoveredBrand, setHoveredBrand] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -1007,6 +1025,7 @@ function BrandsSection() {
                 onClick={() => {
                   setClickedBrand(brand.name);
                   setTimeout(() => setClickedBrand(null), 600);
+                  navigate(`/cars?brand=${encodeURIComponent(brand.name)}`);
                 }}
                 onTouchStart={() => {
                   setHoveredBrand(brand.name);
