@@ -226,118 +226,54 @@ export default function Home() {
   );
 }
 
-/* ── Hero Backdrop (isolated parallax: updates DOM directly, no page re-render) ── */
+/* ── Hero Backdrop (auto-rotating car images) ── */
 function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
-  const videoRef = useRef(null);
-  const [currentVideo, setCurrentVideo] = useState(0);
   const [prefersReducedMotion] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
-
-  const videos = [
-    {
-      src: '/videos/Porsche GT3RS 991.2 Mountain Road Cinematic 4K_2160p.mp4',
-      startTime: 0,
-      endTime: 103,
-      name: 'Porsche GT3RS'
-    },
-    {
-      src: '/videos/Rolls-Royce Introduces Spectre_ The World\'s First Ultra-Luxury Electric Super Coupé_1440p.mp4',
-      startTime: 3,
-      endTime: 59,
-      name: 'Rolls-Royce Spectre'
-    }
-  ];
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    const currentVideoData = videos[currentVideo];
-    video.currentTime = currentVideoData.startTime;
-
-    const handleTimeUpdate = () => {
-      if (video.currentTime >= currentVideoData.endTime) {
-        setCurrentVideo(prev => (prev + 1) % videos.length);
-      }
-    };
-
-    const handleLoadedMetadata = () => {
-      video.currentTime = currentVideoData.startTime;
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(err => {
-          console.warn('Video autoplay blocked:', err);
-        });
-      }
-    };
-
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-    if (video.readyState >= 2) {
-      video.currentTime = currentVideoData.startTime;
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(err => {
-          console.warn('Video autoplay blocked:', err);
-        });
-      }
-    }
-
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-    };
-  }, [currentVideo, prefersReducedMotion]);
-
-  // Show poster for reduced motion users
-  if (prefersReducedMotion) {
-    return (
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundImage: 'url(/videos/poster.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }} />
-    );
-  }
+  const canKenBurns = enableKenBurns && !prefersReducedMotion;
 
   return (
     <div style={{
       position: 'absolute',
       inset: 0,
       overflow: 'hidden',
+      background: '#050507',
     }}>
-      <video
-        ref={videoRef}
-        key={currentVideo}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        poster="/videos/poster.jpg"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          minWidth: '100%',
-          minHeight: '100%',
-          width: 'auto',
-          height: 'auto',
-          transform: 'translate(-50%, -50%)',
-          objectFit: 'cover',
-          filter: 'brightness(1.02) contrast(1.05)',
-        }}
-      >
-        <source
-          src={videos[currentVideo].src}
-          type="video/mp4"
-        />
-      </video>
+      {HERO_SLIDES.map((item, i) => {
+        const car = cars.find(c => c.id === item.carId);
+        const active = i === slide;
+        return (
+          <div
+            key={item.carId}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: active ? 1 : 0,
+              transition: prefersReducedMotion ? 'none' : 'opacity 1.1s ease-in-out',
+              zIndex: active ? 1 : 0,
+              pointerEvents: 'none',
+            }}
+            aria-hidden={!active}
+          >
+            <img
+              src={car?.image}
+              alt={car ? `${car.brand} ${car.name}` : ''}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                transform: canKenBurns ? (active ? 'scale(1.06)' : 'scale(1)') : 'scale(1)',
+                transition: canKenBurns ? 'transform 7s ease-out, opacity 1.1s ease-in-out' : (prefersReducedMotion ? 'none' : 'opacity 1.1s ease-in-out'),
+                filter: 'brightness(0.82) contrast(1.05) saturate(1.05)',
+              }}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
