@@ -241,11 +241,86 @@ export default function Home() {
                 data-magnetic
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
               >
-                اكتشف العربية
+                View Car
                 <span aria-hidden="true">→</span>
               </Link>
             </motion.div>
           </AnimatePresence>
+        </div>
+
+        {/* Slide counter (right side) */}
+        <div
+          style={{
+            position: 'absolute',
+            right: 'clamp(16px, 3vw, 36px)',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 6,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 10,
+          }}
+          aria-label="Hero slides"
+        >
+          {HERO_SLIDES.map((item, i) => {
+            const active = i === slide;
+            return (
+              <button
+                key={item.carId}
+                type="button"
+                onClick={() => goToSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-current={active ? 'true' : undefined}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '4px 0',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  color: active ? '#F4D03F' : 'rgba(240,237,232,0.45)',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'var(--font-ui)',
+                    fontSize: active ? 13 : 11,
+                    letterSpacing: '2px',
+                    fontWeight: active ? 700 : 500,
+                    textShadow: active ? '0 0 12px rgba(244,208,63,0.45)' : 'none',
+                    minWidth: 24,
+                    textAlign: 'right',
+                  }}
+                >
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: active ? 28 : 14,
+                    height: 1,
+                    background: active ? '#C9A84C' : 'rgba(240,237,232,0.28)',
+                    boxShadow: active ? '0 0 8px rgba(201,168,76,0.6)' : 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                />
+              </button>
+            );
+          })}
+          <div
+            style={{
+              marginTop: 8,
+              fontFamily: 'var(--font-ui)',
+              fontSize: 10,
+              letterSpacing: '2px',
+              color: 'rgba(240,237,232,0.45)',
+            }}
+          >
+            {String(slide + 1).padStart(2, '0')} / {String(HERO_SLIDES.length).padStart(2, '0')}
+          </div>
         </div>
 
         {/* Bottom border/divider - makes the hero end clear and visible */}
@@ -308,6 +383,9 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
       {HERO_SLIDES.map((item, i) => {
         const car = cars.find(c => c.id === item.carId);
         const active = i === slide;
+        const imageSrc = item.carId === 20
+          ? (car?.heroImage || car?.image)
+          : (car?.image || car?.heroImage);
         return (
           <div
             key={item.carId}
@@ -322,7 +400,7 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
             aria-hidden={!active}
           >
             <img
-              src={car?.image}
+              src={imageSrc}
               alt={car ? `${car.brand} ${car.name}` : ''}
               style={{
                 width: '100%',
