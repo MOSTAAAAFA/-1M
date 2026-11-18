@@ -119,10 +119,13 @@ export default function Navbar() {
         alignItems: 'center',
         padding: '0 48px',
         transition: 'background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s ease',
-        borderBottom: solid ? '1px solid rgba(201,168,76,0.22)' : '1px solid transparent',
+        background: solid ? undefined : 'linear-gradient(to bottom, rgba(5,5,7,0.82) 0%, rgba(5,5,7,0.38) 100%)',
+        backdropFilter: solid ? undefined : 'blur(10px)',
+        WebkitBackdropFilter: solid ? undefined : 'blur(10px)',
+        borderBottom: solid ? '1px solid rgba(201,168,76,0.30)' : '1px solid rgba(201,168,76,0.22)',
         boxShadow: solid
           ? '0 10px 40px rgba(0,0,0,0.5), 0 1px 0 rgba(201,168,76,0.18), inset 0 -1px 0 rgba(201,168,76,0.08)'
-          : 'none',
+          : '0 8px 28px rgba(0,0,0,0.28)',
       }}
       >
         <div style={{
@@ -197,16 +200,16 @@ export default function Navbar() {
                 >
                   <Link to={to} style={{
                     fontFamily: typography.fontUI,
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.semibold,
-                    letterSpacing: '3px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    letterSpacing: '2.4px',
                     textTransform: 'uppercase',
-                    color: active ? colors.gold : colors.white70,
+                    color: active ? colors.gold : 'rgba(255,255,255,0.92)',
                     textDecoration: 'none',
                     position: 'relative',
-                    paddingBottom: 3,
+                    paddingBottom: 4,
                     transition: `color ${transitions.duration.normal} ${transitions.easeOut}`,
-                    textShadow: !solid && !active ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
+                    textShadow: !solid && !active ? '0 1px 6px rgba(0,0,0,0.45)' : 'none',
                   }}>
                     {label}
                     {active && (
@@ -439,7 +442,7 @@ export default function Navbar() {
                 borderRadius: radius.full,
                 color: colors.white,
                 fontFamily: typography.fontUI,
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: typography.fontWeight.semibold,
                 letterSpacing: typography.letterSpacing.wider,
                 textTransform: 'uppercase',
@@ -473,7 +476,7 @@ export default function Navbar() {
                 borderRadius: radius.full,
                 color: colors.gold,
                 fontFamily: typography.fontUI,
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: typography.fontWeight.bold,
                 letterSpacing: typography.letterSpacing.wider,
                 textTransform: 'uppercase',
@@ -516,7 +519,7 @@ export default function Navbar() {
                 borderRadius: radius.full,
                 color: colors.black,
                 fontFamily: typography.fontUI,
-                fontSize: typography.fontSize.sm,
+                fontSize: '14px',
                 fontWeight: typography.fontWeight.bold,
                 letterSpacing: typography.letterSpacing.widest,
                 textTransform: 'uppercase',
@@ -565,9 +568,9 @@ export default function Navbar() {
                 background: colors.white10,
                 border: `1px solid ${colors.border2}`,
                 borderRadius: radius.full,
-                color: colors.white70,
+                color: 'rgba(255,255,255,0.88)',
                 fontFamily: typography.fontUI,
-                fontSize: typography.fontSize.sm,
+                fontSize: '14px',
                 fontWeight: typography.fontWeight.semibold,
                 letterSpacing: typography.letterSpacing.widest,
                 textTransform: 'uppercase',
@@ -659,7 +662,7 @@ export default function Navbar() {
           {NAV_LINKS.map(({ label, to }, i) => (
             <Link key={to} to={to} style={{
               fontFamily: typography.fontDisplay,
-              fontSize: typography.fontSize['4xl'],
+              fontSize: 'clamp(32px, 8vw, 44px)',
               fontWeight: typography.fontWeight.light,
               color: colors.white,
               textDecoration: 'none',
@@ -680,7 +683,7 @@ export default function Navbar() {
           ))}
           <Link to="/" style={{
             fontFamily: typography.fontDisplay,
-            fontSize: typography.fontSize['4xl'],
+            fontSize: 'clamp(32px, 8vw, 44px)',
             fontWeight: typography.fontWeight.light,
             color: colors.white,
             textDecoration: 'none',
@@ -731,17 +734,22 @@ export default function Navbar() {
         @media (max-width: 1100px) {
           .nav-links, .nav-search { display: none !important; }
           .mobile-burger { display: flex !important; }
+          nav.site-nav { padding: 0 20px !important; }
+          .nav-actions { gap: 8px !important; }
+          .nav-icons { margin-right: 8px !important; }
+          .nav-auth { margin-right: 8px !important; }
         }
         @media (max-width: 768px) {
+          nav.site-nav { padding: 0 16px !important; }
           .nav-icons, .nav-auth { display: none !important; }
           /* The Garage and Admin controls are ~240px wide together, which
              pushed the burger past the right edge and made the menu
              unreachable on phones. Both now live in the overlay instead. */
           .nav-cart, .nav-admin { display: none !important; }
+          .nav-actions { margin-left: auto; gap: 0 !important; }
         }
         @media (max-width: 480px) {
-          nav { padding: 0 16px !important; }
-          nav span { font-size: 18px !important; }
+          nav.site-nav { padding: 0 12px !important; }
         }
       `}</style>
     </>

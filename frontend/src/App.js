@@ -376,7 +376,7 @@ function SiteChrome() {
     <>
       <AnnouncementBar />
       {settings.aiAssistantEnabled !== false && <AIAssistant />}
-      <WhatsAppButton phoneNumber={settings.whatsapp || '+201050933078'} />
+      <WhatsAppButton phoneNumber={settings.whatsapp || '+201032849750'} />
     </>
   );
 }

@@ -11,8 +11,8 @@ const siteSettingsSchema = new mongoose.Schema(
     copyright: { type: String, default: "© 2026 1M Motors. All rights reserved." },
     footerDescription: { type: String, default: "The world's most exclusive automotive experience." },
 
-    phone: { type: String, default: "+2 010 5093 3078" },
-    whatsapp: { type: String, default: "201050933078" },
+    phone: { type: String, default: "+2 010 3284 9750" },
+    whatsapp: { type: String, default: "201032849750" },
     email: { type: String, default: "info@1mmotors.com" },
     address: { type: String, default: "Cairo, Egypt" },
     instagram: { type: String, default: "1m_motors" },

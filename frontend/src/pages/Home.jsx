@@ -166,7 +166,7 @@ export default function Home() {
         }}/>
 
         {/* Content */}
-        <div className="container" style={{
+        <div className="container hero-content-wrap" style={{
           height: '100%',
           maxWidth: 'none',
           display: 'flex',
@@ -250,6 +250,7 @@ export default function Home() {
 
         {/* Slide counter (right side) */}
         <div
+          className="hero-slide-counter"
           style={{
             position: 'absolute',
             right: 'clamp(16px, 3vw, 36px)',
@@ -272,6 +273,7 @@ export default function Home() {
                 onClick={() => goToSlide(i)}
                 aria-label={`Go to slide ${i + 1}`}
                 aria-current={active ? 'true' : undefined}
+                className="hero-slide-counter-btn"
                 style={{
                   background: 'none',
                   border: 'none',
@@ -299,6 +301,7 @@ export default function Home() {
                 </span>
                 <span
                   aria-hidden="true"
+                  className="hero-slide-counter-line"
                   style={{
                     width: active ? 28 : 14,
                     height: 1,
@@ -311,6 +314,7 @@ export default function Home() {
             );
           })}
           <div
+            className="hero-slide-counter-total"
             style={{
               marginTop: 8,
               fontFamily: 'var(--font-ui)',
@@ -335,6 +339,48 @@ export default function Home() {
           zIndex: 10,
         }} />
 
+        <style>{`
+          @media (max-width: 768px) {
+            .hero-content-wrap {
+              padding-left: 16px !important;
+              padding-right: 16px !important;
+              padding-bottom: 132px !important;
+              align-items: flex-end !important;
+            }
+            .hero-slide-counter {
+              top: auto !important;
+              bottom: 20px !important;
+              right: 16px !important;
+              left: 16px !important;
+              transform: none !important;
+              flex-direction: row !important;
+              align-items: center !important;
+              justify-content: flex-end !important;
+              gap: 8px !important;
+              flex-wrap: wrap;
+            }
+            .hero-slide-counter-btn {
+              padding: 6px 2px !important;
+              gap: 4px !important;
+            }
+            .hero-slide-counter-line {
+              display: none !important;
+            }
+            .hero-slide-counter-total {
+              margin-top: 0 !important;
+              margin-left: 4px;
+            }
+          }
+          @media (max-width: 480px) {
+            .hero-slide-counter {
+              justify-content: center !important;
+              bottom: 16px !important;
+            }
+            .hero-content-wrap {
+              padding-bottom: 148px !important;
+            }
+          }
+        `}</style>
       </section>
 
       {/* ══ STATS BAR ══ */}
