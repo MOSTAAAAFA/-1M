@@ -756,10 +756,10 @@ function WelcomeMessage({ onClose }) {
             marginBottom: 20,
             animation: 'fadeInUp 0.5s ease-out 0.4s both',
           }}>
-            This premium platform is brought to you by:
+            Owner of 1M Motors:
           </div>
 
-          {/* Names container */}
+          {/* Owner container */}
           <div style={{
             background: 'rgba(201,168,76,0.05)',
             borderRadius: '12px',
@@ -768,7 +768,17 @@ function WelcomeMessage({ onClose }) {
             marginBottom: 16,
             animation: 'fadeInScale 0.6s ease-out 0.6s both',
           }}>
-            {/* Name */}
+            <div style={{
+              fontFamily: 'var(--font-ui)',
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              color: 'rgba(201,168,76,0.85)',
+              marginBottom: 10,
+            }}>
+              OWNER
+            </div>
             <div style={{
               fontFamily: 'var(--font-display)',
               fontSize: 26,
@@ -780,15 +790,7 @@ function WelcomeMessage({ onClose }) {
               letterSpacing: '1px',
               lineHeight: 1.3,
             }}>
-              YOUSSEF ALI
-              <div style={{
-                width: '60px',
-                height: '2px',
-                background: 'linear-gradient(to right, transparent, #F4D03F, #E0C06A, #C9A84C, transparent)',
-                margin: '12px auto',
-                opacity: 0.8,
-              }}/>
-              MOSTAFA ABDELHAMEED
+              MOSTAFA HANY SHAKER
             </div>
           </div>
 
