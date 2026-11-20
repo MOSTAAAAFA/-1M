@@ -47,7 +47,7 @@ export default function Home() {
   // Performance optimization flags
   const enableKenBurns = shouldEnableKenBurns();
 
-  // Auto slide transition every 6 seconds (pauses on toggle, hover, focus, hidden tab, reduced-motion)
+  // Auto slide transition every 3 seconds (pauses on toggle, hover, focus, hidden tab, reduced-motion)
   const autoplayBlocked = autoplayPaused || heroHovered || heroFocused;
   useEffect(() => {
     if (prefersReducedMotion || autoplayBlocked) return;
@@ -62,7 +62,7 @@ export default function Home() {
       setPrevSlide(slide);
       setSlide(s => (s + 1) % HERO_SLIDES.length);
     };
-    let timer = setTimeout(tick, 4000);
+    let timer = setTimeout(tick, 3000);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [slide, autoplayBlocked, prefersReducedMotion]);
 
@@ -439,9 +439,10 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
               position: 'absolute',
               inset: 0,
               opacity: active ? 1 : 0,
-              transition: prefersReducedMotion ? 'none' : 'opacity 1.1s ease-in-out',
+              transition: prefersReducedMotion ? 'none' : 'opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
               zIndex: active ? 1 : 0,
               pointerEvents: 'none',
+              willChange: 'opacity',
             }}
             aria-hidden={!active}
           >
@@ -453,8 +454,13 @@ function HeroBackdrop({ slide, prevSlide, enableKenBurns }) {
                 height: '100%',
                 objectFit: 'cover',
                 objectPosition: 'center',
-                transform: canKenBurns ? (active ? 'scale(1.06)' : 'scale(1)') : 'scale(1)',
-                transition: canKenBurns ? 'transform 7s ease-out, opacity 1.1s ease-in-out' : (prefersReducedMotion ? 'none' : 'opacity 1.1s ease-in-out'),
+                transform: canKenBurns
+                  ? (active ? 'scale(1.06)' : 'scale(1.02)')
+                  : (active ? 'scale(1.02)' : 'scale(1)'),
+                transition: canKenBurns
+                  ? 'transform 6.5s ease-out, opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1)'
+                  : (prefersReducedMotion ? 'none' : 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1)'),
+                willChange: 'transform, opacity',
                 filter: 'brightness(0.82) contrast(1.05) saturate(1.05)',
               }}
               loading={i === 0 ? 'eager' : 'lazy'}
