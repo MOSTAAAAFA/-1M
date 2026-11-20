@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
-  getBlurPlaceholder,
   getFallbackImage,
   logImagePerformance,
   ImageLoadState
@@ -9,13 +8,8 @@ import {
 import { durations, easings } from '../utils/animations';
 
 /**
- * OptimizedImage - Premium lazy-loading image component
- * Features:
- * - Blur-up placeholder while loading
- * - Intersection observer for lazy loading
- * - Error handling with fallback
- * - Smooth fade-in animation
- * - Performance monitoring
+ * OptimizedImage - image component with smooth fade-in and error fallback.
+ * Uses native browser lazy loading/decoding for faster delivery.
  */
 const OptimizedImage = ({
   src,
@@ -30,83 +24,44 @@ const OptimizedImage = ({
   onError,
   eager = false, // Load immediately without lazy loading
   aspectRatio = null, // e.g., "16/9" or 1.778
+  fetchPriority,
   ...props
 }) => {
-  const [loadState, setLoadState] = useState(ImageLoadState.IDLE);
-  const [imageSrc, setImageSrc] = useState(eager ? src : placeholder || getBlurPlaceholder());
-  const imageRef = useRef(null);
-  const startTimeRef = useRef(null);
+  const [loadState, setLoadState] = useState(ImageLoadState.LOADING);
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const startTimeRef = useRef(typeof performance !== 'undefined' ? performance.now() : 0);
 
-  const loadImage = useCallback(() => {
-    setLoadState(ImageLoadState.LOADING);
-    startTimeRef.current = performance.now();
-
-    const img = new Image();
-
-    img.onload = () => {
-      setImageSrc(src);
-      setLoadState(ImageLoadState.LOADED);
-
-      // Log performance in development
-      if (startTimeRef.current) {
-        logImagePerformance(src, startTimeRef.current);
-      }
-
-      // Call custom onLoad callback
-      if (onLoad) onLoad(img);
-    };
-
-    img.onerror = () => {
-      setImageSrc(fallback || getFallbackImage(width || 800, height || 600, 'Image unavailable'));
-      setLoadState(ImageLoadState.ERROR);
-
-      if (onError) onError();
-    };
-
-    img.src = src;
-  }, [src, width, height, fallback, onLoad, onError]);
-
-  // Intersection Observer for lazy loading
   useEffect(() => {
-    if (eager) {
-      loadImage();
-      return;
+    setCurrentSrc(src);
+    setLoadState(ImageLoadState.LOADING);
+    startTimeRef.current = typeof performance !== 'undefined' ? performance.now() : 0;
+  }, [src]);
+
+  const handleLoad = (e) => {
+    setLoadState(ImageLoadState.LOADED);
+    if (startTimeRef.current) {
+      logImagePerformance(src, startTimeRef.current);
     }
+    if (onLoad) onLoad(e.target);
+  };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && loadState === ImageLoadState.IDLE) {
-            loadImage();
-            observer.disconnect();
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: '100px', // Start loading 100px before visible
-        threshold: 0.01
-      }
-    );
-
-    if (imageRef.current) {
-      observer.observe(imageRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [src, eager, loadState, loadImage]);
+  const handleError = () => {
+    setCurrentSrc(fallback || getFallbackImage(width || 800, height || 600, 'Image unavailable'));
+    setLoadState(ImageLoadState.ERROR);
+    if (onError) onError();
+  };
 
   // Calculate aspect ratio padding if needed
   const aspectRatioStyle = aspectRatio
-    ? { paddingBottom: typeof aspectRatio === 'string'
-        ? `calc(100% / (${aspectRatio}))`
-        : `${(1 / aspectRatio) * 100}%`
+    ? {
+        paddingBottom: typeof aspectRatio === 'string'
+          ? `calc(100% / (${aspectRatio}))`
+          : `${(1 / aspectRatio) * 100}%`
       }
     : {};
 
   return (
     <div
-      ref={imageRef}
       className={`optimized-image-container ${className}`}
       style={{
         position: 'relative',
@@ -119,15 +74,12 @@ const OptimizedImage = ({
       {...props}
     >
       <motion.img
-        src={imageSrc}
+        src={currentSrc}
         alt={alt}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: loadState === ImageLoadState.LOADED ? 1 : 0.3,
-          scale: loadState === ImageLoadState.LOADED ? 1 : 1.05
-        }}
+        initial={{ opacity: 0.01 }}
+        animate={{ opacity: loadState === ImageLoadState.ERROR ? 0.75 : 1 }}
         transition={{
-          duration: durations.moderate,
+          duration: durations.fast,
           ease: easings.luxury
         }}
         style={{
@@ -137,31 +89,21 @@ const OptimizedImage = ({
           width: '100%',
           height: '100%',
           objectFit,
-          filter: loadState === ImageLoadState.LOADING ? 'blur(10px)' : 'blur(0px)',
-          transition: 'filter 0.3s ease-out',
-          ...(loadState === ImageLoadState.ERROR && { opacity: 0.6 })
+          ...(placeholder && loadState === ImageLoadState.LOADING
+            ? {
+                backgroundImage: `url("${placeholder}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }
+            : null)
         }}
         loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchPriority={fetchPriority || (eager ? 'high' : undefined)}
         draggable={false}
+        onLoad={handleLoad}
+        onError={handleError}
       />
-
-      {/* Loading indicator */}
-      {loadState === ImageLoadState.LOADING && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10
-          }}
-        >
-          <div className="loading-spinner" />
-        </motion.div>
-      )}
     </div>
   );
 };

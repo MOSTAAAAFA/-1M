@@ -28,6 +28,7 @@ export default function CarDetails() {
   const [isMuted, setIsMuted] = useState(true);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
   const heroRef = useRef(null);
 
@@ -57,6 +58,24 @@ export default function CarDetails() {
     if (car) trackActivity('view', car);
     return () => clearTimeout(t);
   }, [id, car]);
+
+  useEffect(() => {
+    setVideoReady(false);
+  }, [id, car?.heroVideo]);
+
+  useEffect(() => {
+    if (!car) return;
+    const heroSrc = car.heroImage || car.image;
+    if (!heroSrc) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = heroSrc;
+    document.head.appendChild(link);
+    return () => {
+      if (link.parentNode) link.parentNode.removeChild(link);
+    };
+  }, [car]);
 
   if (!car) {
     return (
@@ -108,17 +127,13 @@ export default function CarDetails() {
 }}>
     {car.heroVideo ? (
     <>
-    <motion.video
-      ref={videoRef}
-      autoPlay
-      muted={isMuted}
-      loop
-      playsInline
-      // These are 100MB+ files. preload="auto" made the browser buffer the
-      // whole thing before the user could skip, and the poster frame meant
-      // they saw black for seconds first.
-      preload="metadata"
-      poster={car.heroImage || car.image}
+    <motion.img
+      src={car.heroImage || car.image}
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
       style={{
         position: 'absolute',
         inset: 0,
@@ -131,9 +146,43 @@ export default function CarDetails() {
         scale: smoothHeroScale,
         opacity: heroOpacity,
       }}
+    />
+    <motion.div
+      initial={false}
+      animate={{ opacity: videoReady ? 1 : 0 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+      }}
     >
-      <source src={car.heroVideo} type="video/mp4" />
-    </motion.video>
+      <motion.video
+        ref={videoRef}
+        autoPlay
+        muted={isMuted}
+        loop
+        playsInline
+        preload="metadata"
+        onCanPlay={() => setVideoReady(true)}
+        onPlaying={() => setVideoReady(true)}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          filter: 'contrast(1.05) saturate(1.1) brightness(1.02)',
+          y: smoothHeroY,
+          scale: smoothHeroScale,
+          opacity: heroOpacity,
+          backgroundColor: 'transparent',
+        }}
+      >
+        <source src={car.heroVideo} type="video/mp4" />
+      </motion.video>
+    </motion.div>
 
     {/* Sound Toggle Button */}
     <motion.button
@@ -180,6 +229,9 @@ export default function CarDetails() {
     <motion.img
       src={car.heroImage || car.image}
       alt={car.name}
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
       onError={(e) => { e.currentTarget.src = `https://placehold.co/1920x1080/111117/C9A84C?text=${encodeURIComponent(car.brand + ' ' + car.name)}`; }}
       initial={{ opacity: 0, scale: 1.04 }}
       animate={{ opacity: 1, scale: 1 }}
